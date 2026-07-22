@@ -1,4 +1,3 @@
-import 'package:euphony/core/result.dart';
 import 'package:euphony/data/remote/innertube/innertube_utils.dart';
 import 'package:euphony/data/remote/innertube/parsers/item_parser.dart';
 import 'package:euphony/data/remote/innertube/parsers/search_parser.dart';
