@@ -1,0 +1,25 @@
+import 'dart:developer' as developer;
+
+import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
+
+/// Creates a logger for [name], conventionally the class or file using it.
+Logger logFor(String name) => Logger(name);
+
+/// Wires the `logging` package into the platform log.
+///
+/// In release builds only warnings and above are recorded, so a broken parser
+/// still leaves a trace without shipping a debug firehose.
+void initLogging({Level? level}) {
+  Logger.root.level = level ?? (kReleaseMode ? Level.WARNING : Level.ALL);
+  Logger.root.onRecord.listen((record) {
+    developer.log(
+      record.message,
+      time: record.time,
+      level: record.level.value,
+      name: record.loggerName,
+      error: record.error,
+      stackTrace: record.stackTrace,
+    );
+  });
+}
