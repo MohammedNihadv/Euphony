@@ -6,9 +6,7 @@
 
 ### *Music deserves better than interruptions.*
 
-A modern, beautiful, open-source music player built with Flutter.
-
-> **Built on the radical idea that pressing ▶ Play shouldn't require a subscription.**
+A modern, open-source music player built with Flutter.
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.44+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -21,86 +19,49 @@ A modern, beautiful, open-source music player built with Flutter.
 
 ---
 
-## 📦 Which APK Should I Download?
+## Which APK Should I Download?
 
 | APK File | Target Device | Recommendation |
 | :--- | :--- | :--- |
-| 📱 **`app-arm64-v8a-release.apk`** | **Modern Android Phones & Tablets** | ⭐ **RECOMMENDED for 99% of devices** (manufactured 2017+). Smallest file size (~42 MB) & best performance. |
-| 📻 **`app-armeabi-v7a-release.apk`** | **Older 32-bit Android Devices** | For older budget smartphones or legacy 32-bit devices. |
-| 💻 **`app-x86_64-release.apk`** | **Emulators & Chromebooks** | For Android Studio / BlueStacks emulators, PCs, and Intel Chromebooks. |
+| `app-arm64-v8a-release.apk` | Modern Android Phones & Tablets | **Recommended for 99% of devices** (manufactured 2017+). Smallest file size (~42 MB) and best performance. |
+| `app-armeabi-v7a-release.apk` | Older 32-bit Android Devices | For older budget smartphones or legacy 32-bit devices. |
+| `app-x86_64-release.apk` | Emulators & Chromebooks | For Android Studio / BlueStacks emulators, PCs, and Intel Chromebooks. |
 
 ---
 
 # Why Euphony?
 
-Somewhere along the way...
+Somewhere along the way, music players became subscription services, shuffle became a premium feature, and ads started interrupting your playlists.
 
-Music players became subscription services.
+Euphony is a music player that simply gets out of your way:
 
-Shuffle became a premium feature.
-
-Ads started interrupting the best part of your playlist.
-
-Every update wanted another account.
-
-Every feature wanted another payment.
-
-Somehow, **playing your own music** became a business model.
-
-So here's **Euphony**.
-
-A music player that simply gets out of your way.
-
-- 🎵 No ads.
-- 🔓 100% open source.
-- 🚫 No unnecessary complexity.
-- 🎨 Beautiful by default.
-- ⚡ Fast, lightweight, and built with Flutter.
-- ❤️ Built by the community, for the community.
-
-Because software should respect its users.
-
-Not constantly upsell them.
+- No ads
+- 100% open source
+- Fast, lightweight, and built with Flutter
+- Built by the community, for the community
 
 ---
 
 # Features
 
-## 🎧 Listen
+### Listen
+- Beautiful Material 3 & Neo-Brutalist interface
+- Fast search across tracks, albums, artists & playlists
+- Queue management with shuffle & repeat
+- Playback speed controls & sleep timer
+- Background playback with native media notification controls
 
-- Beautiful Material 3 experience
-- Bold Neo-Brutalist interface
-- Lightning-fast search
-- Albums, artists & playlists
-- Queue management
-- Shuffle & repeat
-- Playback speed controls
-- Sleep timer
-- Background playback
-- Native media controls
-
-## 📥 Your Library
-
-- Offline downloads
-- Local music support
-- Playlist management
-- Smart caching
-- Persistent playback state
-
-## 🎨 Designed to Feel Different
-
-- Custom Neo-Brutalist design system
-- Fluid animations
-- Responsive layouts
-- Dark & Light themes
-- Crafted for performance
+### Your Library
+- Offline downloads & local music playback
+- Playlist management with instant persistence
+- Smart caching & persistent playback state
 
 ---
 
-# Built With
+# Tech Stack
 
 | Technology | Purpose |
-|------------|---------|
+| :--- | :--- |
 | Flutter | Cross-platform UI framework |
 | Dart | Programming language |
 | Riverpod | State management |
@@ -111,55 +72,18 @@ Not constantly upsell them.
 
 ---
 
-# Philosophy
-
-Euphony is built around a few simple ideas.
-
-- Music should be enjoyable.
-- Software should be transparent.
-- Open source should stay open.
-- Design should feel intentional.
-- The Play button shouldn't have a price tag.
-
-Everything else is just implementation details.
-
----
-
 # Contributing
 
-Whether you're fixing a typo, redesigning the UI, optimizing performance, or building the next big feature—
-
-**you're welcome here.**
+Contributions are welcome!
 
 1. Fork the repository.
-2. Create a feature branch.
-3. Make something awesome.
-4. Open a Pull Request.
-
-Every contribution helps Euphony become better.
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'feat: Add AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
 
 ---
 
 # License
 
-Released under the **MIT License**.
-
-Use it.
-
-Learn from it.
-
-Build on it.
-
-Make it yours.
-
-Just don't replace the Play button with **"Upgrade to Premium."** 😉
-
----
-
-<div align="center">
-
-### ⭐ If Euphony made your playlist a little happier, consider giving the project a star.
-
-**Made with Flutter. Powered by open source. Built for music lovers.**
-
-</div>
+Released under the **MIT License**. See `LICENSE` for details.
