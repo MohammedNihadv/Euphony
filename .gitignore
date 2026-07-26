@@ -51,3 +51,27 @@ app.*.map.json
 
 # Generated sources ARE committed — CI regenerates them and fails on drift,
 # which is what catches a codegen change nobody re-ran.
+
+# AI config files
+.agents/
+.claude/
+AGENTS.md
+CLAUDE.md
+chat_history.md
+skills-lock.json
+
+# Debug output files
+stderr.txt
+stdout.txt
+web_stderr*.txt
+web_stdout*.txt
+
+# Scratch / temp
+scratch/
+
+# Issues photos (local debugging only)
+Issues-photo/
+
+# Config files for launcher_icons and splash (committed for reproducibility)
+# flutter_launcher_icons.yaml
+# flutter_native_splash.yaml

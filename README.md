@@ -1,81 +1,155 @@
+<div align="center">
+
+<img src="assets/images/app.icon.png" width="140" alt="Euphony"/>
+
 # Euphony
 
-A music streaming client for Android — a from-scratch rebuild of the archived
-[Harmony Music](https://github.com/anandnet/Harmony-Music), keeping its hard-won
-YouTube InnerTube work and replacing everything around it.
+### *Music deserves better than interruptions.*
 
-Status: **phase 0 of 8** — foundations. Not usable yet.
+A modern, beautiful, open-source music player built with Flutter.
 
-## Why
+> **Built on the radical idea that pressing ▶ Play shouldn't require a subscription.**
 
-Harmony is archived. Its search broke in the wild, playback bugs recur, and forks
-patch it piecemeal. Euphony targets feature parity with Harmony 1.12.2 on a
-layered architecture with tests around the parts that actually break.
+[![Flutter](https://img.shields.io/badge/Flutter-3.44+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/MohammedNihadv/Euphony)](https://github.com/MohammedNihadv/Euphony/releases)
+[![Stars](https://img.shields.io/github/stars/MohammedNihadv/Euphony?style=social)](https://github.com/MohammedNihadv/Euphony)
 
-## Stack
+*Beautiful UI • Material 3 • Neo-Brutalist Design • Open Source*
 
-| | |
-|---|---|
-| Flutter | 3.44.1 / Dart 3.12 |
-| State | Riverpod 3.3 (codegen) |
-| Database | Drift 2.34 / SQLite |
-| Settings | shared_preferences behind a typed repository |
-| Design | Material 3 with an own token layer in `lib/design/` |
+</div>
 
-## Layout
+---
 
-```
-lib/
-├── app/          MaterialApp, shell
-├── core/         Result / Failure, logging, retry
-├── design/       tokens, theme, components  ← the only place styling lives
-├── data/         db/, remote/, repository/
-├── domain/       immutable models
-├── playback/     audio handler, queue
-└── features/     one folder per screen area
-```
+# Why Euphony?
 
-One rule: `features/` talks to `repository/`, never to Drift or the network
-directly.
+Somewhere along the way...
 
-## Develop
+Music players became subscription services.
 
-```sh
-flutter pub get
-dart run build_runner build     # after touching @riverpod or Drift tables
-dart run build_runner watch     # or leave this running
-flutter run
-```
+Shuffle became a premium feature.
 
-Generated `*.g.dart` files are committed. CI regenerates them and fails if they
-drift from their inputs.
+Ads started interrupting the best part of your playlist.
 
-Before pushing:
+Every update wanted another account.
 
-```sh
-dart format .
-flutter analyze
-flutter test
-```
+Every feature wanted another payment.
 
-## Phases
+Somehow, **playing your own music** became a business model.
 
-| # | Phase | State |
-|---|---|---|
-| 0 | Foundations — Riverpod, Drift, design system, CI | in progress |
-| 1 | Data layer — InnerTube client, parsers, golden tests | |
-| 2 | Playback — just_audio gapless queue, media session | |
-| 3 | Shell + core UI — tabs, mini player, search | |
-| 4 | Library — playlists, albums, artists, history | |
-| 5 | Offline — cache, downloads, tagging | |
-| 6 | Extras — radio, lyrics, sleep timer, equalizer | |
-| 7 | Portability — backup, import/export, Piped | |
-| 8 | Polish — locales, branding, a11y, signing | |
+So here's **Euphony**.
 
-Each phase ends with an installable APK.
+A music player that simply gets out of your way.
 
-## Credit
+- 🎵 No ads.
+- 🔓 100% open source.
+- 🚫 No unnecessary complexity.
+- 🎨 Beautiful by default.
+- ⚡ Fast, lightweight, and built with Flutter.
+- ❤️ Built by the community, for the community.
 
-The InnerTube endpoint knowledge and response paths are ported from Harmony
-Music by anandnet. Euphony would not be possible without that reverse
-engineering.
+Because software should respect its users.
+
+Not constantly upsell them.
+
+---
+
+# Features
+
+## 🎧 Listen
+
+- Beautiful Material 3 experience
+- Bold Neo-Brutalist interface
+- Lightning-fast search
+- Albums, artists & playlists
+- Queue management
+- Shuffle & repeat
+- Playback speed controls
+- Sleep timer
+- Background playback
+- Native media controls
+
+## 📥 Your Library
+
+- Offline downloads
+- Local music support
+- Playlist management
+- Smart caching
+- Persistent playback state
+
+## 🎨 Designed to Feel Different
+
+- Custom Neo-Brutalist design system
+- Fluid animations
+- Responsive layouts
+- Dark & Light themes
+- Crafted for performance
+
+---
+
+# Built With
+
+| Technology | Purpose |
+|------------|---------|
+| Flutter | Cross-platform UI framework |
+| Dart | Programming language |
+| Riverpod | State management |
+| Drift + SQLite | Local database |
+| just_audio | Audio playback |
+| audio_service | Background playback |
+| go_router | Navigation |
+
+---
+
+# Philosophy
+
+Euphony is built around a few simple ideas.
+
+- Music should be enjoyable.
+- Software should be transparent.
+- Open source should stay open.
+- Design should feel intentional.
+- The Play button shouldn't have a price tag.
+
+Everything else is just implementation details.
+
+---
+
+# Contributing
+
+Whether you're fixing a typo, redesigning the UI, optimizing performance, or building the next big feature—
+
+**you're welcome here.**
+
+1. Fork the repository.
+2. Create a feature branch.
+3. Make something awesome.
+4. Open a Pull Request.
+
+Every contribution helps Euphony become better.
+
+---
+
+# License
+
+Released under the **MIT License**.
+
+Use it.
+
+Learn from it.
+
+Build on it.
+
+Make it yours.
+
+Just don't replace the Play button with **"Upgrade to Premium."** 😉
+
+---
+
+<div align="center">
+
+### ⭐ If Euphony made your playlist a little happier, consider giving the project a star.
+
+**Made with Flutter. Powered by open source. Built for music lovers.**
+
+</div>

@@ -2,54 +2,13 @@ import '../../../../core/failure.dart';
 import '../../../../core/result.dart';
 import '../../../../domain/album.dart';
 import '../../../../domain/artist.dart';
+import '../../../../domain/music_item.dart';
 import '../../../../domain/playlist.dart';
 import '../../../../domain/song.dart';
 import '../innertube_paths.dart';
 import '../innertube_utils.dart';
 import '../json_nav.dart';
 import 'song_runs.dart';
-
-/// Anything a shelf can contain.
-///
-/// Shelves are heterogeneous — a search page's top shelf can hold an artist, an
-/// album and three songs. Returning a sealed union rather than Harmony's
-/// `dynamic` means callers must handle every case.
-sealed class MusicItem {
-  const MusicItem();
-}
-
-final class SongItem extends MusicItem {
-  const SongItem(this.song);
-  final Song song;
-}
-
-final class AlbumItem extends MusicItem {
-  const AlbumItem(this.album);
-  final Album album;
-}
-
-final class ArtistItem extends MusicItem {
-  const ArtistItem(this.artist);
-  final Artist artist;
-}
-
-final class PlaylistItem extends MusicItem {
-  const PlaylistItem(this.playlist);
-  final Playlist playlist;
-}
-
-/// A radio or mix — a playlist that only exists as an endpoint.
-final class StationItem extends MusicItem {
-  const StationItem({
-    required this.title,
-    required this.playlistId,
-    this.artworkUrl,
-  });
-
-  final String title;
-  final String playlistId;
-  final String? artworkUrl;
-}
 
 /// What a renderer is expected to produce, when the surrounding shelf knows.
 enum ItemHint { song, video, album, artist, playlist, station }

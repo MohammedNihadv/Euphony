@@ -17,13 +17,27 @@ extension type const ThumbnailUrl(String url) {
   static const int _highSize = 400;
   static const int _maxSize = 600;
 
+  /// Matches a `w60` / `h60` / `s60` segment of a Google user content size spec.
+  static final RegExp _sizeSegment = RegExp(r'^([whs])\d+$');
+
   /// The URL rewritten to request a [size] x [size] image.
   String sized(int size) {
-    if (url.contains('-rj')) {
-      return '${url.split('=').first}=w$size-h$size-l90-rj';
-    }
-    if (url.contains('=s')) {
-      return '${url.split('=s').first}=s$size';
+    final equals = url.indexOf('=');
+    if (url.contains('googleusercontent.com') && equals != -1) {
+      // `w60-h60-l90-rj` carries more than a size: `l90` is the JPEG quality and
+      // `rj` forces JPEG output. Rewrite only the dimensions and keep the rest,
+      // or Google serves a differently-encoded image than the caller asked for.
+      final spec = url
+          .substring(equals + 1)
+          .split('-')
+          .map(
+            (segment) => switch (_sizeSegment.firstMatch(segment)?.group(1)) {
+              final String prefix => '$prefix$size',
+              null => segment,
+            },
+          )
+          .join('-');
+      return '${url.substring(0, equals)}=$spec';
     }
     if (url.contains('i.yti') && size >= _maxSize) {
       return url.replaceFirst('sddefault', 'maxresdefault');

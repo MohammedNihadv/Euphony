@@ -35,7 +35,13 @@ jobs:
 
       - run: flutter analyze
 
-      - run: flutter test
+      - run: flutter test --coverage
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/lcov.info
+          if-no-files-found: warn
 
   build-apk:
     name: Build APK
@@ -57,10 +63,18 @@ jobs:
 
       - run: flutter pub get
 
-      - run: flutter build apk --debug
+      # Release, not debug. R8 shrinking only runs in the release build, so a
+      # missing keep rule — the classic "works in debug, crashes on launch in
+      # release" failure — is invisible to a debug build.
+      #
+      # --split-per-abi because that is what actually ships: one fat APK is
+      # ~61 MB against ~20 MB per architecture.
+      - run: flutter build apk --release --split-per-abi
 
       - uses: actions/upload-artifact@v4
         with:
-          name: euphony-debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          # No key.properties in CI, so these are signed with debug keys:
+          # installable for testing, not publishable.
+          name: euphony-release-apks-debug-signed
+          path: build/app/outputs/flutter-apk/app-*-release.apk
           if-no-files-found: error

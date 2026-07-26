@@ -101,6 +101,135 @@ final class SearchHistoryDaoProvider
 
 String _$searchHistoryDaoHash() => r'4fe610d07076f8110c854d3815981b923d8b375f';
 
+@ProviderFor(likedSongsDao)
+final likedSongsDaoProvider = LikedSongsDaoProvider._();
+
+final class LikedSongsDaoProvider
+    extends $FunctionalProvider<LikedSongsDao, LikedSongsDao, LikedSongsDao>
+    with $Provider<LikedSongsDao> {
+  LikedSongsDaoProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'likedSongsDaoProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$likedSongsDaoHash();
+
+  @$internal
+  @override
+  $ProviderElement<LikedSongsDao> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  LikedSongsDao create(Ref ref) {
+    return likedSongsDao(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(LikedSongsDao value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<LikedSongsDao>(value),
+    );
+  }
+}
+
+String _$likedSongsDaoHash() => r'4321c4d7efdf0af2142647b218b4513b33e1dfce';
+
+@ProviderFor(savedAlbumsDao)
+final savedAlbumsDaoProvider = SavedAlbumsDaoProvider._();
+
+final class SavedAlbumsDaoProvider
+    extends $FunctionalProvider<SavedAlbumsDao, SavedAlbumsDao, SavedAlbumsDao>
+    with $Provider<SavedAlbumsDao> {
+  SavedAlbumsDaoProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'savedAlbumsDaoProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$savedAlbumsDaoHash();
+
+  @$internal
+  @override
+  $ProviderElement<SavedAlbumsDao> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  SavedAlbumsDao create(Ref ref) {
+    return savedAlbumsDao(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SavedAlbumsDao value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SavedAlbumsDao>(value),
+    );
+  }
+}
+
+String _$savedAlbumsDaoHash() => r'b9621305a8d0732e7fe3f4ccd78c9a8e27c02808';
+
+@ProviderFor(savedPlaylistsDao)
+final savedPlaylistsDaoProvider = SavedPlaylistsDaoProvider._();
+
+final class SavedPlaylistsDaoProvider
+    extends
+        $FunctionalProvider<
+          SavedPlaylistsDao,
+          SavedPlaylistsDao,
+          SavedPlaylistsDao
+        >
+    with $Provider<SavedPlaylistsDao> {
+  SavedPlaylistsDaoProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'savedPlaylistsDaoProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$savedPlaylistsDaoHash();
+
+  @$internal
+  @override
+  $ProviderElement<SavedPlaylistsDao> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  SavedPlaylistsDao create(Ref ref) {
+    return savedPlaylistsDao(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(SavedPlaylistsDao value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<SavedPlaylistsDao>(value),
+    );
+  }
+}
+
+String _$savedPlaylistsDaoHash() => r'749181f8cba6e82b3dc4384c790c5cbc7d72204d';
+
 /// Overridden in `main()` with the instance loaded before the first frame, so
 /// settings are readable synchronously and the app never paints an unthemed
 /// frame.

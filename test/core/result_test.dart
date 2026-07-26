@@ -20,7 +20,7 @@ void main() {
       expect(result.valueOrNull, isNull);
       expect(result.failureOrNull, failure);
       expect(result.valueOr(3), 3);
-      expect(result.unwrap, throwsA(failure));
+      expect(() => result.unwrap(), throwsA(failure));
     });
 
     test('map transforms Ok and passes Err through', () {

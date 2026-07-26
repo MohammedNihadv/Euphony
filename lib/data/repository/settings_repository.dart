@@ -48,4 +48,26 @@ class SettingsRepository {
 
   Future<void> setColourSource(ColourSource value) =>
       _prefs.setString(_kColourSource, value.name);
+
+  static const _kAudioQuality = 'audio_quality';
+  static const _kAutoPlaySimilar = 'auto_play_similar';
+  static const _kSkipSilence = 'skip_silence';
+  static const _kContentRegion = 'content_region';
+
+  String get audioQuality => _prefs.getString(_kAudioQuality) ?? 'HIGH';
+  Future<void> setAudioQuality(String value) =>
+      _prefs.setString(_kAudioQuality, value);
+
+  bool get autoPlaySimilar => _prefs.getBool(_kAutoPlaySimilar) ?? true;
+  Future<void> setAutoPlaySimilar(bool value) =>
+      _prefs.setBool(_kAutoPlaySimilar, value);
+
+  bool get skipSilence => _prefs.getBool(_kSkipSilence) ?? false;
+  Future<void> setSkipSilence(bool value) =>
+      _prefs.setBool(_kSkipSilence, value);
+
+  String get contentRegion =>
+      _prefs.getString(_kContentRegion) ?? 'US - United States';
+  Future<void> setContentRegion(String value) =>
+      _prefs.setString(_kContentRegion, value);
 }

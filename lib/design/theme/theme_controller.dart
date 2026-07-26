@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -60,12 +62,12 @@ class ThemeController extends _$ThemeController {
 
   Future<void> setMode(ThemeMode mode) async {
     state = state.copyWith(mode: mode);
-    await _settings.setThemeMode(mode);
+    unawaited(_settings.setThemeMode(mode));
   }
 
   Future<void> setAmoled({required bool value}) async {
     state = state.copyWith(amoled: value);
-    await _settings.setAmoled(value: value);
+    unawaited(_settings.setAmoled(value: value));
   }
 
   Future<void> setColourSource(ColourSource source) async {
@@ -79,7 +81,7 @@ class ThemeController extends _$ThemeController {
           ? state.scheme
           : ArtworkScheme.fallback,
     );
-    await _settings.setColourSource(source);
+    unawaited(_settings.setColourSource(source));
   }
 
   /// Repaints the app in the colours of [artwork], keyed by [key] (the song

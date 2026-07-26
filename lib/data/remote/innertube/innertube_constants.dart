@@ -4,7 +4,31 @@
 /// key YouTube Music ships in its own page source, not a credential.
 abstract final class Innertube {
   static const String domain = 'https://music.youtube.com/';
-  static const String baseUrl = '${domain}youtubei/v1/';
+
+  /// A local CORS proxy to send requests through instead of [domain].
+  ///
+  /// Empty in every real build. Browsers refuse to call InnerTube directly —
+  /// YouTube serves no `Access-Control-Allow-Origin`, so Chrome blocks the
+  /// request before it leaves the page — which makes `-d chrome` useless for
+  /// anything past the shell. `tool/dev_proxy.dart` forwards the same calls
+  /// with CORS headers attached:
+  ///
+  /// ```sh
+  /// dart run tool/dev_proxy.dart
+  /// flutter run -d chrome --dart-define=EUPHONY_DEV_PROXY=http://localhost:8787
+  /// ```
+  ///
+  /// Android and iOS have no such restriction and never need this.
+  static const String devProxy = String.fromEnvironment('EUPHONY_DEV_PROXY');
+
+  /// Where requests are actually sent — [domain], or [devProxy] when set.
+  ///
+  /// Distinct from [domain], which stays the real origin because YouTube
+  /// inspects the `origin` header and the proxy has to forward it unchanged.
+  static String get requestBase =>
+      devProxy.isEmpty ? domain : '${devProxy.replaceAll(RegExp(r'/+$'), '')}/';
+
+  static String get baseUrl => '${requestBase}youtubei/v1/';
   static const String apiKey = 'AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30';
   static const String fixedParams = '?prettyPrint=false&alt=json&key=$apiKey';
 

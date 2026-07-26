@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import '../data/remote/innertube/parsers/item_parser.dart';
+import 'music_item.dart';
 
 /// One titled shelf of search results — "Songs", "Albums", "Community
 /// playlists".

@@ -1,5 +1,8 @@
 package com.mhdni.euphony
 
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceActivity
 
-class MainActivity : FlutterActivity()
+// AudioServiceActivity, not FlutterActivity: audio_service routes media button
+// intents and service reconnection through it. With a plain FlutterActivity the
+// notification and lock-screen controls never reach the app.
+class MainActivity : AudioServiceActivity()

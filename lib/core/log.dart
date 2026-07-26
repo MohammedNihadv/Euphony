@@ -27,5 +27,20 @@ void initLogging({Level? level}) {
       error: record.error,
       stackTrace: record.stackTrace,
     );
+    // `developer.log` is a no-op on the web build, which hides every warning
+    // the app raises there. Mirror anything worth acting on to the console so
+    // `flutter run -d chrome` and the browser devtools both show it.
+    if (!isReleaseBuild && record.level >= Level.WARNING) {
+      // ignore: avoid_print
+      print('[${record.level.name}] ${record.loggerName}: ${record.message}');
+      if (record.error != null) {
+        // ignore: avoid_print
+        print('  error: ${record.error}');
+      }
+      if (record.stackTrace != null) {
+        // ignore: avoid_print
+        print('  stack: ${record.stackTrace}');
+      }
+    }
   });
 }

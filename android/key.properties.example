@@ -1,0 +1,17 @@
+# Copy to android/key.properties and fill in. That file is gitignored — the
+# keystore and its passwords must never be committed.
+#
+# Generate a keystore once, then keep it somewhere you will not lose it: an APK
+# signed with a different key cannot upgrade one already installed, and Play
+# will reject it outright.
+#
+#   keytool -genkey -v -keystore euphony-release.jks \
+#     -keyalg RSA -keysize 2048 -validity 10000 -alias euphony
+#
+# storeFile is resolved relative to android/app/, so an absolute path outside
+# the repository is the safest choice.
+
+storeFile=/absolute/path/to/euphony-release.jks
+storePassword=
+keyAlias=euphony
+keyPassword=

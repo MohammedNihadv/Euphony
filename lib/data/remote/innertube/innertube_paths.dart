@@ -35,16 +35,33 @@ abstract final class P {
     0,
   ]);
 
-  /// The two-column layout YouTube moved playlists to.
-  static const playlistShelf = JsonPath([
+  /// The two-column layout YouTube moved albums and playlists to: the left
+  /// column ([twoColumnTab]) holds the header, the right
+  /// ([twoColumnSecondary]) holds the track shelf.
+  static const twoColumnTab = JsonPath([
+    'contents',
+    'twoColumnBrowseResultsRenderer',
+    'tabs',
+    0,
+    'tabRenderer',
+    'content',
+  ]);
+  static const twoColumnSecondary = JsonPath([
     'contents',
     'twoColumnBrowseResultsRenderer',
     'secondaryContents',
     'sectionListRenderer',
     'contents',
-    0,
-    'musicPlaylistShelfRenderer',
   ]);
+
+  /// The playlist track shelf inside [twoColumnSecondary].
+  static const String playlistShelf = 'musicPlaylistShelfRenderer';
+
+  /// The album/playlist header inside [twoColumnTab].
+  static const String responsiveHeader = 'musicResponsiveHeaderRenderer';
+
+  /// The artist page header.
+  static const String immersiveHeader = 'musicImmersiveHeaderRenderer';
 
   // Text.
   static const runText = JsonPath(['runs', 0, 'text']);

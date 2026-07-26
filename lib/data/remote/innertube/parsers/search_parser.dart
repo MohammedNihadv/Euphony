@@ -2,6 +2,7 @@ import '../../../../core/log.dart';
 import '../../../../core/result.dart';
 import '../../../../domain/album.dart';
 import '../../../../domain/artist.dart';
+import '../../../../domain/music_item.dart';
 import '../../../../domain/playlist.dart';
 import '../../../../domain/search_results.dart';
 import '../../../../domain/song.dart';

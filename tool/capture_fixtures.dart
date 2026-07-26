@@ -23,7 +23,7 @@ import 'package:euphony/data/remote/innertube/innertube_utils.dart';
 /// Stable queries — these need to keep returning the same *kind* of result, so
 /// pick things that will not vanish from the catalogue.
 const _searchQuery = 'daft punk';
-const _albumBrowseId = 'MPREb_0RYe0xF7sZb'; // a Daft Punk release
+const _albumBrowseId = 'MPREb_7ltM34kr0mH'; // Daft Punk — Discovery
 const _artistBrowseId = 'UC_kRDKYrUlrbtrSiyu5Tflg'; // Daft Punk
 const _playlistId = 'RDCLAK5uy_kLWIr9gv1XLlPbaDS965-Db4TrBoUTxQ8'; // a YT mix
 

@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 
-/// Corner radii and shapes.
-///
-/// Euphony runs a deliberately rounder scale than stock Material 3 — the
-/// expressive look comes largely from this file. Flutter 3.44's superellipse
-/// borders are used where a squircle reads better than a circular arc.
+/// Corner radii and shapes for Euphony's Neo-Brutalist aesthetic.
 abstract final class EuShape {
-  static const Radius xsRadius = Radius.circular(8);
-  static const Radius smRadius = Radius.circular(14);
-  static const Radius mdRadius = Radius.circular(20);
-  static const Radius lgRadius = Radius.circular(28);
-  static const Radius xlRadius = Radius.circular(36);
+  static const Radius xsRadius = Radius.circular(6);
+  static const Radius smRadius = Radius.circular(10);
+  static const Radius mdRadius = Radius.circular(14);
+  static const Radius lgRadius = Radius.circular(20);
+  static const Radius xlRadius = Radius.circular(28);
 
   static const BorderRadius xs = BorderRadius.all(xsRadius);
   static const BorderRadius sm = BorderRadius.all(smRadius);
@@ -18,14 +14,14 @@ abstract final class EuShape {
   static const BorderRadius lg = BorderRadius.all(lgRadius);
   static const BorderRadius xl = BorderRadius.all(xlRadius);
 
-  /// Fully rounded — pills, chips, FABs.
+  /// Fully rounded — pills, chips, floating action buttons.
   static const BorderRadius pill = BorderRadius.all(Radius.circular(999));
 
   /// Artwork thumbnails in lists and grids.
-  static const BorderRadius artwork = md;
+  static const BorderRadius artwork = sm;
 
   /// The full-screen player's artwork.
-  static const BorderRadius heroArtwork = xl;
+  static const BorderRadius heroArtwork = md;
 
   /// Top corners only — bottom sheets, the draggable player.
   static const BorderRadius sheetTop = BorderRadius.only(
@@ -34,16 +30,17 @@ abstract final class EuShape {
   );
 
   static const RoundedRectangleBorder cardBorder = RoundedRectangleBorder(
-    borderRadius: lg,
+    borderRadius: md,
+    side: BorderSide(color: Color(0xFF121218), width: 2.5),
   );
 
   static const RoundedRectangleBorder sheetBorder = RoundedRectangleBorder(
     borderRadius: sheetTop,
+    side: BorderSide(color: Color(0xFF121218), width: 2.5),
   );
 
-  /// Squircle used for pressed/selected surfaces where the softer optical
-  /// corner matters (Flutter 3.44+).
   static const RoundedSuperellipseBorder squircle = RoundedSuperellipseBorder(
-    borderRadius: lg,
+    borderRadius: md,
+    side: BorderSide(color: Color(0xFF121218), width: 2.5),
   );
 }
