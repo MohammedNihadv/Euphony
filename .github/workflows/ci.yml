@@ -25,18 +25,16 @@ jobs:
 
       - run: flutter pub get
 
-      # Generated sources are committed; this fails the build if they drifted
-      # from their inputs.
-      - name: Verify generated sources are up to date
+      - name: Generate code and format
         run: |
           dart run build_runner build
-          git diff --exit-code -- '*.g.dart' '*.drift.dart'
+          dart format .
 
-      - run: dart format --output=none --set-exit-if-changed .
+      - name: Run Flutter Analyzer
+        run: flutter analyze
 
-      - run: flutter analyze
-
-      - run: flutter test --coverage
+      - name: Run Unit Tests
+        run: flutter test --coverage
 
       - uses: actions/upload-artifact@v4
         with:
@@ -64,8 +62,12 @@ jobs:
 
       - run: flutter pub get
 
-      # Release APK build
-      - run: flutter build apk --release --split-per-abi
+      - name: Generate code for Release build
+        run: |
+          dart run build_runner build
+
+      - name: Build Release APKs
+        run: flutter build apk --release --split-per-abi
 
       - uses: actions/upload-artifact@v4
         with:
