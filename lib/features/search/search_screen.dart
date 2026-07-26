@@ -337,12 +337,17 @@ class _SearchLanding extends ConsumerWidget {
                     GestureDetector(
                       onTap: () => onSelected(row.query),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.surfaceContainerLow,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.3,
+                            ),
                             width: 1.2,
                           ),
                         ),
@@ -352,7 +357,9 @@ class _SearchLanding extends ConsumerWidget {
                             Icon(
                               Icons.history,
                               size: 16,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.7,
+                              ),
                             ),
                             const SizedBox(width: 6),
                             Text(
@@ -368,7 +375,9 @@ class _SearchLanding extends ConsumerWidget {
                               child: Icon(
                                 Icons.close_rounded,
                                 size: 15,
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                                color: theme.colorScheme.onSurface.withValues(
+                                  alpha: 0.4,
+                                ),
                               ),
                             ),
                           ],
@@ -424,9 +433,10 @@ class _SearchLanding extends ConsumerWidget {
                           style: TextStyle(
                             color: item.color == EuBrutal.highlight
                                 ? EuBrutal.ink
-                                : (item.color == const Color(0xFF00E5FF) || item.color == const Color(0xFF00E676)
-                                    ? EuBrutal.ink
-                                    : Colors.white),
+                                : (item.color == const Color(0xFF00E5FF) ||
+                                          item.color == const Color(0xFF00E676)
+                                      ? EuBrutal.ink
+                                      : Colors.white),
                             fontWeight: FontWeight.w900,
                             fontSize: 16,
                           ),
@@ -541,35 +551,45 @@ class _ResultSlivers extends StatelessWidget {
             child: Row(
               children: [
                 for (final entry in results.filters.entries) ...[
-                  Builder(builder: (context) {
-                    final isSelected = activeFilter == entry.key;
-                    return GestureDetector(
-                      onTap: () => onFilterSelected(entry.key, entry.value),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 7,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected ? EuBrutal.highlight : Theme.of(context).colorScheme.surfaceContainerLow,
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: EuBrutal.ink,
-                            width: isSelected ? 2.5 : 1.5,
+                  Builder(
+                    builder: (context) {
+                      final isSelected = activeFilter == entry.key;
+                      return GestureDetector(
+                        onTap: () => onFilterSelected(entry.key, entry.value),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 7,
                           ),
-                          boxShadow: isSelected ? EuBrutal.smHardShadow : null,
-                        ),
-                        child: Text(
-                          entry.key,
-                          style: TextStyle(
-                            color: EuBrutal.ink,
-                            fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
-                            fontSize: 13,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? EuBrutal.highlight
+                                : Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerLow,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: EuBrutal.ink,
+                              width: isSelected ? 2.5 : 1.5,
+                            ),
+                            boxShadow: isSelected
+                                ? EuBrutal.smHardShadow
+                                : null,
+                          ),
+                          child: Text(
+                            entry.key,
+                            style: TextStyle(
+                              color: EuBrutal.ink,
+                              fontWeight: isSelected
+                                  ? FontWeight.w900
+                                  : FontWeight.w700,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  }),
+                      );
+                    },
+                  ),
                   const SizedBox(width: EuSpace.sm),
                 ],
               ],

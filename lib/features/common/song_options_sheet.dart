@@ -20,9 +20,8 @@ void showSongOptionsSheet(BuildContext context, Song song) {
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       side: BorderSide(color: EuBrutal.ink, width: 2.5),
     ),
-    builder: (context) => SingleChildScrollView(
-      child: _SongOptionsSheetBody(song: song),
-    ),
+    builder: (context) =>
+        SingleChildScrollView(child: _SongOptionsSheetBody(song: song)),
   );
 }
 
@@ -49,7 +48,9 @@ class _SongOptionsSheetBody extends ConsumerWidget {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: EuBrutal.ink, width: 2),
-                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHighest,
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: song.artworkUrl != null
@@ -85,10 +86,9 @@ class _SongOptionsSheetBody extends ConsumerWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.7),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -132,9 +132,9 @@ class _SongOptionsSheetBody extends ConsumerWidget {
             onTap: () {
               ref.read(playerControllerProvider).addToQueue(song);
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Added to queue')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(const SnackBar(content: Text('Added to queue')));
             },
           ),
           StreamBuilder<bool>(
@@ -168,52 +168,75 @@ class _SongOptionsSheetBody extends ConsumerWidget {
               );
             },
           ),
-          Consumer(builder: (context, ref, _) {
-            final isDownloaded = ref.watch(downloadedSongsProvider).any((s) => s.id == song.id);
-            final progressMap = ref.watch(downloadProgressProvider);
-            final progress = progressMap[song.id];
-            
-            return ListTile(
-              leading: progress != null
-                  ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 3, color: EuBrutal.accent),
-                    )
-                  : Icon(
-                      isDownloaded ? Icons.check_circle : Icons.download_for_offline_outlined,
-                      color: isDownloaded ? Colors.green : EuBrutal.accent,
-                    ),
-              title: Text(
-                isDownloaded
-                    ? 'Remove Download'
-                    : (progress != null ? 'Downloading ${(progress * 100).toInt()}%...' : 'Download Track'),
-                style: const TextStyle(fontWeight: FontWeight.w800),
-              ),
-              subtitle: Text(isDownloaded ? 'Remove from offline storage' : 'Save track for offline listening'),
-              onTap: () {
-                if (progress != null) return;
-                if (isDownloaded) {
-                  ref.read(downloadedSongsProvider.notifier).removeDownload(song.id);
-                  Navigator.pop(context);
-                } else {
-                  ref.read(downloadedSongsProvider.notifier).downloadSong(song);
-                  Navigator.pop(context);
-                }
-              },
-            );
-          }),
+          Consumer(
+            builder: (context, ref, _) {
+              final isDownloaded = ref
+                  .watch(downloadedSongsProvider)
+                  .any((s) => s.id == song.id);
+              final progressMap = ref.watch(downloadProgressProvider);
+              final progress = progressMap[song.id];
+
+              return ListTile(
+                leading: progress != null
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: EuBrutal.accent,
+                        ),
+                      )
+                    : Icon(
+                        isDownloaded
+                            ? Icons.check_circle
+                            : Icons.download_for_offline_outlined,
+                        color: isDownloaded ? Colors.green : EuBrutal.accent,
+                      ),
+                title: Text(
+                  isDownloaded
+                      ? 'Remove Download'
+                      : (progress != null
+                            ? 'Downloading ${(progress * 100).toInt()}%...'
+                            : 'Download Track'),
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                subtitle: Text(
+                  isDownloaded
+                      ? 'Remove from offline storage'
+                      : 'Save track for offline listening',
+                ),
+                onTap: () {
+                  if (progress != null) return;
+                  if (isDownloaded) {
+                    ref
+                        .read(downloadedSongsProvider.notifier)
+                        .removeDownload(song.id);
+                    Navigator.pop(context);
+                  } else {
+                    ref
+                        .read(downloadedSongsProvider.notifier)
+                        .downloadSong(song);
+                    Navigator.pop(context);
+                  }
+                },
+              );
+            },
+          ),
           if (song.artistNames.isNotEmpty)
             ListTile(
-              leading: const Icon(Icons.person_search_outlined,
-                  color: EuBrutal.ink),
+              leading: const Icon(
+                Icons.person_search_outlined,
+                color: EuBrutal.ink,
+              ),
               title: Text(
                 'Search "${song.artistNames}"',
                 style: const TextStyle(fontWeight: FontWeight.w800),
               ),
               onTap: () {
                 Navigator.pop(context);
-                context.go('/search?q=${Uri.encodeComponent(song.artistNames)}');
+                context.go(
+                  '/search?q=${Uri.encodeComponent(song.artistNames)}',
+                );
               },
             ),
           const SizedBox(height: EuSpace.lg),
@@ -256,7 +279,11 @@ void _showAddToPlaylistSheet(BuildContext context, Song song) {
                           ),
                         ),
                       ),
-                      const Divider(color: EuBrutal.ink, thickness: 2, height: 1),
+                      const Divider(
+                        color: EuBrutal.ink,
+                        thickness: 2,
+                        height: 1,
+                      ),
                       ListTile(
                         leading: Container(
                           padding: const EdgeInsets.all(6),
@@ -264,11 +291,18 @@ void _showAddToPlaylistSheet(BuildContext context, Song song) {
                             color: EuBrutal.accent,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.add, color: Colors.white, size: 20),
+                          child: const Icon(
+                            Icons.add,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
                         title: const Text(
                           'Create New Playlist',
-                          style: TextStyle(fontWeight: FontWeight.w900, color: EuBrutal.accent),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: EuBrutal.accent,
+                          ),
                         ),
                         onTap: () {
                           Navigator.pop(context);
@@ -286,28 +320,45 @@ void _showAddToPlaylistSheet(BuildContext context, Song song) {
                       else
                         for (final playlist in playlists)
                           ListTile(
-                            leading: const Icon(Icons.playlist_play, color: EuBrutal.ink),
+                            leading: const Icon(
+                              Icons.playlist_play,
+                              color: EuBrutal.ink,
+                            ),
                             title: Text(
                               playlist.title,
-                              style: const TextStyle(fontWeight: FontWeight.w800),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
-                            subtitle: Text('${playlist.trackCount ?? 0} tracks'),
+                            subtitle: Text(
+                              '${playlist.trackCount ?? 0} tracks',
+                            ),
                             onTap: () async {
-                              final notifier = ref.read(localPlaylistTracksProvider.notifier);
-                              await notifier.addSongToPlaylist(playlist.id, song);
-                              final currentTracks = notifier.getPlaylistTracks(playlist.id);
+                              final notifier = ref.read(
+                                localPlaylistTracksProvider.notifier,
+                              );
+                              await notifier.addSongToPlaylist(
+                                playlist.id,
+                                song,
+                              );
+                              final currentTracks = notifier.getPlaylistTracks(
+                                playlist.id,
+                              );
                               await dao.save(
                                 id: playlist.id,
                                 title: playlist.title,
                                 author: playlist.author ?? 'Custom Playlist',
-                                artworkUrl: song.artworkUrl ?? playlist.artworkUrl,
+                                artworkUrl:
+                                    song.artworkUrl ?? playlist.artworkUrl,
                                 trackCount: currentTracks.length,
                               );
                               if (context.mounted) {
                                 Navigator.pop(context);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('Added "${song.title}" to ${playlist.title}'),
+                                    content: Text(
+                                      'Added "${song.title}" to ${playlist.title}',
+                                    ),
                                   ),
                                 );
                               }
@@ -352,7 +403,10 @@ void _showNewPlaylistDialog(BuildContext context, Song song) {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -362,7 +416,8 @@ void _showNewPlaylistDialog(BuildContext context, Song song) {
             onPressed: () async {
               final name = controller.text.trim();
               if (name.isNotEmpty) {
-                final playlistId = 'local_${DateTime.now().millisecondsSinceEpoch}';
+                final playlistId =
+                    'local_${DateTime.now().millisecondsSinceEpoch}';
                 final notifier = ref.read(localPlaylistTracksProvider.notifier);
                 final dao = ref.read(savedPlaylistsDaoProvider);
                 await notifier.addSongToPlaylist(playlistId, song);
@@ -376,12 +431,19 @@ void _showNewPlaylistDialog(BuildContext context, Song song) {
                 if (context.mounted) {
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Created "$name" and added "${song.title}"')),
+                    SnackBar(
+                      content: Text(
+                        'Created "$name" and added "${song.title}"',
+                      ),
+                    ),
                   );
                 }
               }
             },
-            child: const Text('Create & Add', style: TextStyle(fontWeight: FontWeight.w900)),
+            child: const Text(
+              'Create & Add',
+              style: TextStyle(fontWeight: FontWeight.w900),
+            ),
           ),
         ],
       ),

@@ -209,9 +209,7 @@ class _QueueRow extends ConsumerWidget {
                             fontWeight: FontWeight.w600,
                             color: isCurrent
                                 ? EuBrutal.onHighlight.withValues(alpha: 0.75)
-                                : EuBrutal.ink.withValues(
-                                    alpha: 0.7,
-                                  ),
+                                : EuBrutal.ink.withValues(alpha: 0.7),
                           ),
                         ),
                     ],
@@ -233,9 +231,7 @@ class _QueueRow extends ConsumerWidget {
                       formatPlaybackDuration(duration!),
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: EuBrutal.ink.withValues(
-                          alpha: 0.6,
-                        ),
+                        color: EuBrutal.ink.withValues(alpha: 0.6),
                       ),
                     ),
                   ),

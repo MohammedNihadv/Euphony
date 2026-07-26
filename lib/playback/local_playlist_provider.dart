@@ -65,13 +65,13 @@ class LocalPlaylistNotifier extends Notifier<Map<String, List<Song>>> {
   }
 
   Map<String, dynamic> _songToJson(Song song) => {
-        'id': song.id,
-        'title': song.title,
-        'artistNames': song.artistNames,
-        'albumTitle': song.albumTitle,
-        'artworkUrl': song.artworkUrl,
-        'durationSeconds': song.duration?.inSeconds,
-      };
+    'id': song.id,
+    'title': song.title,
+    'artistNames': song.artistNames,
+    'albumTitle': song.albumTitle,
+    'artworkUrl': song.artworkUrl,
+    'durationSeconds': song.duration?.inSeconds,
+  };
 
   Song? _songFromJson(Map<String, dynamic> json) {
     final id = json['id'] as String?;
@@ -92,5 +92,5 @@ class LocalPlaylistNotifier extends Notifier<Map<String, List<Song>>> {
 
 final localPlaylistTracksProvider =
     NotifierProvider<LocalPlaylistNotifier, Map<String, List<Song>>>(
-  LocalPlaylistNotifier.new,
-);
+      LocalPlaylistNotifier.new,
+    );

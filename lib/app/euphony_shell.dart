@@ -57,7 +57,10 @@ class EuphonyShell extends ConsumerWidget {
                   }),
                   iconTheme: WidgetStateProperty.resolveWith((states) {
                     if (states.contains(WidgetState.selected)) {
-                      return const IconThemeData(color: EuBrutal.onAccent, size: 24);
+                      return const IconThemeData(
+                        color: EuBrutal.onAccent,
+                        size: 24,
+                      );
                     }
                     return const IconThemeData(size: 24);
                   }),
@@ -65,8 +68,10 @@ class EuphonyShell extends ConsumerWidget {
               ),
               child: NavigationBar(
                 selectedIndex: navigationShell.currentIndex,
-                onDestinationSelected: (index) =>
-                    navigationShell.goBranch(index, initialLocation: index == navigationShell.currentIndex),
+                onDestinationSelected: (index) => navigationShell.goBranch(
+                  index,
+                  initialLocation: index == navigationShell.currentIndex,
+                ),
                 destinations: const [
                   NavigationDestination(
                     icon: Icon(Icons.home_outlined),

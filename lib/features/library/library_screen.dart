@@ -54,8 +54,14 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           dividerColor: Colors.transparent,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           labelPadding: const EdgeInsets.symmetric(horizontal: 18),
-          labelStyle: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 14,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 14,
+          ),
           indicator: BoxDecoration(
             color: EuBrutal.highlight,
             borderRadius: BorderRadius.circular(22),
@@ -67,9 +73,15 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           labelColor: EuBrutal.ink,
           unselectedLabelColor: EuBrutal.ink,
           tabs: const [
-            Tab(icon: Icon(Icons.download_done_rounded, size: 20), text: 'Downloads'),
+            Tab(
+              icon: Icon(Icons.download_done_rounded, size: 20),
+              text: 'Downloads',
+            ),
             Tab(icon: Icon(Icons.favorite_rounded, size: 20), text: 'Liked'),
-            Tab(icon: Icon(Icons.queue_music_rounded, size: 20), text: 'Playlists'),
+            Tab(
+              icon: Icon(Icons.queue_music_rounded, size: 20),
+              text: 'Playlists',
+            ),
             Tab(icon: Icon(Icons.album_rounded, size: 20), text: 'Albums'),
             Tab(icon: Icon(Icons.history_rounded, size: 20), text: 'History'),
           ],
@@ -103,7 +115,11 @@ class _LikedSongsTab extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.favorite_border, size: 56, color: EuBrutal.alert),
+                const Icon(
+                  Icons.favorite_border,
+                  size: 56,
+                  color: EuBrutal.alert,
+                ),
                 const SizedBox(height: EuSpace.md),
                 Text(
                   'No liked songs yet',
@@ -121,19 +137,23 @@ class _LikedSongsTab extends ConsumerWidget {
           );
         }
 
-        final songs = entries.map((entry) => Song(
-          id: entry.id,
-          title: entry.title,
-          artists: entry.artists
-              .split(', ')
-              .map((n) => ArtistRef(name: n))
-              .toList(),
-          albumTitle: entry.albumTitle,
-          artworkUrl: entry.artworkUrl,
-          duration: entry.durationSeconds != null
-              ? Duration(seconds: entry.durationSeconds!)
-              : null,
-        )).toList();
+        final songs = entries
+            .map(
+              (entry) => Song(
+                id: entry.id,
+                title: entry.title,
+                artists: entry.artists
+                    .split(', ')
+                    .map((n) => ArtistRef(name: n))
+                    .toList(),
+                albumTitle: entry.albumTitle,
+                artworkUrl: entry.artworkUrl,
+                duration: entry.durationSeconds != null
+                    ? Duration(seconds: entry.durationSeconds!)
+                    : null,
+              ),
+            )
+            .toList();
 
         return ListView(
           padding: const EdgeInsets.all(EuSpace.screenGutter),
@@ -211,10 +231,9 @@ class _LikedSongsTab extends ConsumerWidget {
                   child: ElevatedButton.icon(
                     onPressed: () {
                       if (songs.isNotEmpty) {
-                        ref.read(playerControllerProvider).playQueue(
-                          songs,
-                          shuffle: true,
-                        );
+                        ref
+                            .read(playerControllerProvider)
+                            .playQueue(songs, shuffle: true);
                       }
                     },
                     icon: const Icon(Icons.shuffle, size: 20),
@@ -270,9 +289,14 @@ class _LikedSongsTab extends ConsumerWidget {
                   title: entries[i].title,
                   subtitle: entries[i].artists,
                   artworkUrl: entries[i].artworkUrl,
-                  onTap: () => ref.read(playerControllerProvider).playSong(songs[i]),
+                  onTap: () =>
+                      ref.read(playerControllerProvider).playSong(songs[i]),
                   trailing: IconButton(
-                    icon: const Icon(Icons.favorite, color: EuBrutal.alert, size: 20),
+                    icon: const Icon(
+                      Icons.favorite,
+                      color: EuBrutal.alert,
+                      size: 20,
+                    ),
                     onPressed: () => dao.unlike(entries[i].id),
                   ),
                 ),
@@ -309,7 +333,9 @@ class _SavedPlaylistsTab extends ConsumerWidget {
                 type: MaterialType.transparency,
                 borderRadius: BorderRadius.circular(12),
                 child: ListTile(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   onTap: () => _showCreatePlaylistDialog(context, ref),
                   leading: Container(
                     width: 48,
@@ -335,7 +361,10 @@ class _SavedPlaylistsTab extends ConsumerWidget {
                       color: EuBrutal.ink,
                     ),
                   ),
-                  trailing: const Icon(Icons.chevron_right, color: EuBrutal.ink),
+                  trailing: const Icon(
+                    Icons.chevron_right,
+                    color: EuBrutal.ink,
+                  ),
                 ),
               ),
             ),
@@ -346,13 +375,17 @@ class _SavedPlaylistsTab extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.playlist_play, size: 48, color: EuBrutal.accent),
+                    const Icon(
+                      Icons.playlist_play,
+                      size: 48,
+                      color: EuBrutal.accent,
+                    ),
                     const SizedBox(height: EuSpace.md),
                     Text(
                       'No saved playlists yet',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w900,
-                          ),
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ],
                 ),
@@ -404,7 +437,10 @@ class _SavedPlaylistsTab extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w700)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -414,7 +450,9 @@ class _SavedPlaylistsTab extends ConsumerWidget {
             onPressed: () async {
               final name = controller.text.trim();
               if (name.isNotEmpty) {
-                await ref.read(savedPlaylistsDaoProvider).save(
+                await ref
+                    .read(savedPlaylistsDaoProvider)
+                    .save(
                       id: 'local_${DateTime.now().millisecondsSinceEpoch}',
                       title: name,
                       author: 'Custom Playlist',
@@ -423,7 +461,10 @@ class _SavedPlaylistsTab extends ConsumerWidget {
                 if (context.mounted) Navigator.pop(context);
               }
             },
-            child: const Text('Create', style: TextStyle(fontWeight: FontWeight.w900)),
+            child: const Text(
+              'Create',
+              style: TextStyle(fontWeight: FontWeight.w900),
+            ),
           ),
         ],
       ),
@@ -557,7 +598,10 @@ class _LibraryTile extends StatelessWidget {
         type: MaterialType.transparency,
         child: ListTile(
           onTap: onTap,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 4,
+          ),
           leading: Container(
             width: 48,
             height: 48,
@@ -644,7 +688,12 @@ class _DownloadsTab extends ConsumerWidget {
     }
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(EuSpace.screenGutter, EuSpace.md, EuSpace.screenGutter, 100),
+      padding: const EdgeInsets.fromLTRB(
+        EuSpace.screenGutter,
+        EuSpace.md,
+        EuSpace.screenGutter,
+        100,
+      ),
       children: [
         if (progressMap.isNotEmpty) ...[
           Container(
@@ -715,7 +764,9 @@ class _DownloadsTab extends ConsumerWidget {
                           child: LinearProgressIndicator(
                             value: entry.value,
                             backgroundColor: Colors.white,
-                            valueColor: const AlwaysStoppedAnimation<Color>(EuBrutal.accent),
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              EuBrutal.accent,
+                            ),
                             minHeight: 6,
                           ),
                         ),
@@ -749,55 +800,69 @@ class _DownloadsTab extends ConsumerWidget {
             child: Material(
               type: MaterialType.transparency,
               child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-              leading: Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: EuBrutal.accent.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 4,
                 ),
-                child: const Icon(Icons.music_note, color: EuBrutal.accent),
-              ),
-              title: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      song.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 15),
-                    ),
+                leading: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: EuBrutal.accent.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.check_circle, color: Colors.green, size: 18),
-                ],
-              ),
-              subtitle: Text(
-                song.artists.map((a) => a.name).join(', '),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                  color: EuBrutal.ink.withValues(alpha: 0.7),
+                  child: const Icon(Icons.music_note, color: EuBrutal.accent),
                 ),
-              ),
-              trailing: IconButton(
-                icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                tooltip: 'Remove Download',
-                onPressed: () {
-                  ref.read(downloadedSongsProvider.notifier).removeDownload(song.id);
+                title: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        song.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                      size: 18,
+                    ),
+                  ],
+                ),
+                subtitle: Text(
+                  song.artists.map((a) => a.name).join(', '),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                    color: EuBrutal.ink.withValues(alpha: 0.7),
+                  ),
+                ),
+                trailing: IconButton(
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.redAccent,
+                  ),
+                  tooltip: 'Remove Download',
+                  onPressed: () {
+                    ref
+                        .read(downloadedSongsProvider.notifier)
+                        .removeDownload(song.id);
+                  },
+                ),
+                onTap: () {
+                  ref.read(playerControllerProvider).playSong(song);
                 },
               ),
-              onTap: () {
-                ref.read(playerControllerProvider).playSong(song);
-              },
-            ),
             ),
           ),
       ],
     );
   }
 }
-

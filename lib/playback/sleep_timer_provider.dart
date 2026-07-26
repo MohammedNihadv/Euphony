@@ -45,26 +45,23 @@ class SleepTimerState {
 
 final sleepTimerProvider =
     NotifierProvider<SleepTimerNotifier, SleepTimerState>(
-  SleepTimerNotifier.new,
-);
+      SleepTimerNotifier.new,
+    );
 
 class SleepTimerNotifier extends Notifier<SleepTimerState> {
   Timer? _timer;
 
   @override
   SleepTimerState build() {
-    ref.listen<AsyncValue<PlayerState>>(
-      playerStateProvider,
-      (previous, next) {
-        if (!state.isActive) return;
-        if (state.finishCurrentSong) {
-          final processingState = next.asData?.value.processingState;
-          if (processingState == ProcessingState.completed) {
-            _triggerSleep();
-          }
+    ref.listen<AsyncValue<PlayerState>>(playerStateProvider, (previous, next) {
+      if (!state.isActive) return;
+      if (state.finishCurrentSong) {
+        final processingState = next.asData?.value.processingState;
+        if (processingState == ProcessingState.completed) {
+          _triggerSleep();
         }
-      },
-    );
+      }
+    });
 
     ref.onDispose(() {
       _timer?.cancel();

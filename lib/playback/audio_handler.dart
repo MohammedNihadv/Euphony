@@ -98,7 +98,8 @@ class EuphonyAudioHandler extends BaseAudioHandler with SeekHandler {
 
   MediaItem _toMediaItem(Song song) {
     // Prefer the explicitly loaded artworkUrl if available, otherwise fall back to artwork object
-    final artworkStr = song.artworkUrl ?? song.artwork?.high ?? song.artwork?.medium;
+    final artworkStr =
+        song.artworkUrl ?? song.artwork?.high ?? song.artwork?.medium;
     return MediaItem(
       id: song.id,
       title: song.title,

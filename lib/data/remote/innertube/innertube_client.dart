@@ -359,7 +359,8 @@ class InnertubeClient {
       'videoId': videoId,
     };
 
-    final isYouTubeClient = clientName == 'TVHTML5_SIMPLY_EMBEDDED_PLAYER' ||
+    final isYouTubeClient =
+        clientName == 'TVHTML5_SIMPLY_EMBEDDED_PLAYER' ||
         clientName == 'ANDROID_VR' ||
         clientName == 'IOS' ||
         clientName == 'ANDROID';
@@ -383,10 +384,7 @@ class InnertubeClient {
         final response = await _dio.post<dynamic>(
           url,
           data: body,
-          options: Options(
-            headers: headers,
-            validateStatus: (_) => true,
-          ),
+          options: Options(headers: headers, validateStatus: (_) => true),
         );
 
         final status = response.statusCode ?? 0;

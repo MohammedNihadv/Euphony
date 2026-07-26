@@ -24,7 +24,8 @@ class UpdateChecker {
 
   final Dio _dio;
   static const String currentVersion = '0.1.0';
-  static const String repoUrl = 'https://api.github.com/repos/MohammedNihadv/Euphony/releases/latest';
+  static const String repoUrl =
+      'https://api.github.com/repos/MohammedNihadv/Euphony/releases/latest';
 
   Future<UpdateInfo?> checkUpdate() async {
     try {
@@ -37,7 +38,9 @@ class UpdateChecker {
       final data = response.data!;
       final rawTag = (data['tag_name'] as String? ?? '').trim();
       final latestTag = rawTag.startsWith('v') ? rawTag.substring(1) : rawTag;
-      final releaseUrl = data['html_url'] as String? ?? 'https://github.com/MohammedNihadv/Euphony/releases';
+      final releaseUrl =
+          data['html_url'] as String? ??
+          'https://github.com/MohammedNihadv/Euphony/releases';
       final releaseNotes = data['body'] as String?;
 
       String? apkUrl;
@@ -72,8 +75,14 @@ class UpdateChecker {
 
   bool _isVersionGreater(String latest, String current) {
     if (latest.isEmpty) return false;
-    final latestParts = latest.split('.').map((e) => int.tryParse(e) ?? 0).toList();
-    final currentParts = current.split('.').map((e) => int.tryParse(e) ?? 0).toList();
+    final latestParts = latest
+        .split('.')
+        .map((e) => int.tryParse(e) ?? 0)
+        .toList();
+    final currentParts = current
+        .split('.')
+        .map((e) => int.tryParse(e) ?? 0)
+        .toList();
 
     for (var i = 0; i < latestParts.length || i < currentParts.length; i++) {
       final l = i < latestParts.length ? latestParts[i] : 0;

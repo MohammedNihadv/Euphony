@@ -23,11 +23,11 @@ class SettingsState {
     bool? skipSilence,
     String? contentRegion,
   }) => SettingsState(
-        audioQuality: audioQuality ?? this.audioQuality,
-        autoPlaySimilar: autoPlaySimilar ?? this.autoPlaySimilar,
-        skipSilence: skipSilence ?? this.skipSilence,
-        contentRegion: contentRegion ?? this.contentRegion,
-      );
+    audioQuality: audioQuality ?? this.audioQuality,
+    autoPlaySimilar: autoPlaySimilar ?? this.autoPlaySimilar,
+    skipSilence: skipSilence ?? this.skipSilence,
+    contentRegion: contentRegion ?? this.contentRegion,
+  );
 }
 
 class SettingsController extends Notifier<SettingsState> {
@@ -64,6 +64,4 @@ class SettingsController extends Notifier<SettingsState> {
 }
 
 final settingsControllerProvider =
-    NotifierProvider<SettingsController, SettingsState>(
-  SettingsController.new,
-);
+    NotifierProvider<SettingsController, SettingsState>(SettingsController.new);

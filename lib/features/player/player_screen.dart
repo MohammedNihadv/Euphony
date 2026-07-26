@@ -77,7 +77,10 @@ class PlayerScreen extends ConsumerWidget {
                 builder: (context, constraints) {
                   // Dynamically scale artwork so controls always fit on any screen ratio
                   // without overflow or requiring scrolling.
-                  final maxArtSize = (constraints.maxHeight * 0.40).clamp(150.0, 360.0);
+                  final maxArtSize = (constraints.maxHeight * 0.40).clamp(
+                    150.0,
+                    360.0,
+                  );
 
                   return Center(
                     child: ConstrainedBox(
@@ -172,7 +175,9 @@ class _TrackHeader extends ConsumerWidget {
                 ),
                 const SizedBox(height: EuSpace.xs),
                 Text(
-                  song.artistNames.isEmpty ? 'Unknown Artist' : song.artistNames,
+                  song.artistNames.isEmpty
+                      ? 'Unknown Artist'
+                      : song.artistNames,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleMedium?.copyWith(
@@ -237,7 +242,9 @@ class _DownloadButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDownloaded = ref.watch(downloadedSongsProvider).any((s) => s.id == song.id);
+    final isDownloaded = ref
+        .watch(downloadedSongsProvider)
+        .any((s) => s.id == song.id);
     final progressMap = ref.watch(downloadProgressProvider);
     final progress = progressMap[song.id];
 
@@ -256,10 +263,7 @@ class _DownloadButton extends ConsumerWidget {
             ),
             Text(
               '${(progress * 100).toInt()}',
-              style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w900,
-              ),
+              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w900),
             ),
           ],
         ),
@@ -392,10 +396,7 @@ class _BottomIconButton extends StatelessWidget {
 }
 
 class _SpeedButton extends StatelessWidget {
-  const _SpeedButton({
-    required this.speed,
-    required this.onPressed,
-  });
+  const _SpeedButton({required this.speed, required this.onPressed});
 
   final double speed;
   final VoidCallback onPressed;
@@ -455,7 +456,10 @@ void _showSpeedSheet(BuildContext context, WidgetRef ref) {
                 padding: EdgeInsets.all(EuSpace.lg),
                 child: Text(
                   'PLAYBACK SPEED',
-                  style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                  ),
                 ),
               ),
               for (final speed in speeds)
@@ -505,7 +509,10 @@ void _showSleepTimerSheet(BuildContext context, WidgetRef ref) {
                 padding: EdgeInsets.all(EuSpace.lg),
                 child: Text(
                   'SLEEP TIMER',
-                  style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                  ),
                 ),
               ),
               for (final preset in SleepTimerPreset.values)

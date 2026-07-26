@@ -42,7 +42,10 @@ class HomeRepository {
       // Check if charts and playlists sections exist; if not, fetch them
       final hasCharts = value.sections.any((s) {
         final l = s.title.toLowerCase();
-        return l.contains('chart') || l.contains('top') || l.contains('trending') || l.contains('hit');
+        return l.contains('chart') ||
+            l.contains('top') ||
+            l.contains('trending') ||
+            l.contains('hit');
       });
       final extraSections = <HomeSection>[];
       if (!hasCharts) {
@@ -94,10 +97,7 @@ class HomeRepository {
           final feed = HomeFeed(
             quickPicks: songs.take(8).toList(),
             sections: [
-              HomeSection(
-                title: 'Top Charts & Hits',
-                items: items,
-              ),
+              HomeSection(title: 'Top Charts & Hits', items: items),
               playlistsSection,
             ],
           );
@@ -136,10 +136,7 @@ class HomeRepository {
       if (parsedSearch case Ok(:final value) when value.sections.isNotEmpty) {
         final items = value.sections.expand((s) => s.items).toList();
         if (items.isNotEmpty) {
-          return HomeSection(
-            title: 'Top Charts & Hits',
-            items: items,
-          );
+          return HomeSection(title: 'Top Charts & Hits', items: items);
         }
       }
     } catch (_) {}
@@ -159,10 +156,7 @@ class HomeRepository {
       if (parsedSearch case Ok(:final value) when value.sections.isNotEmpty) {
         final items = value.sections.expand((s) => s.items).toList();
         if (items.isNotEmpty) {
-          return HomeSection(
-            title: 'Featured Playlists & Mixes',
-            items: items,
-          );
+          return HomeSection(title: 'Featured Playlists & Mixes', items: items);
         }
       }
     } catch (_) {}
@@ -211,4 +205,3 @@ class HomeRepository {
     );
   }
 }
-

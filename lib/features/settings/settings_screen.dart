@@ -46,12 +46,7 @@ class SettingsScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-            20,
-            EuSpace.md,
-            20,
-            120,
-          ),
+          padding: const EdgeInsets.fromLTRB(20, EuSpace.md, 20, 120),
           children: [
             // Appearance Section Card
             Container(
@@ -346,7 +341,6 @@ class SettingsScreen extends ConsumerWidget {
             ),
             const SizedBox(height: EuSpace.lg),
 
-
             Container(
               decoration: EuBrutal.boxDecoration(
                 color: Colors.transparent,
@@ -377,28 +371,46 @@ class SettingsScreen extends ConsumerWidget {
                       const SizedBox(height: EuSpace.md),
                       ListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Export Backup', style: TextStyle(fontWeight: FontWeight.w800)),
+                        title: const Text(
+                          'Export Backup',
+                          style: TextStyle(fontWeight: FontWeight.w800),
+                        ),
                         subtitle: const Text('Save your library and settings'),
                         trailing: const Icon(Icons.file_upload),
                         onTap: () async {
                           final success = await BackupService.exportBackup();
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(success ? 'Backup saved successfully.' : 'Backup failed or cancelled.')),
+                              SnackBar(
+                                content: Text(
+                                  success
+                                      ? 'Backup saved successfully.'
+                                      : 'Backup failed or cancelled.',
+                                ),
+                              ),
                             );
                           }
                         },
                       ),
                       ListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Import Backup', style: TextStyle(fontWeight: FontWeight.w800)),
+                        title: const Text(
+                          'Import Backup',
+                          style: TextStyle(fontWeight: FontWeight.w800),
+                        ),
                         subtitle: const Text('Restore from a backup file'),
                         trailing: const Icon(Icons.file_download),
                         onTap: () async {
                           final success = await BackupService.importBackup();
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(success ? 'Backup imported! Please restart the app.' : 'Import failed or cancelled.')),
+                              SnackBar(
+                                content: Text(
+                                  success
+                                      ? 'Backup imported! Please restart the app.'
+                                      : 'Import failed or cancelled.',
+                                ),
+                              ),
                             );
                           }
                         },
@@ -433,7 +445,10 @@ class SettingsScreen extends ConsumerWidget {
                             decoration: BoxDecoration(
                               color: EuBrutal.highlight,
                               borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: themeData.colorScheme.onSurface, width: 2),
+                              border: Border.all(
+                                color: themeData.colorScheme.onSurface,
+                                width: 2,
+                              ),
                             ),
                             child: Icon(
                               Icons.graphic_eq,
@@ -684,7 +699,11 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
 
     if (info != null && !info.hasUpdate) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('You are on the latest version (v${info.currentVersion}).')),
+        SnackBar(
+          content: Text(
+            'You are on the latest version (v${info.currentVersion}).',
+          ),
+        ),
       );
     }
   }
@@ -736,19 +755,30 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
                       if (info != null && info.hasUpdate)
                         Text(
                           'New version available: v${info.latestVersion}',
-                          style: const TextStyle(fontWeight: FontWeight.w900, color: EuBrutal.accent),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: EuBrutal.accent,
+                          ),
                         )
                       else
                         const Text(
                           'Up to date • Auto-preserves all data',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: Colors.grey),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
                         ),
                     ],
                   ),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: (info != null && info.hasUpdate) ? EuBrutal.accent : themeData.colorScheme.surfaceContainerHighest,
-                      foregroundColor: (info != null && info.hasUpdate) ? Colors.white : themeData.colorScheme.onSurface,
+                      backgroundColor: (info != null && info.hasUpdate)
+                          ? EuBrutal.accent
+                          : themeData.colorScheme.surfaceContainerHighest,
+                      foregroundColor: (info != null && info.hasUpdate)
+                          ? Colors.white
+                          : themeData.colorScheme.onSurface,
                       side: const BorderSide(color: EuBrutal.ink, width: 2),
                     ),
                     onPressed: _checking
@@ -766,12 +796,18 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
                             height: 16,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : Icon((info != null && info.hasUpdate) ? Icons.file_download : Icons.refresh),
-                    label: Text(_checking
-                        ? 'Checking...'
-                        : (info != null && info.hasUpdate)
-                            ? 'Update'
-                            : 'Check'),
+                        : Icon(
+                            (info != null && info.hasUpdate)
+                                ? Icons.file_download
+                                : Icons.refresh,
+                          ),
+                    label: Text(
+                      _checking
+                          ? 'Checking...'
+                          : (info != null && info.hasUpdate)
+                          ? 'Update'
+                          : 'Check',
+                    ),
                   ),
                 ],
               ),
@@ -793,7 +829,11 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
         ),
         title: Text(
           'UPDATE AVAILABLE (v${info.latestVersion})',
-          style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: 0.8, fontSize: 16),
+          style: const TextStyle(
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.8,
+            fontSize: 16,
+          ),
         ),
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -801,7 +841,10 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
           children: [
             Text(
               'A new version of Euphony is available!',
-              style: TextStyle(fontWeight: FontWeight.w800, color: Theme.of(context).colorScheme.onSurface),
+              style: TextStyle(
+                fontWeight: FontWeight.w800,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
             ),
             const SizedBox(height: EuSpace.sm),
             const Text(
@@ -810,7 +853,10 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
             ),
             if (info.releaseNotes != null && info.releaseNotes!.isNotEmpty) ...[
               const SizedBox(height: EuSpace.md),
-              const Text('Release Notes:', style: TextStyle(fontWeight: FontWeight.w900)),
+              const Text(
+                'Release Notes:',
+                style: TextStyle(fontWeight: FontWeight.w900),
+              ),
               const SizedBox(height: 4),
               Container(
                 padding: const EdgeInsets.all(10),
@@ -820,7 +866,10 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
                 ),
                 child: Text(
                   info.releaseNotes!,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -829,7 +878,10 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Later', style: TextStyle(fontWeight: FontWeight.w700)),
+            child: const Text(
+              'Later',
+              style: TextStyle(fontWeight: FontWeight.w700),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -840,7 +892,10 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
               Navigator.pop(context);
               context.push(info.releaseUrl);
             },
-            child: const Text('Download Release', style: TextStyle(fontWeight: FontWeight.w900)),
+            child: const Text(
+              'Download Release',
+              style: TextStyle(fontWeight: FontWeight.w900),
+            ),
           ),
         ],
       ),

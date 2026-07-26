@@ -125,7 +125,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 sliver: SliverToBoxAdapter(
                   child: StreamBuilder<void>(
                     stream: Stream<void>.periodic(const Duration(minutes: 1)),
-                    builder: (context, _) => _HeroBanner(greeting: _greetingMessage()),
+                    builder: (context, _) =>
+                        _HeroBanner(greeting: _greetingMessage()),
                   ),
                 ),
               ),
@@ -140,29 +141,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   child: _loading
                       ? const SizedBox(key: ValueKey('loading'))
                       : _error != null
-                          ? Padding(
-                              key: const ValueKey('error'),
-                              padding: const EdgeInsets.all(EuSpace.xl),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const SizedBox(height: 40),
-                                  const Icon(Icons.error_outline,
-                                      size: 48, color: EuBrutal.alert),
-                                  const SizedBox(height: EuSpace.md),
-                                  Text(_error!,
-                                      style: theme.textTheme.titleMedium,
-                                      textAlign: TextAlign.center),
-                                  const SizedBox(height: EuSpace.md),
-                                  FilledButton.icon(
-                                    onPressed: _loadHomeFeed,
-                                    icon: const Icon(Icons.refresh),
-                                    label: const Text('Try Again'),
-                                  ),
-                                ],
+                      ? Padding(
+                          key: const ValueKey('error'),
+                          padding: const EdgeInsets.all(EuSpace.xl),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 40),
+                              const Icon(
+                                Icons.error_outline,
+                                size: 48,
+                                color: EuBrutal.alert,
                               ),
-                            )
-                          : const SizedBox(key: ValueKey('content')),
+                              const SizedBox(height: EuSpace.md),
+                              Text(
+                                _error!,
+                                style: theme.textTheme.titleMedium,
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: EuSpace.md),
+                              FilledButton.icon(
+                                onPressed: _loadHomeFeed,
+                                icon: const Icon(Icons.refresh),
+                                label: const Text('Try Again'),
+                              ),
+                            ],
+                          ),
+                        )
+                      : const SizedBox(key: ValueKey('content')),
                 ),
               ),
 
@@ -170,7 +176,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 const _HomeSkeletonFeed()
               else if (_error != null)
                 const SliverToBoxAdapter(child: SizedBox.shrink())
-
               else if (_feed != null) ...[
                 // Quick Picks Grid (Image 3)
                 if (_feed!.quickPicks.isNotEmpty &&
@@ -198,19 +203,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       vertical: EuSpace.xs,
                     ),
                     sliver: SliverGrid(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 10,
-                        childAspectRatio: 2.7,
-                      ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final song = _feed!.quickPicks[index];
-                          return _QuickPickTile(song: song);
-                        },
-                        childCount: _feed!.quickPicks.length.clamp(0, 6),
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 10,
+                            crossAxisSpacing: 10,
+                            childAspectRatio: 2.7,
+                          ),
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final song = _feed!.quickPicks[index];
+                        return _QuickPickTile(song: song);
+                      }, childCount: _feed!.quickPicks.length.clamp(0, 6)),
                     ),
                   ),
                 ],
@@ -230,9 +233,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ),
                     ),
 
-                const SliverPadding(
-                  padding: EdgeInsets.only(bottom: 80.0),
-                ),
+                const SliverPadding(padding: EdgeInsets.only(bottom: 80.0)),
               ],
             ],
           ),
@@ -285,10 +286,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       return !lower.contains('playlist');
     }
     if (_selectedCategory == 'Playlists') {
-      return lower.contains('playlist') || lower.contains('mix') || lower.contains('radio');
+      return lower.contains('playlist') ||
+          lower.contains('mix') ||
+          lower.contains('radio');
     }
     if (_selectedCategory == 'Charts') {
-      return lower.contains('chart') || lower.contains('top') || lower.contains('trending') || lower.contains('hit');
+      return lower.contains('chart') ||
+          lower.contains('top') ||
+          lower.contains('trending') ||
+          lower.contains('hit');
     }
     return true;
   }
@@ -403,7 +409,6 @@ class _HeroBannerState extends State<_HeroBanner>
   }
 }
 
-
 /// Horizontal Quick Pick tile matching Image 3 (Neo-Brutalist card layout with black border and offset shadow).
 class _QuickPickTile extends ConsumerWidget {
   const _QuickPickTile({required this.song});
@@ -420,9 +425,7 @@ class _QuickPickTile extends ConsumerWidget {
         color: isDark ? theme.colorScheme.surfaceContainerLow : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: EuBrutal.ink, width: 2),
-        boxShadow: const [
-          BoxShadow(color: EuBrutal.ink, offset: Offset(2, 2)),
-        ],
+        boxShadow: const [BoxShadow(color: EuBrutal.ink, offset: Offset(2, 2))],
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -449,12 +452,20 @@ class _QuickPickTile extends ConsumerWidget {
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Container(
                               color: EuBrutal.highlight,
-                              child: const Icon(Icons.music_note, size: 20, color: EuBrutal.ink),
+                              child: const Icon(
+                                Icons.music_note,
+                                size: 20,
+                                color: EuBrutal.ink,
+                              ),
                             ),
                           )
                         : Container(
                             color: EuBrutal.highlight,
-                            child: const Icon(Icons.music_note, size: 20, color: EuBrutal.ink),
+                            child: const Icon(
+                              Icons.music_note,
+                              size: 20,
+                              color: EuBrutal.ink,
+                            ),
                           ),
                   ),
                 ),
@@ -469,7 +480,9 @@ class _QuickPickTile extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: isDark ? theme.colorScheme.onSurface : EuBrutal.ink,
+                          color: isDark
+                              ? theme.colorScheme.onSurface
+                              : EuBrutal.ink,
                           fontWeight: FontWeight.w900,
                           fontSize: 12,
                         ),
@@ -480,8 +493,11 @@ class _QuickPickTile extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: (isDark ? theme.colorScheme.onSurface : EuBrutal.ink)
-                              .withValues(alpha: 0.7),
+                          color:
+                              (isDark
+                                      ? theme.colorScheme.onSurface
+                                      : EuBrutal.ink)
+                                  .withValues(alpha: 0.7),
                           fontWeight: FontWeight.w600,
                           fontSize: 10,
                         ),
@@ -497,6 +513,7 @@ class _QuickPickTile extends ConsumerWidget {
     );
   }
 }
+
 /// Five bars that independently bounce up and down like a music equaliser.
 class _AnimatedMusicBars extends StatefulWidget {
   const _AnimatedMusicBars();
@@ -539,7 +556,10 @@ class _AnimatedMusicBarsState extends State<_AnimatedMusicBars>
             final t = (_ctrl.value + _phases[i]) % 1.0;
             final speed = _speeds[i];
             // Sine curve so it feels organic, not linear
-            final frac = (0.5 - 0.5 * Math.cos(t * speed * Math.pi * 2)).clamp(0.0, 1.0);
+            final frac = (0.5 - 0.5 * Math.cos(t * speed * Math.pi * 2)).clamp(
+              0.0,
+              1.0,
+            );
             final height = 10.0 + frac * 30.0;
             return Padding(
               padding: EdgeInsets.only(left: i == 0 ? 0 : 4),
@@ -558,6 +578,7 @@ class _AnimatedMusicBarsState extends State<_AnimatedMusicBars>
     );
   }
 }
+
 class _HomeSectionBlock extends ConsumerWidget {
   const _HomeSectionBlock({required this.section});
 
@@ -645,7 +666,9 @@ class _HomeItemCard extends ConsumerWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.8,
+                        ),
                         width: 1.8,
                       ),
                     ),
@@ -658,12 +681,18 @@ class _HomeItemCard extends ConsumerWidget {
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Container(
                               color: EuBrutal.accent.withValues(alpha: 0.2),
-                              child: const Icon(Icons.music_note, color: EuBrutal.accent),
+                              child: const Icon(
+                                Icons.music_note,
+                                color: EuBrutal.accent,
+                              ),
                             ),
                           )
                         : Container(
                             color: EuBrutal.accent.withValues(alpha: 0.2),
-                            child: const Icon(Icons.music_note, color: EuBrutal.accent),
+                            child: const Icon(
+                              Icons.music_note,
+                              color: EuBrutal.accent,
+                            ),
                           ),
                   ),
                 ),
@@ -757,148 +786,144 @@ class _HomeSkeletonFeedState extends State<_HomeSkeletonFeed>
         vertical: EuSpace.md,
       ),
       sliver: SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            if (index == 0) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: EuSpace.lg),
-                child: AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, child) {
-                    return Container(
-                      padding: const EdgeInsets.all(EuSpace.lg),
-                      decoration: EuBrutal.boxDecoration(
-                        color: EuBrutal.accent.withValues(
-                          alpha: 0.8 + 0.2 * _controller.value,
+        delegate: SliverChildBuilderDelegate((context, index) {
+          if (index == 0) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: EuSpace.lg),
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, child) {
+                  return Container(
+                    padding: const EdgeInsets.all(EuSpace.lg),
+                    decoration: EuBrutal.boxDecoration(
+                      color: EuBrutal.accent.withValues(
+                        alpha: 0.8 + 0.2 * _controller.value,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      shadows: EuBrutal.hardShadow,
+                    ),
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.asset(
+                            'assets/images/app.icon.png',
+                            width: 36,
+                            height: 36,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(16),
-                        shadows: EuBrutal.hardShadow,
-                      ),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.asset(
-                              'assets/images/app.icon.png',
-                              width: 36,
-                              height: 36,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          const SizedBox(width: EuSpace.md),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Euphony Music',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w900,
-                                      ),
+                        const SizedBox(width: EuSpace.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Euphony Music',
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                              ),
+                              const SizedBox(height: 2),
+                              const Text(
+                                'Tuning your frequencies... Loading tracks',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
                                 ),
-                                const SizedBox(height: 2),
-                                const Text(
-                                  'Tuning your frequencies... Loading tracks',
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
                             ),
                           ),
-                          const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          }
+          return AnimatedBuilder(
+            animation: _controller,
+            builder: (context, child) {
+              final shimmer = LinearGradient(
+                begin: Alignment(-1.5 + _controller.value * 3.0, 0),
+                end: Alignment(-0.5 + _controller.value * 3.0, 0),
+                colors: [
+                  _shimmerBase(context),
+                  _shimmerHighlight(context),
+                  _shimmerBase(context),
+                ],
               );
-            }
-            return AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                final shimmer = LinearGradient(
-                  begin: Alignment(-1.5 + _controller.value * 3.0, 0),
-                  end: Alignment(-0.5 + _controller.value * 3.0, 0),
-                  colors: [
-                    _shimmerBase(context),
-                    _shimmerHighlight(context),
-                    _shimmerBase(context),
-                  ],
-                );
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: EuSpace.md),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      height: 72,
-                      decoration: BoxDecoration(
-                        gradient: shimmer,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 12),
-                          Container(
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+              return Padding(
+                padding: const EdgeInsets.only(bottom: EuSpace.md),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    height: 72,
+                    decoration: BoxDecoration(
+                      gradient: shimmer,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const SizedBox(width: 12),
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  width: 160,
-                                  height: 13,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 160,
+                                height: 13,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(6),
                                 ),
-                                const SizedBox(height: 8),
-                                Container(
-                                  width: 90,
-                                  height: 11,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                width: 90,
+                                height: 11,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(6),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                );
-              },
-            );
-          },
-          childCount: 7,
-        ),
+                ),
+              );
+            },
+          );
+        }, childCount: 7),
       ),
     );
   }
 }
-

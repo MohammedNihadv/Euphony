@@ -34,7 +34,8 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
   }
 
   Future<void> _loadDetails() async {
-    final isLocalPlaylist = widget.isPlaylist &&
+    final isLocalPlaylist =
+        widget.isPlaylist &&
         (widget.id.startsWith('local_') ||
             widget.id.startsWith('LIB') ||
             ref.read(localPlaylistTracksProvider).containsKey(widget.id));
@@ -49,7 +50,9 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
       if (!mounted) return;
       setState(() {
         _title = match?.title ?? 'Custom Playlist';
-        _artworkUrl = match?.artworkUrl ?? (localTracks.isNotEmpty ? localTracks.first.artworkUrl : null);
+        _artworkUrl =
+            match?.artworkUrl ??
+            (localTracks.isNotEmpty ? localTracks.first.artworkUrl : null);
         _tracks = localTracks;
         _loading = false;
         _error = null;
@@ -94,7 +97,8 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isLocal = widget.isPlaylist &&
+    final isLocal =
+        widget.isPlaylist &&
         (widget.id.startsWith('local_') ||
             widget.id.startsWith('LIB') ||
             ref.watch(localPlaylistTracksProvider).containsKey(widget.id));
@@ -137,7 +141,11 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
             ? Center(
                 child: Padding(
                   padding: const EdgeInsets.all(EuSpace.xl),
-                  child: Text(_error!, style: theme.textTheme.titleMedium, textAlign: TextAlign.center),
+                  child: Text(
+                    _error!,
+                    style: theme.textTheme.titleMedium,
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               )
             : ListView(
@@ -164,7 +172,11 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                           clipBehavior: Clip.antiAlias,
                           child: _artworkUrl != null
                               ? Image.network(_artworkUrl!, fit: BoxFit.cover)
-                              : const Icon(Icons.queue_music, size: 60, color: EuBrutal.ink),
+                              : const Icon(
+                                  Icons.queue_music,
+                                  size: 60,
+                                  color: EuBrutal.ink,
+                                ),
                         ),
                         const SizedBox(height: EuSpace.md),
                         Text(
@@ -230,7 +242,11 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                       padding: const EdgeInsets.symmetric(vertical: EuSpace.xl),
                       child: Column(
                         children: [
-                          const Icon(Icons.music_off_outlined, size: 48, color: EuBrutal.accent),
+                          const Icon(
+                            Icons.music_off_outlined,
+                            size: 48,
+                            color: EuBrutal.accent,
+                          ),
                           const SizedBox(height: EuSpace.md),
                           Text(
                             'No songs in this playlist yet',
@@ -242,7 +258,9 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                           Text(
                             'Tap "Add to Playlist" on any song to add tracks here.',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.7,
+                              ),
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -263,12 +281,16 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                           color: theme.colorScheme.surfaceContainerLow,
                           borderRadius: BorderRadius.circular(12),
                           child: ListTile(
-                            onTap: () =>
-                                ref.read(playerControllerProvider).playSong(song),
-                            onLongPress: () => showSongOptionsSheet(context, song),
+                            onTap: () => ref
+                                .read(playerControllerProvider)
+                                .playSong(song),
+                            onLongPress: () =>
+                                showSongOptionsSheet(context, song),
                             title: Text(
                               song.title,
-                              style: const TextStyle(fontWeight: FontWeight.w800),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
                             subtitle: Text(song.artistNames),
                             trailing: Row(
@@ -286,16 +308,31 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                                 ),
                                 if (isLocal)
                                   IconButton(
-                                    icon: const Icon(Icons.remove_circle_outline, size: 22, color: EuBrutal.alert),
+                                    icon: const Icon(
+                                      Icons.remove_circle_outline,
+                                      size: 22,
+                                      color: EuBrutal.alert,
+                                    ),
                                     tooltip: 'Remove from playlist',
                                     onPressed: () async {
                                       await ref
-                                          .read(localPlaylistTracksProvider.notifier)
-                                          .removeSongFromPlaylist(widget.id, song.id);
+                                          .read(
+                                            localPlaylistTracksProvider
+                                                .notifier,
+                                          )
+                                          .removeSongFromPlaylist(
+                                            widget.id,
+                                            song.id,
+                                          );
                                       final updated = ref
-                                          .read(localPlaylistTracksProvider.notifier)
+                                          .read(
+                                            localPlaylistTracksProvider
+                                                .notifier,
+                                          )
                                           .getPlaylistTracks(widget.id);
-                                      await ref.read(savedPlaylistsDaoProvider).save(
+                                      await ref
+                                          .read(savedPlaylistsDaoProvider)
+                                          .save(
                                             id: widget.id,
                                             title: _title ?? 'Custom Playlist',
                                             artworkUrl: _artworkUrl,

@@ -97,9 +97,7 @@ class MiniPlayer extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: EuBrutal.ink.withValues(
-                                alpha: 0.7,
-                              ),
+                              color: EuBrutal.ink.withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -170,4 +168,3 @@ PageRouteBuilder<void> _buildPlayerRoute() {
     },
   );
 }
-

@@ -569,14 +569,18 @@ class PlayerController {
         );
         final url = bestAudio.url.toString();
         if (url.isNotEmpty) {
-          _log.info('resolved via YoutubeExplode (${bestAudio.tag}) for ${song.id}');
+          _log.info(
+            'resolved via YoutubeExplode (${bestAudio.tag}) for ${song.id}',
+          );
           final resolved = ResolvedStream(url);
           _streams[song.id] = resolved;
           return resolved;
         }
       }
     } catch (e) {
-      _log.warning('YoutubeExplode failed for ${song.id}, falling back to InnertubeClient: $e');
+      _log.warning(
+        'YoutubeExplode failed for ${song.id}, falling back to InnertubeClient: $e',
+      );
     }
 
     // 2. Fallback engine: InnertubeClient mobile client

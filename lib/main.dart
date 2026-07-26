@@ -61,4 +61,3 @@ Future<void> _startAudioService(ProviderContainer container) async {
     debugPrint('audio service failed to start: $error\n$stack');
   }
 }
-

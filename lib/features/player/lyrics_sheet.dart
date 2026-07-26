@@ -151,36 +151,40 @@ class _LyricsSheetState extends State<_LyricsSheet> {
                     child: CircularProgressIndicator(color: EuBrutal.accent),
                   )
                 : _error != null
-                    ? Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(EuSpace.xl),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.music_off, size: 48, color: EuBrutal.alert),
-                              const SizedBox(height: EuSpace.md),
-                              Text(
-                                _error!,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ],
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(EuSpace.xl),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.music_off,
+                            size: 48,
+                            color: EuBrutal.alert,
                           ),
-                        ),
-                      )
-                    : SingleChildScrollView(
-                        padding: const EdgeInsets.all(EuSpace.xl),
-                        child: SelectableText(
-                          _plainLyrics!,
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            fontSize: 18,
-                            height: 1.6,
-                            fontWeight: FontWeight.w700,
+                          const SizedBox(height: EuSpace.md),
+                          Text(
+                            _error!,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
-                        ),
+                        ],
                       ),
+                    ),
+                  )
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.all(EuSpace.xl),
+                    child: SelectableText(
+                      _plainLyrics!,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontSize: 18,
+                        height: 1.6,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
           ),
         ],
       ),

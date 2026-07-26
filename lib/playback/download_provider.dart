@@ -32,8 +32,8 @@ class DownloadProgressNotifier extends Notifier<Map<String, double>> {
 
 final downloadProgressProvider =
     NotifierProvider<DownloadProgressNotifier, Map<String, double>>(() {
-  return DownloadProgressNotifier();
-});
+      return DownloadProgressNotifier();
+    });
 
 class DownloadedSongsNotifier extends Notifier<List<Song>> {
   @override
@@ -160,7 +160,9 @@ class DownloadedSongsNotifier extends Notifier<List<Song>> {
     return {
       'id': s.id,
       'title': s.title,
-      'artists': s.artists.map((a) => {'id': a.browseId, 'name': a.name}).toList(),
+      'artists': s.artists
+          .map((a) => {'id': a.browseId, 'name': a.name})
+          .toList(),
       'albumId': s.albumId,
       'albumTitle': s.albumTitle,
       'artworkUrl': s.artworkUrl,
@@ -171,12 +173,14 @@ class DownloadedSongsNotifier extends Notifier<List<Song>> {
 
   Song? _songFromJson(Map<String, dynamic> json) {
     try {
-      final artistsList = (json['artists'] as List<dynamic>?)
-              ?.map((item) {
-                final m = item as Map<String, dynamic>;
-                return ArtistRef(browseId: m['id'] as String?, name: m['name'] as String? ?? 'Unknown');
-              })
-              .toList() ??
+      final artistsList =
+          (json['artists'] as List<dynamic>?)?.map((item) {
+            final m = item as Map<String, dynamic>;
+            return ArtistRef(
+              browseId: m['id'] as String?,
+              name: m['name'] as String? ?? 'Unknown',
+            );
+          }).toList() ??
           const [];
       final durationSec = json['duration'] as int?;
       return Song(
@@ -195,6 +199,7 @@ class DownloadedSongsNotifier extends Notifier<List<Song>> {
   }
 }
 
-final downloadedSongsProvider = NotifierProvider<DownloadedSongsNotifier, List<Song>>(() {
-  return DownloadedSongsNotifier();
-});
+final downloadedSongsProvider =
+    NotifierProvider<DownloadedSongsNotifier, List<Song>>(() {
+      return DownloadedSongsNotifier();
+    });

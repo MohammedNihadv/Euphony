@@ -123,8 +123,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                                   _artist!.subscribers!,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color: EuBrutal.ink
-                                        .withValues(alpha: 0.7),
+                                    color: EuBrutal.ink.withValues(alpha: 0.7),
                                   ),
                                 ),
                             ],

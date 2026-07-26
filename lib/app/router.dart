@@ -69,9 +69,8 @@ final routerProvider = GoRouter(
     ),
     GoRoute(
       path: '/artist/:id',
-      pageBuilder: (context, state) => _buildSmoothPage(
-        ArtistScreen(browseId: state.pathParameters['id']!),
-      ),
+      pageBuilder: (context, state) =>
+          _buildSmoothPage(ArtistScreen(browseId: state.pathParameters['id']!)),
     ),
   ],
 );
