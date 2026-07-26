@@ -15,7 +15,7 @@ A modern, beautiful, open-source music player built with Flutter.
 [![Release](https://img.shields.io/badge/Release-v0.1.0-blue)](https://github.com/MohammedNihadv/Euphony/releases)
 [![Stars](https://img.shields.io/github/stars/MohammedNihadv/Euphony?style=social)](https://github.com/MohammedNihadv/Euphony)
 
-*Beautiful UI • Material 3 • Neo-Brutalist Design • Open Source*
+*Material 3 • Neo-Brutalist Design • Open Source*
 
 </div>
 
