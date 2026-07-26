@@ -21,6 +21,16 @@ A modern, beautiful, open-source music player built with Flutter.
 
 ---
 
+## 📦 Which APK Should I Download?
+
+| APK File | Target Device | Recommendation |
+| :--- | :--- | :--- |
+| 📱 **`app-arm64-v8a-release.apk`** | **Modern Android Phones & Tablets** | ⭐ **RECOMMENDED for 99% of devices** (manufactured 2017+). Smallest file size (~42 MB) & best performance. |
+| 📻 **`app-armeabi-v7a-release.apk`** | **Older 32-bit Android Devices** | For older budget smartphones or legacy 32-bit devices. |
+| 💻 **`app-x86_64-release.apk`** | **Emulators & Chromebooks** | For Android Studio / BlueStacks emulators, PCs, and Intel Chromebooks. |
+
+---
+
 # Why Euphony?
 
 Somewhere along the way...
