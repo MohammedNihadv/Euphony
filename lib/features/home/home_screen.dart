@@ -1,4 +1,4 @@
-import 'dart:math' as Math;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -450,7 +450,7 @@ class _QuickPickTile extends ConsumerWidget {
                         ? Image.network(
                             artworkUrl,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
+                            errorBuilder: (_, _, _) => Container(
                               color: EuBrutal.highlight,
                               child: const Icon(
                                 Icons.music_note,
@@ -556,7 +556,7 @@ class _AnimatedMusicBarsState extends State<_AnimatedMusicBars>
             final t = (_ctrl.value + _phases[i]) % 1.0;
             final speed = _speeds[i];
             // Sine curve so it feels organic, not linear
-            final frac = (0.5 - 0.5 * Math.cos(t * speed * Math.pi * 2)).clamp(
+            final frac = (0.5 - 0.5 * math.cos(t * speed * math.pi * 2)).clamp(
               0.0,
               1.0,
             );
@@ -679,7 +679,7 @@ class _HomeItemCard extends ConsumerWidget {
                             width: double.infinity,
                             height: double.infinity,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
+                            errorBuilder: (_, _, _) => Container(
                               color: EuBrutal.accent.withValues(alpha: 0.2),
                               child: const Icon(
                                 Icons.music_note,

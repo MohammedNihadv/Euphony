@@ -549,13 +549,13 @@ class PlayerController {
     try {
       final docDir = await getApplicationDocumentsDirectory();
       final file = File('${docDir.path}/offline_audio/${song.id}.audio');
-      if (await file.exists()) {
+      if (file.existsSync()) {
         _log.info('playing ${song.id} offline from ${file.path}');
         return ResolvedStream(file.uri.toString());
       }
     } catch (_) {}
 
-    // 1. Primary engine: YoutubeExplode (identical to Harmony-Music)
+    // Primary engine: YoutubeExplode
     // Resolves signatures, throttling challenges, and client headers automatically.
     try {
       final yt = yt_explode.YoutubeExplode();

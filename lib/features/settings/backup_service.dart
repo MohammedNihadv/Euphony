@@ -15,7 +15,7 @@ class BackupService {
       // drift_flutter uses the name provided plus '.sqlite'
       final dbFile = File('${docDir.path}/euphony.sqlite');
 
-      if (!await dbFile.exists()) {
+      if (!dbFile.existsSync()) {
         _log.warning('No database found to backup.');
         return false;
       }

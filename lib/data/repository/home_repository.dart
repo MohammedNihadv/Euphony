@@ -57,7 +57,7 @@ class HomeRepository {
       final playlistsSection = await _fetchPlaylistsSection();
       extraSections.add(playlistsSection);
 
-      HomeFeed finalFeed = HomeFeed(
+      final finalFeed = HomeFeed(
         quickPicks: value.quickPicks,
         sections: [...value.sections, ...extraSections],
       );
@@ -162,7 +162,7 @@ class HomeRepository {
     } catch (_) {}
 
     // Fallback curated playlists if network search returned no items
-    return HomeSection(
+    return const HomeSection(
       title: 'Featured Playlists & Mixes',
       items: [
         PlaylistItem(

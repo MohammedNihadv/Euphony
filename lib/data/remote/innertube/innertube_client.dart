@@ -56,13 +56,11 @@ class InnertubeClient {
     Dio? dio,
     VisitorIdStore? visitorIdStore,
     DateTime Function()? clock,
-    String language = 'en',
-    String region = 'US',
-  }) : _dio = dio ?? Dio(),
-       _visitorIds = visitorIdStore ?? MemoryVisitorIdStore(),
-       _now = clock ?? DateTime.now,
-       _language = language,
-       _region = region;
+    this._language = 'en',
+    this._region = 'US',
+  })  : _dio = dio ?? Dio(),
+        _visitorIds = visitorIdStore ?? MemoryVisitorIdStore(),
+        _now = clock ?? DateTime.now;
 
   final Dio _dio;
   final VisitorIdStore _visitorIds;

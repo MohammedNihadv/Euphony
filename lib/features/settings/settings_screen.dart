@@ -712,7 +712,7 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
   Widget build(BuildContext context) {
     final themeData = Theme.of(context);
     final updateAsync = ref.watch(updateCheckFutureProvider);
-    final info = _info ?? updateAsync.valueOrNull;
+    final info = _info ?? updateAsync.asData?.value;
 
     return Container(
       decoration: EuBrutal.boxDecoration(
@@ -748,9 +748,9 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Current Version: v${UpdateChecker.currentVersion}',
-                        style: const TextStyle(fontWeight: FontWeight.w800),
+                        style: TextStyle(fontWeight: FontWeight.w800),
                       ),
                       if (info != null && info.hasUpdate)
                         Text(
