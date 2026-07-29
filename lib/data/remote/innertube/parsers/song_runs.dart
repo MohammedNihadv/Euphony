@@ -29,6 +29,18 @@ class SongRuns {
   final String? views;
 }
 
+/// Content-type words YouTube puts as the first subtitle run; never artists.
+const _typeLabels = {
+  'song',
+  'video',
+  'album',
+  'single',
+  'ep',
+  'playlist',
+  'artist',
+  'episode',
+};
+
 final _viewsPattern = RegExp(r'^\d([^ ])* [^ ]*$');
 final _durationPattern = RegExp(r'^(\d+:)*\d+:\d+$');
 final _yearPattern = RegExp(r'^\d{4}$');
@@ -84,6 +96,11 @@ SongRuns parseSongRuns(List<dynamic> runs) {
       year = int.tryParse(text);
     } else if (i > 0 && _viewsPattern.hasMatch(text)) {
       views = text.split(' ').first;
+    } else if (_typeLabels.contains(text.trim().toLowerCase())) {
+      // The first subtitle run on an unfiltered-search row is a content-type
+      // word ("Song", "Video", "Album"). It is not an artist — dropping it here
+      // is what stops rows reading "Song · Song" instead of "Song · Artist".
+      continue;
     } else {
       artists.add(ArtistRef(name: text));
     }

@@ -5,6 +5,7 @@ import '../design/theme/eu_theme.dart';
 import '../design/theme/theme_controller.dart';
 import '../design/tokens/motion.dart';
 import 'router.dart';
+import 'splash.dart';
 
 class EuphonyApp extends ConsumerWidget {
   const EuphonyApp({super.key});
@@ -22,6 +23,8 @@ class EuphonyApp extends ConsumerWidget {
       themeAnimationDuration: EuMotion.themeShift,
       themeAnimationCurve: EuMotion.emphasized,
       routerConfig: routerProvider,
+      builder: (context, child) =>
+          SplashOverlay(child: child ?? const SizedBox.shrink()),
     );
   }
 }

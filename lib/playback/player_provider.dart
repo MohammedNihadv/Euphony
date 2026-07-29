@@ -557,10 +557,9 @@ class PlayerController {
 
     // Primary engine: YoutubeExplode
     // Resolves signatures, throttling challenges, and client headers automatically.
+    final yt = yt_explode.YoutubeExplode();
     try {
-      final yt = yt_explode.YoutubeExplode();
       final manifest = await yt.videos.streamsClient.getManifest(song.id);
-      yt.close();
       final audioOnly = manifest.audioOnly;
       if (audioOnly.isNotEmpty) {
         final bestAudio = audioOnly.lastWhere(
@@ -581,6 +580,10 @@ class PlayerController {
       _log.warning(
         'YoutubeExplode failed for ${song.id}, falling back to InnertubeClient: $e',
       );
+    } finally {
+      // Always release the client's HTTP resources, even when getManifest threw
+      // — otherwise a run of failing tracks leaks a socket pool each time.
+      yt.close();
     }
 
     // 2. Fallback engine: InnertubeClient mobile client
