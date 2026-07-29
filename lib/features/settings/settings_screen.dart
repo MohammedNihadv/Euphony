@@ -456,7 +456,8 @@ class SettingsScreen extends ConsumerWidget {
                                       ),
                                 ),
                                 const Text(
-                                  'v1.0.0 • Neo-Brutalist Edition',
+                                  'v${UpdateChecker.currentVersion} • '
+                                  'Neo-Brutalist Edition',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w800,
                                     fontSize: 12,
@@ -672,32 +673,35 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Current Version: v${UpdateChecker.currentVersion}',
-                        style: TextStyle(fontWeight: FontWeight.w800),
-                      ),
-                      if (info != null && info.hasUpdate)
-                        Text(
-                          'New version available: v${info.latestVersion}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            color: EuBrutal.accent,
-                          ),
-                        )
-                      else
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         const Text(
-                          'Up to date • Auto-preserves all data',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
+                          'Current Version: v${UpdateChecker.currentVersion}',
+                          style: TextStyle(fontWeight: FontWeight.w800),
                         ),
-                    ],
+                        if (info != null && info.hasUpdate)
+                          Text(
+                            'New version available: v${info.latestVersion}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              color: EuBrutal.accent,
+                            ),
+                          )
+                        else
+                          const Text(
+                            'Up to date • Auto-preserves all data',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: EuSpace.md),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: (info != null && info.hasUpdate)
