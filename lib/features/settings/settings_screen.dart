@@ -200,14 +200,14 @@ class SettingsScreen extends ConsumerWidget {
                           decoration: BoxDecoration(
                             color: EuBrutal.highlight,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: EuBrutal.ink, width: 1.5),
+                            border: Border.all(color: EuBrutal.onHighlight, width: 1.5),
                           ),
                           child: Text(
                             settings.audioQuality,
                             style: const TextStyle(
+                              color: EuBrutal.onHighlight,
                               fontWeight: FontWeight.w900,
                               fontSize: 12,
-                              color: EuBrutal.ink,
                             ),
                           ),
                         ),
@@ -450,9 +450,9 @@ class SettingsScreen extends ConsumerWidget {
                                 width: 2,
                               ),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.graphic_eq,
-                              color: themeData.colorScheme.onSurface,
+                              color: EuBrutal.onHighlight,
                               size: 28,
                             ),
                           ),

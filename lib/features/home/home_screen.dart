@@ -244,34 +244,33 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   Widget _buildCategoryChip(String label) {
     final isSelected = _selectedCategory == label;
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final scheme = Theme.of(context).colorScheme;
 
-    final bg = isSelected
-        ? EuBrutal.highlight
-        : (isDark ? theme.colorScheme.surfaceContainerLow : Colors.white);
+    // Selected: the bright highlight slab with dark text and a hard shadow.
+    // Unselected: a quiet surface pill with the light frame and light text —
+    // both read clearly on the dark canvas.
+    final bg = isSelected ? EuBrutal.highlight : scheme.surfaceContainerHigh;
+    final fg = isSelected ? EuBrutal.onHighlight : scheme.onSurface;
 
     return GestureDetector(
       onTap: () => setState(() => _selectedCategory = label),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
         decoration: BoxDecoration(
           color: bg,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: EuBrutal.ink,
-            width: isSelected ? 2.5 : 1.5,
+            color: isSelected ? EuBrutal.ink : EuBrutal.ink.withValues(alpha: 0.35),
+            width: isSelected ? 2 : 1.5,
           ),
-          boxShadow: isSelected
-              ? const [BoxShadow(color: EuBrutal.ink, offset: Offset(2, 2))]
-              : null,
+          boxShadow: isSelected ? EuBrutal.smHardShadow : null,
         ),
         child: Text(
           label,
-          style: const TextStyle(
-            color: EuBrutal.ink,
-            fontWeight: FontWeight.w900,
+          style: TextStyle(
+            color: fg,
+            fontWeight: FontWeight.w800,
             fontSize: 13,
           ),
         ),
@@ -390,14 +389,12 @@ class _HeroBannerState extends State<_HeroBanner>
                 decoration: BoxDecoration(
                   color: EuBrutal.highlight,
                   shape: BoxShape.circle,
-                  border: Border.all(color: EuBrutal.ink, width: 2.5),
-                  boxShadow: const [
-                    BoxShadow(color: EuBrutal.ink, offset: Offset(2, 2)),
-                  ],
+                  border: Border.all(color: EuBrutal.onHighlight, width: 2.5),
+                  boxShadow: EuBrutal.smHardShadow,
                 ),
                 child: const Icon(
                   Icons.bar_chart_rounded,
-                  color: EuBrutal.ink,
+                  color: EuBrutal.onHighlight,
                   size: 32,
                 ),
               ),
@@ -455,7 +452,7 @@ class _QuickPickTile extends ConsumerWidget {
                               child: const Icon(
                                 Icons.music_note,
                                 size: 20,
-                                color: EuBrutal.ink,
+                                color: EuBrutal.onHighlight,
                               ),
                             ),
                           )
@@ -464,7 +461,7 @@ class _QuickPickTile extends ConsumerWidget {
                             child: const Icon(
                               Icons.music_note,
                               size: 20,
-                              color: EuBrutal.ink,
+                              color: EuBrutal.onHighlight,
                             ),
                           ),
                   ),

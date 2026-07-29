@@ -14,12 +14,18 @@ class EuphonyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeControllerProvider);
 
+    // Euphony is dark-only: the identity is bold colour blocks glowing on a
+    // near-black canvas, and the brutalist frame is a light outline that only
+    // reads on dark. Both theme slots resolve to the dark build and the mode is
+    // pinned, so a device set to "light" never lands on an unreadable screen.
+    final darkTheme = EuTheme.dark(theme.scheme.dark, amoled: theme.amoled);
+
     return MaterialApp.router(
       title: 'Euphony',
       debugShowCheckedModeBanner: false,
-      themeMode: theme.mode,
-      theme: EuTheme.light(theme.scheme.light),
-      darkTheme: EuTheme.dark(theme.scheme.dark, amoled: theme.amoled),
+      themeMode: ThemeMode.dark,
+      theme: darkTheme,
+      darkTheme: darkTheme,
       themeAnimationDuration: EuMotion.themeShift,
       themeAnimationCurve: EuMotion.emphasized,
       routerConfig: routerProvider,

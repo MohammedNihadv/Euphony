@@ -564,23 +564,24 @@ class _ResultSlivers extends StatelessWidget {
                   Builder(
                     builder: (context) {
                       final isSelected = activeFilter == entry.key;
+                      final scheme = Theme.of(context).colorScheme;
                       return GestureDetector(
                         onTap: () => onFilterSelected(entry.key, entry.value),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 7,
+                            horizontal: 16,
+                            vertical: 8,
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? EuBrutal.highlight
-                                : Theme.of(
-                                    context,
-                                  ).colorScheme.surfaceContainerLow,
+                                : scheme.surfaceContainerHigh,
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
-                              color: EuBrutal.ink,
-                              width: isSelected ? 2.5 : 1.5,
+                              color: isSelected
+                                  ? EuBrutal.ink
+                                  : EuBrutal.ink.withValues(alpha: 0.35),
+                              width: isSelected ? 2 : 1.5,
                             ),
                             boxShadow: isSelected
                                 ? EuBrutal.smHardShadow
@@ -589,10 +590,10 @@ class _ResultSlivers extends StatelessWidget {
                           child: Text(
                             entry.key,
                             style: TextStyle(
-                              color: EuBrutal.ink,
-                              fontWeight: isSelected
-                                  ? FontWeight.w900
-                                  : FontWeight.w700,
+                              color: isSelected
+                                  ? EuBrutal.onHighlight
+                                  : scheme.onSurface,
+                              fontWeight: FontWeight.w700,
                               fontSize: 13,
                             ),
                           ),
@@ -712,14 +713,18 @@ class _TopResultCard extends ConsumerWidget {
                         decoration: BoxDecoration(
                           color: EuBrutal.highlight,
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: EuBrutal.ink, width: 1.5),
+                          border: Border.all(
+                            color: EuBrutal.onHighlight,
+                            width: 1.5,
+                          ),
                         ),
                         child: Text(
                           'TOP MATCH',
                           style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(
-                                color: EuBrutal.ink,
+                                color: EuBrutal.onHighlight,
                                 fontWeight: FontWeight.w900,
+                                letterSpacing: 0.5,
                               ),
                         ),
                       ),

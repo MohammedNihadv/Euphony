@@ -236,10 +236,10 @@ abstract final class EuTheme {
         linearTrackColor: scheme.surfaceContainerHighest,
       ),
 
-      dividerTheme: const DividerThemeData(
-        color: EuBrutal.ink,
-        thickness: 2,
-        space: 2,
+      dividerTheme: DividerThemeData(
+        color: EuBrutal.ink.withValues(alpha: 0.12),
+        thickness: 1,
+        space: 1,
       ),
 
       pageTransitionsTheme: const PageTransitionsTheme(

@@ -105,7 +105,11 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                                   _artist!.artworkUrl!,
                                   fit: BoxFit.cover,
                                 )
-                              : const Icon(Icons.person, size: 40),
+                              : const Icon(
+                                  Icons.person,
+                                  size: 40,
+                                  color: EuBrutal.onHighlight,
+                                ),
                         ),
                         const SizedBox(width: EuSpace.lg),
                         Expanded(

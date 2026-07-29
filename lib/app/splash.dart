@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 
 import '../design/tokens/brutal.dart';
 
-/// The paper canvas the splash sits on — matched to the app + the native
+/// The dark canvas the splash sits on — matched to the app and the native
 /// launch background so the hand-off is seamless.
-const Color _splashCanvas = Color(0xFFFAF7F2);
+const Color _splashCanvas = Color(0xFF0D0D14);
 
 /// Wraps the app and plays a one-time animated splash over it on cold start.
 ///
@@ -161,7 +161,7 @@ class _LogoSlab extends StatelessWidget {
             height: 54,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: EuBrutal.ink, width: 2.5),
+              border: Border.all(color: EuBrutal.onHighlight, width: 2.5),
             ),
             clipBehavior: Clip.antiAlias,
             child: Image.asset('assets/images/app.icon.png', fit: BoxFit.cover),
@@ -170,7 +170,7 @@ class _LogoSlab extends StatelessWidget {
           const Text(
             'Euphony',
             style: TextStyle(
-              color: EuBrutal.ink,
+              color: EuBrutal.onHighlight,
               fontSize: 34,
               fontWeight: FontWeight.w900,
               letterSpacing: -0.5,
