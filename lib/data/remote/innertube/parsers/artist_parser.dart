@@ -8,12 +8,49 @@ import 'item_parser.dart';
 
 /// Parses an artist page response (`UC...`).
 Result<Artist> parseArtistPage(Map<String, dynamic> root, String browseId) {
-  final name = navOrNull<String>(root, P.titleText) ?? 'Artist';
-  final artworkUrl = navOrNull<String>(root, P.thumbnails + [0, 'url']);
-  final subscribers = navOrNull<String>(root, P.subtitle);
+  // The artist name, art and subscriber count live in the immersive header —
+  // not at the response root, which is where this used to look (and so always
+  // fell back to the "Artist" placeholder with no art).
+  final header =
+      navOrNull<Map<String, dynamic>>(
+        root,
+        const JsonPath(['header', P.immersiveHeader]),
+      ) ??
+      navOrNull<Map<String, dynamic>>(
+        root,
+        const JsonPath(['header', 'musicVisualHeaderRenderer']),
+      ) ??
+      const <String, dynamic>{};
 
+  final name = navOrNull<String>(header, P.titleText) ?? 'Artist';
+  final artworkUrl =
+      navOrNull<String>(header, P.thumbnailNested + [0, 'url']) ??
+      navOrNull<String>(header, P.thumbnails + [0, 'url']);
+  final subscribers =
+      navOrNull<String>(
+        header,
+        const JsonPath([
+          'subscriptionButton',
+          'subscribeButtonRenderer',
+          'subscriberCountText',
+          'runs',
+          0,
+          'text',
+        ]),
+      ) ??
+      navOrNull<String>(
+        header,
+        const JsonPath(['monthlyListenerCount', 'runs', 0, 'text']),
+      );
+
+  // Sections live under the single-column tab, not the response root.
   final sectionsList =
-      navOrNull<List<dynamic>>(root, P.sectionList) ?? const [];
+      navOrNull<List<dynamic>>(
+        root,
+        P.singleColumnTab + ['sectionListRenderer', 'contents'],
+      ) ??
+      navOrNull<List<dynamic>>(root, P.sectionList) ??
+      const [];
   final artistSections = <ArtistSection>[];
 
   for (final section in sectionsList) {

@@ -400,7 +400,7 @@ class _SavedPlaylistsTab extends ConsumerWidget {
                     subtitle: entry.author ?? '${entry.trackCount ?? 0} tracks',
                     artworkUrl: entry.artworkUrl,
                     leadingIcon: Icons.playlist_play,
-                    onTap: () => context.go('/playlist/${entry.id}'),
+                    onTap: () => context.push('/playlist/${entry.id}'),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete_outline, size: 20),
                       onPressed: () => dao.remove(entry.id),
@@ -487,7 +487,7 @@ class _SavedAlbumsTab extends ConsumerWidget {
         subtitle: entry.artists,
         artworkUrl: entry.artworkUrl,
         leadingIcon: Icons.album,
-        onTap: () => context.go('/album/${entry.browseId}'),
+        onTap: () => context.push('/album/${entry.browseId}'),
         trailing: IconButton(
           icon: const Icon(Icons.delete_outline, size: 20),
           onPressed: () => dao.remove(entry.browseId),

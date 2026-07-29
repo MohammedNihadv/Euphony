@@ -1,13 +1,17 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../../core/failure.dart';
 import '../../../core/log.dart';
 import '../../../core/result.dart';
 import '../../../core/retry.dart';
 import 'innertube_constants.dart';
+
+/// True on the web platform. Defined locally — the same way Flutter's
+/// `kIsWeb` is — so this file (and the fixture-capture tool that imports it)
+/// stays runnable on the plain Dart VM without pulling in `package:flutter`.
+const bool kIsWeb = bool.fromEnvironment('dart.library.js_util');
 
 final _log = logFor('innertube');
 
@@ -247,6 +251,25 @@ class InnertubeClient {
     'browseId': browseId,
     ...extraBody,
   }, extraParams: extraParams);
+
+  /// Fetches the "up next" radio queue seeded from [videoId].
+  ///
+  /// This is what powers autoplay: YouTube returns a `playlistPanelRenderer`
+  /// of related tracks that keep the music going after the current queue ends.
+  /// The `RDAMVM<videoId>` playlist id and `wAEB` params are the radio-mode
+  /// values YouTube's own client sends (ported from Harmony's getWatchPlaylist).
+  Future<Result<Map<String, dynamic>>> next(String videoId) => post(
+    Innertube.next,
+    {
+      ...context,
+      'videoId': videoId,
+      'playlistId': 'RDAMVM$videoId',
+      'isAudioOnly': true,
+      'enablePersistentPlaylistPanel': true,
+      'tunerSettingValue': 'AUTOMIX_SETTING_NORMAL',
+      'params': 'wAEB',
+    },
+  );
 
   /// Fetches player metadata and streaming formats for [videoId].
   ///

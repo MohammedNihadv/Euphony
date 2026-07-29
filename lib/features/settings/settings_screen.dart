@@ -79,37 +79,15 @@ class SettingsScreen extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: EuSpace.sm),
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.dark_mode,
-                            size: 18,
-                            color: EuBrutal.accent,
-                          ),
-                          const SizedBox(width: EuSpace.sm),
-                          Expanded(
-                            child: Text(
-                              'Euphony uses a dark theme — its bold colour '
-                              'blocks are built to glow on black.',
-                              style: themeData.textTheme.bodySmall?.copyWith(
-                                color: themeData.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Divider(height: 28),
+                      const SizedBox(height: EuSpace.xs),
                       SwitchListTile(
                         activeThumbColor: EuBrutal.accent,
                         contentPadding: EdgeInsets.zero,
                         title: const Text(
-                          'AMOLED True Black',
+                          'AMOLED black',
                           style: TextStyle(fontWeight: FontWeight.w800),
                         ),
-                        subtitle: const Text(
-                          'Use pure black background in dark mode',
-                        ),
+                        subtitle: const Text('Pure black background'),
                         value: theme.amoled,
                         onChanged: (value) =>
                             themeController.setAmoled(value: value),
@@ -118,12 +96,10 @@ class SettingsScreen extends ConsumerWidget {
                         activeThumbColor: EuBrutal.accent,
                         contentPadding: EdgeInsets.zero,
                         title: const Text(
-                          'Dynamic Art Theme',
+                          'Dynamic colours',
                           style: TextStyle(fontWeight: FontWeight.w800),
                         ),
-                        subtitle: const Text(
-                          'Extract accent colors from active album cover',
-                        ),
+                        subtitle: const Text('Tint the player from the artwork'),
                         value: theme.source == ColourSource.artwork,
                         onChanged: (value) => themeController.setColourSource(
                           value ? ColourSource.artwork : ColourSource.fixed,
@@ -471,12 +447,17 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: EuSpace.md),
                       Text(
-                        'Euphony is built with a layered Flutter architecture, InnerTube parser engine, Drift SQLite storage, LRCLIB synced lyrics, and a pixel-perfect Neo-Brutalist design identity.',
+                        'Music deserves better than interruptions.\n\n'
+                        'Euphony is a free, open-source music player that '
+                        'simply gets out of your way — no ads, no paywalls, '
+                        'just your music. Built by the community, for the '
+                        'community.',
                         style: themeData.textTheme.bodyMedium?.copyWith(
                           color: themeData.colorScheme.onSurface.withValues(
                             alpha: 0.8,
                           ),
                           fontWeight: FontWeight.w600,
+                          height: 1.5,
                         ),
                       ),
                     ],

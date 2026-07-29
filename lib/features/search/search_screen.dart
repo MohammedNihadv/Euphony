@@ -1119,13 +1119,13 @@ void _navigateToItem(WidgetRef ref, BuildContext context, MusicItem item) {
     case SongItem(:final song):
       ref.read(playerControllerProvider).playSong(song);
     case AlbumItem(:final album):
-      context.go('/album/${album.browseId}');
+      context.push('/album/${album.browseId}');
     case ArtistItem(:final artist):
-      context.go('/artist/${artist.browseId}');
+      context.push('/artist/${artist.browseId}');
     case PlaylistItem(:final playlist):
-      context.go('/playlist/${playlist.id}');
+      context.push('/playlist/${playlist.id}');
     case StationItem(:final playlistId):
-      context.go('/playlist/$playlistId');
+      context.push('/playlist/$playlistId');
   }
 }
 
