@@ -79,36 +79,22 @@ class SettingsScreen extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: EuSpace.md),
+                      const SizedBox(height: EuSpace.sm),
                       Row(
                         children: [
-                          Expanded(
-                            child: _ModeSelectChip(
-                              label: 'System',
-                              icon: Icons.brightness_auto,
-                              isSelected: theme.mode == ThemeMode.system,
-                              onTap: () =>
-                                  themeController.setMode(ThemeMode.system),
-                            ),
+                          const Icon(
+                            Icons.dark_mode,
+                            size: 18,
+                            color: EuBrutal.accent,
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: EuSpace.sm),
                           Expanded(
-                            child: _ModeSelectChip(
-                              label: 'Light',
-                              icon: Icons.light_mode,
-                              isSelected: theme.mode == ThemeMode.light,
-                              onTap: () =>
-                                  themeController.setMode(ThemeMode.light),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _ModeSelectChip(
-                              label: 'Dark',
-                              icon: Icons.dark_mode,
-                              isSelected: theme.mode == ThemeMode.dark,
-                              onTap: () =>
-                                  themeController.setMode(ThemeMode.dark),
+                            child: Text(
+                              'Euphony uses a dark theme — its bold colour '
+                              'blocks are built to glow on black.',
+                              style: themeData.textTheme.bodySmall?.copyWith(
+                                color: themeData.colorScheme.onSurfaceVariant,
+                              ),
                             ),
                           ),
                         ],
@@ -612,65 +598,6 @@ class SettingsScreen extends ConsumerWidget {
               );
             },
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ModeSelectChip extends StatelessWidget {
-  const _ModeSelectChip({
-    required this.label,
-    required this.icon,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final themeData = Theme.of(context);
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? EuBrutal.accent
-              : themeData.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: EuBrutal.ink, width: isSelected ? 2.5 : 1),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: isSelected ? EuBrutal.ink : themeData.iconTheme.color,
-            ),
-            const SizedBox(width: 4),
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 12,
-                  color: isSelected
-                      ? EuBrutal.ink
-                      : themeData.textTheme.bodyMedium?.color,
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

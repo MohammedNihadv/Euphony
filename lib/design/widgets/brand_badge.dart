@@ -17,11 +17,16 @@ class EuphonyLogoMark extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: EuBrutal.ink, width: 2),
         boxShadow: EuBrutal.glow(EuBrutal.accent, strength: 0.45),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Image.asset('assets/images/app.icon.png', fit: BoxFit.cover),
+      // The source PNG carries a wide transparent margin, so it renders tiny
+      // and double-framed at its natural size. Scaling past that padding makes
+      // the real icon fill the tile edge to edge.
+      child: Transform.scale(
+        scale: 1.62,
+        child: Image.asset('assets/images/app.icon.png', fit: BoxFit.cover),
+      ),
     );
   }
 }

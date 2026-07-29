@@ -56,7 +56,7 @@ class _SplashOverlayState extends State<SplashOverlay>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _intro.forward();
-      Future.delayed(const Duration(milliseconds: 1600), () {
+      Future.delayed(const Duration(milliseconds: 1050), () {
         if (mounted) setState(() => _opacity = 0);
       });
     });
@@ -164,7 +164,13 @@ class _LogoSlab extends StatelessWidget {
               border: Border.all(color: EuBrutal.onHighlight, width: 2.5),
             ),
             clipBehavior: Clip.antiAlias,
-            child: Image.asset('assets/images/app.icon.png', fit: BoxFit.cover),
+            child: Transform.scale(
+              scale: 1.62,
+              child: Image.asset(
+                'assets/images/app.icon.png',
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
           const SizedBox(width: 14),
           const Text(

@@ -801,15 +801,7 @@ class _HomeSkeletonFeedState extends State<_HomeSkeletonFeed>
                     ),
                     child: Row(
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.asset(
-                            'assets/images/app.icon.png',
-                            width: 36,
-                            height: 36,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                        const EuphonyLogoMark(size: 40, radius: 11),
                         const SizedBox(width: EuSpace.md),
                         Expanded(
                           child: Column(
