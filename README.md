@@ -10,7 +10,7 @@ A modern, open-source music player built with Flutter.
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.44+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
-[![Release](https://img.shields.io/badge/Release-v0.1.0-blue)](https://github.com/MohammedNihadv/Euphony/releases)
+[![Release](https://img.shields.io/badge/Release-v0.2.0-blue)](https://github.com/MohammedNihadv/Euphony/releases)
 [![Website](https://img.shields.io/badge/Website-euphonymusic.vercel.app-6A4BE8?style=flat&logo=vercel)](https://euphonymusic.vercel.app/)
 [![Stars](https://img.shields.io/github/stars/MohammedNihadv/Euphony?style=social)](https://github.com/MohammedNihadv/Euphony)
 

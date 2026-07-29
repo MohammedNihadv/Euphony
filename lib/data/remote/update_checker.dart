@@ -23,7 +23,7 @@ class UpdateChecker {
   UpdateChecker({Dio? dio}) : _dio = dio ?? Dio();
 
   final Dio _dio;
-  static const String currentVersion = '0.1.0';
+  static const String currentVersion = '0.2.0';
   static const String repoUrl =
       'https://api.github.com/repos/MohammedNihadv/Euphony/releases/latest';
 
