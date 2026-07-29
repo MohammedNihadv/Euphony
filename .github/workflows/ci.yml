@@ -94,7 +94,7 @@ jobs:
           name: euphony-release-apks
           path: apks
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: apks/*.apk
           # Human-written, community-friendly notes live in RELEASE_NOTES.md so
