@@ -13,10 +13,11 @@
 
 <p align="center">
   <a href="https://euphonymusic.vercel.app/">
-    <img src="https://img.shields.io/badge/🌐_Visit_Official_Website-6A4BE8?style=for-the-badge&logo=vercel&logoColor=white" alt="Official Website"/>
+    <img src="https://img.shields.io/badge/Visit%20Official%20Website-6A4BE8?style=for-the-badge&logo=vercel&logoColor=white" alt="Official Website"/>
   </a>
+  &nbsp;
   <a href="https://github.com/MohammedNihadv/Euphony/releases">
-    <img src="https://img.shields.io/badge/📥_Download_Latest_APK-181824?style=for-the-badge&logo=android&logoColor=white" alt="Download APK"/>
+    <img src="https://img.shields.io/badge/Download%20Latest%20APK-181824?style=for-the-badge&logo=android&logoColor=3DDC84" alt="Download APK"/>
   </a>
 </p>
 
