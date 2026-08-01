@@ -444,15 +444,16 @@ class SettingsScreen extends ConsumerWidget {
                                         letterSpacing: 1.2,
                                       ),
                                 ),
-                                const Text(
-                                  'v${UpdateChecker.currentVersion} • '
-                                  'Neo-Brutalist Edition',
-                                  style: TextStyle(
+                                final appVersion = ref.watch(appVersionProvider).asData?.value ?? '0.2.2';
+                                return Text(
+                                  'v$appVersion • Neo-Brutalist Edition',
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.w800,
                                     fontSize: 12,
                                     color: EuBrutal.accent,
                                   ),
-                                ),
+                                );
+                              }(),
                               ],
                             ),
                           ),
@@ -743,9 +744,9 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Current Version: v${UpdateChecker.currentVersion}',
-                          style: TextStyle(fontWeight: FontWeight.w800),
+                        Text(
+                          'Current Version: v${info?.currentVersion ?? ref.watch(appVersionProvider).asData?.value ?? '0.2.2'}',
+                          style: const TextStyle(fontWeight: FontWeight.w800),
                         ),
                         if (info != null && info.hasUpdate)
                           Text(

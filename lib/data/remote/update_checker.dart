@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class UpdateInfo {
   const UpdateInfo({
@@ -23,12 +24,24 @@ class UpdateChecker {
   UpdateChecker({Dio? dio}) : _dio = dio ?? Dio();
 
   final Dio _dio;
-  static const String currentVersion = '0.2.1';
   static const String repoUrl =
       'https://api.github.com/repos/MohammedNihadv/Euphony/releases/latest';
 
+  /// Returns the current app version from pubspec.yaml via PackageInfo.
+  /// Falls back to '0.0.0' if unavailable.
+  static Future<String> getCurrentVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      return info.version; // e.g. "0.2.2"
+    } catch (_) {
+      return '0.0.0';
+    }
+  }
+
   Future<UpdateInfo?> checkUpdate() async {
     try {
+      final currentVersion = await getCurrentVersion();
+
       final response = await _dio.get<Map<String, dynamic>>(
         repoUrl,
         options: Options(headers: {'Accept': 'application/vnd.github.v3+json'}),
@@ -101,4 +114,8 @@ final updateCheckerProvider = Provider<UpdateChecker>((ref) {
 final updateCheckFutureProvider = FutureProvider<UpdateInfo?>((ref) async {
   final checker = ref.watch(updateCheckerProvider);
   return checker.checkUpdate();
+});
+
+final appVersionProvider = FutureProvider<String>((ref) async {
+  return UpdateChecker.getCurrentVersion();
 });
