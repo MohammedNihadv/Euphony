@@ -1,4 +1,4 @@
-## Euphony v0.2.1 — Premium UI Showcase & CI Polish 🚀
+## Euphony v0.2.1 — Premium UI Showcase & CI Polish 🎶
 
 Euphony continues to evolve with a stunning executive product landing page, zero-warning CI/CD pipelines, and upgraded GitHub Actions workflows.
 
