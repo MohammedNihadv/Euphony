@@ -1,16 +1,24 @@
 <div align="center">
 
+# Euphony
+
+---
+
+Life already has enough interruptions. Your music doesn't need 30-second unskippable ads for products you'll never buy. **Free, ad-free, and crafted with open-source love.**
+
+<br>
+
 <img src="docs/screenshots/banner.png" alt="Euphony Open Source Neo-Brutalist Music Player" width="100%"/>
 
 <br>
 
 <p align="center">
   <a href="https://euphonymusic.vercel.app/">
-    <img src="https://img.shields.io/badge/Visit%20Official%20Website-6A4BE8?style=for-the-badge&logo=vercel&logoColor=white" alt="Official Website"/>
+    <img src="https://img.shields.io/badge/WEB-VISIT%20OFFICIAL%20SITE-6A4BE8?style=for-the-badge&labelColor=000000&logo=vercel&logoColor=white" alt="Official Website"/>
   </a>
   &nbsp;
   <a href="https://github.com/MohammedNihadv/Euphony/releases">
-    <img src="https://img.shields.io/badge/Download%20Latest%20APK-181824?style=for-the-badge&logo=android&logoColor=3DDC84" alt="Download APK"/>
+    <img src="https://img.shields.io/badge/APK-DOWNLOAD%20LATEST%20RELEASE-F5C518?style=for-the-badge&labelColor=000000&logo=android&logoColor=3DDC84" alt="Download APK"/>
   </a>
 </p>
 
@@ -19,10 +27,6 @@
 ---
 
 ## 💎 Why Euphony?
-
-Life already has enough interruptions. Your music doesn't need 30-second unskippable ads for products you'll never buy.
-
-**Free, ad-free, and crafted with open-source love.**
 
 - 🚫 **Zero Ads & Zero Tracking** — Music without interruptions or telemetry.
 - 🎨 **Neo-Brutalist & Material 3 Design** — High-contrast slab borders, hard shadows, and expressive typography in both **Light** and **Dark** modes.
