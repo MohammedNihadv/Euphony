@@ -26,7 +26,7 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
 
 ---
 
-## 💎 Why Euphony?
+## Why Euphony?
 
 - 🚫 **Zero Ads & Zero Tracking** — Music without interruptions or telemetry.
 - 🎨 **Neo-Brutalist & Material 3 Design** — High-contrast slab borders, hard shadows, and expressive typography in both **Light** and **Dark** modes.
@@ -35,7 +35,7 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
 
 ---
 
-## ⚡ Core Features
+## Core Features
 
 | 🎧 Playback & Discovery | 📚 Library & Offline Storage |
 | :--- | :--- |
@@ -43,7 +43,7 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
 
 ---
 
-## 📦 Which APK Should I Download?
+## Which APK Should I Download?
 
 | APK Filename | Target Device | Recommendation |
 | :--- | :--- | :--- |
@@ -53,7 +53,7 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
 
 ---
 
-## 🛠️ Architecture & Tech Stack
+## Architecture & Tech Stack
 
 | Technology | Role | Description |
 | :--- | :--- | :--- |
@@ -65,7 +65,7 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions from developers, designers, and music lovers!
 
@@ -77,6 +77,6 @@ We welcome contributions from developers, designers, and music lovers!
 
 ---
 
-## 📄 License
+## License
 
 Euphony is free software released under the **[GNU General Public License v3.0 (GPL-3.0)](LICENSE)**.
