@@ -64,19 +64,15 @@ class EuphonyAudioHandler extends BaseAudioHandler with SeekHandler {
     playbackState.add(
       PlaybackState(
         controls: [
-          MediaControl.rewind,
           MediaControl.skipToPrevious,
           if (playing) MediaControl.pause else MediaControl.play,
           MediaControl.skipToNext,
-          MediaControl.fastForward,
         ],
         systemActions: const {
           MediaAction.seek,
-          MediaAction.seekForward,
-          MediaAction.seekBackward,
         },
         // Collapsed notification shows prev, play/pause, next
-        androidCompactActionIndices: const [1, 2, 3],
+        androidCompactActionIndices: const [0, 1, 2],
         processingState: _mapProcessingState(_player.processingState),
         playing: playing,
         updatePosition: _player.position,
@@ -97,9 +93,9 @@ class EuphonyAudioHandler extends BaseAudioHandler with SeekHandler {
       };
 
   MediaItem _toMediaItem(Song song) {
-    // Prefer the explicitly loaded artworkUrl if available, otherwise fall back to artwork object
+    // Prefer the highest resolution artwork (600x600) for clean, crisp media notification images
     final artworkStr =
-        song.artworkUrl ?? song.artwork?.high ?? song.artwork?.medium;
+        song.artwork?.max ?? song.artwork?.high ?? song.artworkUrl;
     return MediaItem(
       id: song.id,
       title: song.title,
@@ -108,7 +104,8 @@ class EuphonyAudioHandler extends BaseAudioHandler with SeekHandler {
       duration: song.duration,
       artUri: artworkStr == null ? null : Uri.tryParse(artworkStr),
       extras: const {
-        // Set the neo-brutalist accent color for the Android media notification background
+        // Use our signature Neo-Brutalist Electric Violet accent (#6A4BE8) so
+        // Android/ColorOS tints the media controls in our brand aesthetic.
         'android.media.notification.color': 0xFF6A4BE8,
       },
     );
