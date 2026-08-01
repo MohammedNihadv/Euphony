@@ -23,6 +23,7 @@ class SettingsScreen extends ConsumerWidget {
     final settings = ref.watch(settingsControllerProvider);
     final settingsController = ref.read(settingsControllerProvider.notifier);
     final themeData = Theme.of(context);
+    final appVersion = ref.watch(appVersionProvider).asData?.value ?? '0.2.2';
 
     return Scaffold(
       appBar: AppBar(
@@ -444,16 +445,14 @@ class SettingsScreen extends ConsumerWidget {
                                         letterSpacing: 1.2,
                                       ),
                                 ),
-                                final appVersion = ref.watch(appVersionProvider).asData?.value ?? '0.2.2';
-                                return Text(
+                                Text(
                                   'v$appVersion • Neo-Brutalist Edition',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w800,
                                     fontSize: 12,
                                     color: EuBrutal.accent,
                                   ),
-                                );
-                              }(),
+                                ),
                               ],
                             ),
                           ),
