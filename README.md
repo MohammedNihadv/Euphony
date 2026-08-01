@@ -1,93 +1,84 @@
 <div align="center">
 
-<img src="docs/screenshots/banner.png" alt="Euphony Open Source Neo-Brutalist Music Player Banner" width="100%"/>
-
-# Euphony
-
-### *Music deserves better than interruptions.*
-
-A modern, open-source music player built with Flutter, featuring Light & Dark Neo-Brutalist themes.
-
-[![Flutter](https://img.shields.io/badge/Flutter-3.44+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
-[![License](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
-[![Release](https://img.shields.io/badge/Release-v0.2.0-blue)](https://github.com/MohammedNihadv/Euphony/releases)
-[![Website](https://img.shields.io/badge/Website-euphonymusic.vercel.app-6A4BE8?style=flat&logo=vercel)](https://euphonymusic.vercel.app/)
-[![Stars](https://img.shields.io/github/stars/MohammedNihadv/Euphony?style=social)](https://github.com/MohammedNihadv/Euphony)
-
-*Material 3 • Neo-Brutalist Design • Open Source*
+<img src="docs/screenshots/banner.png" alt="Euphony Open Source Neo-Brutalist Music Player" width="100%"/>
 
 <br>
-<h3><a href="https://euphonymusic.vercel.app/">🌐 Visit Official Website for Universal Downloads & Demo</a></h3>
+
+[![Flutter](https://img.shields.io/badge/Flutter-3.44+-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
+[![Release](https://img.shields.io/badge/Release-v0.2.0-6A4BE8?style=for-the-badge&logo=github&logoColor=white)](https://github.com/MohammedNihadv/Euphony/releases)
+[![License](https://img.shields.io/badge/License-GPL--3.0-24292E?style=for-the-badge&logo=open-source-initiative&logoColor=white)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/MohammedNihadv/Euphony?style=for-the-badge&color=F5C518)](https://github.com/MohammedNihadv/Euphony)
+
+<br>
+
+<p align="center">
+  <a href="https://euphonymusic.vercel.app/">
+    <img src="https://img.shields.io/badge/🌐_Visit_Official_Website-6A4BE8?style=for-the-badge&logo=vercel&logoColor=white" alt="Official Website"/>
+  </a>
+  <a href="https://github.com/MohammedNihadv/Euphony/releases">
+    <img src="https://img.shields.io/badge/📥_Download_Latest_APK-181824?style=for-the-badge&logo=android&logoColor=white" alt="Download APK"/>
+  </a>
+</p>
 
 </div>
 
 ---
 
-## Which APK Should I Download?
-
-| APK File | Target Device | Recommendation |
-| :--- | :--- | :--- |
-| `app-arm64-v8a-release.apk` | Modern Android Phones & Tablets | **Recommended for 99% of devices** (manufactured 2017+). Smallest file size (~42 MB) and best performance. |
-| `app-armeabi-v7a-release.apk` | Older 32-bit Android Devices | For older budget smartphones or legacy 32-bit devices. |
-| `app-x86_64-release.apk` | Emulators & Chromebooks | For Android Studio / BlueStacks emulators, PCs, and Intel Chromebooks. |
-
----
-
-# Why Euphony?
+## 💎 Why Euphony?
 
 Somewhere along the way, music players became subscription services, shuffle became a premium feature, and ads started interrupting your playlists.
 
-Euphony is a music player that simply gets out of your way:
+**Euphony is a music player that simply gets out of your way:**
 
-- No ads
-- 100% open source
-- Fast, lightweight, and built with Flutter
-- Built by the community, for the community
-
----
-
-# Features
-
-### Listen
-- Beautiful Material 3 & Neo-Brutalist interface
-- Fast search across tracks, albums, artists & playlists
-- Queue management with shuffle & repeat
-- Playback speed controls & sleep timer
-- Background playback with native media notification controls
-
-### Your Library
-- Offline downloads & local music playback
-- Playlist management with instant persistence
-- Smart caching & persistent playback state
+- 🚫 **Zero Ads & Zero Tracking** — Music without interruptions or telemetry.
+- 🎨 **Neo-Brutalist & Material 3 Design** — High-contrast slab borders, hard shadows, and expressive typography in both **Light** and **Dark** modes.
+- ⚡ **Lightweight & Blazing Fast** — Engineered with Flutter & Riverpod for fluid 120Hz performance.
+- ❤️ **100% Open Source** — Built by the community, for the community under the **GPL-3.0 License**.
 
 ---
 
-# Tech Stack
+## ⚡ Core Features
 
-| Technology | Purpose |
+| 🎧 Playback & Discovery | 📚 Library & Offline Storage |
 | :--- | :--- |
-| Flutter | Cross-platform UI framework |
-| Dart | Programming language |
-| Riverpod | State management |
-| Drift + SQLite | Local database |
-| just_audio | Audio playback |
-| audio_service | Background playback |
-| go_router | Navigation |
+| **• Universal Music Search** across tracks, albums, artists & playlists<br>**• Queue Management** with seamless shuffle, repeat-all, and repeat-one<br>**• Precision Speed Controls** (0.75x to 2.0x playback speed)<br>**• Smart Sleep Timer** with automatic fade-out<br>**• Native Media Controls** on lock screen, notification panel & wearables | **• Offline Downloads** for 100% offline local playback<br>**• Persistent Playlists** with instant SQLite storage<br>**• Adaptive Audio Quality** (High 256kbps AAC & Standard modes)<br>**• One-Tap Backup & Restore** of playlists and downloads<br>**• AMOLED Black Theme** for true OLED power saving |
 
 ---
 
-# Contributing
+## 📦 Which APK Should I Download?
 
-Contributions are welcome!
-
-1. Fork the repository.
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`).
-3. Commit your changes (`git commit -m 'feat: Add AmazingFeature'`).
-4. Push to the branch (`git push origin feature/AmazingFeature`).
-5. Open a Pull Request.
+| APK Filename | Target Device | Recommendation |
+| :--- | :--- | :--- |
+| `app-arm64-v8a-release.apk` | **Modern Android Phones & Tablets** | ⭐ **Recommended for 99% of users** (devices from 2017+). Smallest download size (~42 MB) and optimized 64-bit performance. |
+| `app-armeabi-v7a-release.apk` | **Older / Budget Android Devices** | For legacy 32-bit smartphones or older tablets. |
+| `app-x86_64-release.apk` | **Emulators, PCs & Chromebooks** | For Android Studio / BlueStacks emulators and Intel/AMD Chromebooks. |
 
 ---
 
-# License
+## 🛠️ Architecture & Tech Stack
 
-Released under the **GNU General Public License v3.0 (GPL-3.0)**. See [LICENSE](LICENSE) for details.
+| Technology | Role | Description |
+| :--- | :--- | :--- |
+| **[Flutter](https://flutter.dev)** | Core Framework | High-performance cross-platform UI engine |
+| **[Riverpod](https://riverpod.dev)** | State Management | Type-safe, testable state & dependency injection |
+| **[Drift](https://drift.simonbinder.eu)** + **SQLite** | Persistence Layer | Reactive local database for library and playlists |
+| **just_audio** + **audio_service** | Audio Playback | Background audio playback with native OS media integration |
+| **go_router** | Navigation | Declarative URL-based app routing |
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from developers, designers, and music lovers!
+
+1. **Fork** the repository on GitHub.
+2. **Clone** your fork locally and create a feature branch (`git checkout -b feature/amazing-feature`).
+3. **Commit** your changes (`git commit -m 'feat: add amazing feature'`).
+4. **Push** to your branch (`git push origin feature/amazing-feature`).
+5. Open a **Pull Request** and describe your improvements!
+
+---
+
+## 📄 License
+
+Euphony is free software released under the **[GNU General Public License v3.0 (GPL-3.0)](LICENSE)**.
