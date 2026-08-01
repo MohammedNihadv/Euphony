@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart' as yt_explode;
 
 import '../core/log.dart';
+import '../core/util/permissions.dart';
 import '../data/providers.dart';
 import '../data/remote/innertube/innertube_client.dart';
 import '../data/remote/innertube/innertube_utils.dart';
@@ -576,6 +577,7 @@ class PlayerController {
     final song = _queue.currentSong;
     if (song == null) return;
 
+    unawaited(ensureNotificationPermission());
     final generation = ++_loadGeneration;
     final source = await _resolveStream(song);
 

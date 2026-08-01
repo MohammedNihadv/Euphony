@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../core/util/permissions.dart';
 import '../design/tokens/brutal.dart';
 
 /// The dark canvas the splash sits on — matched to the app and the native
@@ -85,6 +86,7 @@ class _SplashOverlayState extends State<SplashOverlay>
                 onEnd: () {
                   if (_opacity == 0 && mounted) {
                     setState(() => _dismissed = true);
+                    ensureNotificationPermission();
                   }
                 },
                 child: _SplashContent(
