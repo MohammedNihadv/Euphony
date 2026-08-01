@@ -27,9 +27,9 @@
 
 ## 💎 Why Euphony?
 
-Somewhere along the way, music players became subscription services, shuffle became a premium feature, and ads started interrupting your playlists.
+Life already has enough interruptions. Your music doesn't need 30-second unskippable ads for products you'll never buy.
 
-**Euphony is a music player that simply gets out of your way:**
+**Free, ad-free, and crafted with open-source love.**
 
 - 🚫 **Zero Ads & Zero Tracking** — Music without interruptions or telemetry.
 - 🎨 **Neo-Brutalist & Material 3 Design** — High-contrast slab borders, hard shadows, and expressive typography in both **Light** and **Dark** modes.
