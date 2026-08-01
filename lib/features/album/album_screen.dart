@@ -175,7 +175,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                               : const Icon(
                                   Icons.queue_music,
                                   size: 60,
-                                  color: EuBrutal.ink,
+                                  color: EuBrutal.onHighlight,
                                 ),
                         ),
                         const SizedBox(height: EuSpace.md),

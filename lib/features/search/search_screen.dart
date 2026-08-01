@@ -297,15 +297,18 @@ class _SearchLanding extends ConsumerWidget {
 
   final ValueChanged<String> onSelected;
 
+  // A curated brutalist set: bold and colour-blocked, but drawn from a tighter,
+  // more harmonious range than the old neon rainbow so the grid reads as one
+  // considered palette instead of eight clashing swatches.
   static const _genres = [
-    _GenreItem('Pop', Icons.audiotrack, EuBrutal.accent),
-    _GenreItem('Hip-Hop', Icons.speaker, EuBrutal.highlight),
-    _GenreItem('Rock', Icons.electric_bolt, EuBrutal.alert),
-    _GenreItem('Indie', Icons.palette, Color(0xFF00E676)),
-    _GenreItem('Dance', Icons.nightlife, Color(0xFFFF9100)),
-    _GenreItem('Chill', Icons.spa, Color(0xFF00E5FF)),
-    _GenreItem('Top Charts', Icons.trending_up, EuBrutal.accent),
-    _GenreItem('Workout', Icons.fitness_center, EuBrutal.alert),
+    _GenreItem('Pop', Icons.favorite_rounded, Color(0xFF7C5CFF)),
+    _GenreItem('Hip-Hop', Icons.graphic_eq_rounded, Color(0xFFE85D9E)),
+    _GenreItem('Rock', Icons.bolt_rounded, Color(0xFFE24D3D)),
+    _GenreItem('Indie', Icons.brush_rounded, Color(0xFF1FB6A6)),
+    _GenreItem('Dance', Icons.blur_on_rounded, Color(0xFFF5A623)),
+    _GenreItem('Chill', Icons.spa_rounded, Color(0xFF4C9BE8)),
+    _GenreItem('Top Charts', Icons.trending_up_rounded, Color(0xFF9B6DE8)),
+    _GenreItem('Workout', Icons.fitness_center_rounded, Color(0xFFE24D6A)),
   ];
 
   @override
@@ -420,24 +423,31 @@ class _SearchLanding extends ConsumerWidget {
                     child: Stack(
                       children: [
                         Positioned(
-                          right: -10,
-                          bottom: -10,
-                          child: Icon(
-                            item.icon,
-                            size: 54,
-                            color: EuBrutal.ink.withValues(alpha: 0.25),
+                          right: -8,
+                          bottom: -12,
+                          child: Transform.rotate(
+                            angle: 0.35,
+                            child: Icon(
+                              item.icon,
+                              size: 56,
+                              color:
+                                  (item.color.computeLuminance() > 0.5
+                                          ? EuBrutal.ink
+                                          : Colors.white)
+                                      .withValues(alpha: 0.28),
+                            ),
                           ),
                         ),
                         Text(
                           item.title,
                           style: TextStyle(
-                            color: item.color == EuBrutal.highlight
+                            // Pick ink or white by the tile's own brightness, so
+                            // every label clears contrast without a hardcoded
+                            // per-colour lookup.
+                            color: item.color.computeLuminance() > 0.5
                                 ? EuBrutal.ink
-                                : (item.color == const Color(0xFF00E5FF) ||
-                                          item.color == const Color(0xFF00E676)
-                                      ? EuBrutal.ink
-                                      : Colors.white),
-                            fontWeight: FontWeight.w900,
+                                : Colors.white,
+                            fontWeight: FontWeight.w800,
                             fontSize: 16,
                           ),
                         ),
@@ -554,23 +564,24 @@ class _ResultSlivers extends StatelessWidget {
                   Builder(
                     builder: (context) {
                       final isSelected = activeFilter == entry.key;
+                      final scheme = Theme.of(context).colorScheme;
                       return GestureDetector(
                         onTap: () => onFilterSelected(entry.key, entry.value),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 7,
+                            horizontal: 16,
+                            vertical: 8,
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? EuBrutal.highlight
-                                : Theme.of(
-                                    context,
-                                  ).colorScheme.surfaceContainerLow,
+                                : scheme.surfaceContainerHigh,
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
-                              color: EuBrutal.ink,
-                              width: isSelected ? 2.5 : 1.5,
+                              color: isSelected
+                                  ? EuBrutal.ink
+                                  : EuBrutal.ink.withValues(alpha: 0.35),
+                              width: isSelected ? 2 : 1.5,
                             ),
                             boxShadow: isSelected
                                 ? EuBrutal.smHardShadow
@@ -579,10 +590,10 @@ class _ResultSlivers extends StatelessWidget {
                           child: Text(
                             entry.key,
                             style: TextStyle(
-                              color: EuBrutal.ink,
-                              fontWeight: isSelected
-                                  ? FontWeight.w900
-                                  : FontWeight.w700,
+                              color: isSelected
+                                  ? EuBrutal.onHighlight
+                                  : scheme.onSurface,
+                              fontWeight: FontWeight.w700,
                               fontSize: 13,
                             ),
                           ),
@@ -702,14 +713,18 @@ class _TopResultCard extends ConsumerWidget {
                         decoration: BoxDecoration(
                           color: EuBrutal.highlight,
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: EuBrutal.ink, width: 1.5),
+                          border: Border.all(
+                            color: EuBrutal.onHighlight,
+                            width: 1.5,
+                          ),
                         ),
                         child: Text(
                           'TOP MATCH',
                           style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(
-                                color: EuBrutal.ink,
+                                color: EuBrutal.onHighlight,
                                 fontWeight: FontWeight.w900,
+                                letterSpacing: 0.5,
                               ),
                         ),
                       ),
@@ -1029,14 +1044,20 @@ String _subtitleFor(MusicItem item) => switch (item) {
   StationItem() => 'Station',
 };
 
+/// Metadata lines use a middot separator, the convention every major music app
+/// follows, and never repeat the row's own type. The redundant "Song" prefix is
+/// dropped so a row reads "The Weeknd · After Hours", not "Song · Song".
+const _dot = ' · ';
+
 String _songSubtitle(Song song) {
   final parts = [
-    song.kind == SongKind.video ? 'Video' : 'Song',
+    if (song.kind == SongKind.video) 'Video',
     if (song.artistNames.isNotEmpty) song.artistNames,
-    if (song.albumTitle != null) song.albumTitle!,
+    if (song.albumTitle != null && song.albumTitle != song.artistNames)
+      song.albumTitle!,
     if (song.duration != null) _formatDuration(song.duration!),
   ];
-  return parts.join(' - ');
+  return parts.isEmpty ? 'Song' : parts.join(_dot);
 }
 
 String _albumSubtitle(Album album) {
@@ -1045,7 +1066,7 @@ String _albumSubtitle(Album album) {
     if (album.artistNames.isNotEmpty) album.artistNames,
     if (album.year != null) album.year.toString(),
   ];
-  return parts.join(' - ');
+  return parts.join(_dot);
 }
 
 String _artistSubtitle(Artist artist) {
@@ -1053,7 +1074,7 @@ String _artistSubtitle(Artist artist) {
     'Artist',
     if (artist.subscribers != null) '${artist.subscribers} subscribers',
   ];
-  return parts.join(' - ');
+  return parts.join(_dot);
 }
 
 String _playlistSubtitle(Playlist playlist) {
@@ -1062,7 +1083,7 @@ String _playlistSubtitle(Playlist playlist) {
     if (playlist.author != null) playlist.author!,
     if (playlist.trackCount != null) '${playlist.trackCount} songs',
   ];
-  return parts.join(' - ');
+  return parts.join(_dot);
 }
 
 String? _artworkUrlFor(MusicItem? item) => switch (item) {
@@ -1098,13 +1119,13 @@ void _navigateToItem(WidgetRef ref, BuildContext context, MusicItem item) {
     case SongItem(:final song):
       ref.read(playerControllerProvider).playSong(song);
     case AlbumItem(:final album):
-      context.go('/album/${album.browseId}');
+      context.push('/album/${album.browseId}');
     case ArtistItem(:final artist):
-      context.go('/artist/${artist.browseId}');
+      context.push('/artist/${artist.browseId}');
     case PlaylistItem(:final playlist):
-      context.go('/playlist/${playlist.id}');
+      context.push('/playlist/${playlist.id}');
     case StationItem(:final playlistId):
-      context.go('/playlist/$playlistId');
+      context.push('/playlist/$playlistId');
   }
 }
 

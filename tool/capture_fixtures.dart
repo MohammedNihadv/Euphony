@@ -75,7 +75,12 @@ final _captures = <Capture>[
   (name: 'album', run: (client) => client.browse(_albumBrowseId)),
   (name: 'artist', run: (client) => client.browse(_artistBrowseId)),
   (name: 'playlist', run: (client) => client.browse('VL$_playlistId')),
+  // The autoplay radio queue, seeded from a well-known video.
+  (name: 'radio', run: (client) => client.next(_radioSeedVideoId)),
 ];
+
+/// A stable, popular video id to seed the radio fixture from.
+const _radioSeedVideoId = '4NRXx6U8ABQ'; // The Weeknd — Blinding Lights
 
 /// Keys that carry no information a parser reads, but do carry most of the
 /// bytes and change on every capture.

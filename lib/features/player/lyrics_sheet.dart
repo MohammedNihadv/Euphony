@@ -112,9 +112,9 @@ class _LyricsSheetState extends State<_LyricsSheet> {
                   decoration: BoxDecoration(
                     color: EuBrutal.highlight,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: EuBrutal.ink, width: 2),
+                    border: Border.all(color: EuBrutal.onHighlight, width: 2),
                   ),
-                  child: const Icon(Icons.lyrics, color: EuBrutal.ink),
+                  child: const Icon(Icons.lyrics, color: EuBrutal.onHighlight),
                 ),
                 const SizedBox(width: EuSpace.md),
                 Expanded(

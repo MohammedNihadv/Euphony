@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'brutal.dart';
+
 /// Corner radii and shapes for Euphony's Neo-Brutalist aesthetic.
 abstract final class EuShape {
   static const Radius xsRadius = Radius.circular(6);
@@ -31,16 +33,16 @@ abstract final class EuShape {
 
   static const RoundedRectangleBorder cardBorder = RoundedRectangleBorder(
     borderRadius: md,
-    side: BorderSide(color: Color(0xFF121218), width: 2.5),
+    side: BorderSide(color: EuBrutal.ink, width: 2),
   );
 
   static const RoundedRectangleBorder sheetBorder = RoundedRectangleBorder(
     borderRadius: sheetTop,
-    side: BorderSide(color: Color(0xFF121218), width: 2.5),
+    side: BorderSide(color: EuBrutal.ink, width: 2),
   );
 
   static const RoundedSuperellipseBorder squircle = RoundedSuperellipseBorder(
     borderRadius: md,
-    side: BorderSide(color: Color(0xFF121218), width: 2.5),
+    side: BorderSide(color: EuBrutal.ink, width: 2),
   );
 }

@@ -417,7 +417,7 @@ class _SpeedButton extends StatelessWidget {
                 ? EuBrutal.highlight
                 : themeData.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: EuBrutal.ink, width: isCustom ? 1.5 : 1),
+            border: Border.all(color: isCustom ? EuBrutal.onHighlight : EuBrutal.ink, width: isCustom ? 1.5 : 1),
           ),
           child: Text(
             '${speed}x',
@@ -425,7 +425,7 @@ class _SpeedButton extends StatelessWidget {
               fontWeight: FontWeight.w900,
               fontSize: 13,
               color: isCustom
-                  ? EuBrutal.ink
+                  ? EuBrutal.onHighlight
                   : themeData.textTheme.bodyMedium?.color,
             ),
           ),

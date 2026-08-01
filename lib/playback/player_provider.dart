@@ -150,6 +150,24 @@ class PlaybackNotifier extends Notifier<QueueState> {
     );
   }
 
+  /// Appends several songs at once — used by autoplay to extend the queue with
+  /// related tracks. Songs already present are skipped so the radio does not
+  /// loop the same handful of tracks.
+  void addAllToQueue(List<Song> songs) {
+    final existing = state.queue.map((s) => s.id).toSet();
+    final fresh = songs.where((s) => existing.add(s.id)).toList();
+    if (fresh.isEmpty) return;
+    final newQueue = [...state.queue, ...fresh];
+    final appendedOrder = [
+      for (var i = 0; i < fresh.length; i++) state.queue.length + i,
+    ];
+    state = QueueState(
+      queue: newQueue,
+      currentIndex: state.currentIndex < 0 ? 0 : state.currentIndex,
+      order: [...state.order, ...appendedOrder],
+    );
+  }
+
   void addNext(Song song) {
     final newQueue = [...state.queue, song];
     final newIndex = newQueue.length - 1;
@@ -360,6 +378,13 @@ final playerControllerProvider = Provider<PlayerController>((ref) {
     },
     onError: (message) =>
         ref.read(playbackErrorProvider.notifier).report(message),
+    fetchAutoplay: (seed) async {
+      // Only when the user has autoplay on; otherwise the queue simply ends.
+      if (!ref.read(settingsRepositoryProvider).autoPlaySimilar) {
+        return const <Song>[];
+      }
+      return ref.read(musicDetailRepositoryProvider).relatedSongs(seed.id);
+    },
   );
   ref.onDispose(controller.dispose);
   return controller;
@@ -390,6 +415,7 @@ class PlayerController {
     required bool Function() shuffleEnabled,
     void Function()? onEnableShuffle,
     void Function(String message)? onError,
+    Future<List<Song>> Function(Song seed)? fetchAutoplay,
     // ignore: prefer_initializing_formals
   }) : _client = client,
        // ignore: prefer_initializing_formals
@@ -403,7 +429,9 @@ class PlayerController {
        // ignore: prefer_initializing_formals
        _onEnableShuffle = onEnableShuffle,
        // ignore: prefer_initializing_formals
-       _onError = onError {
+       _onError = onError,
+       // ignore: prefer_initializing_formals
+       _fetchAutoplay = fetchAutoplay {
     _setupListeners();
   }
 
@@ -414,6 +442,13 @@ class PlayerController {
   final bool Function() _shuffleEnabled;
   final void Function()? _onEnableShuffle;
   final void Function(String message)? _onError;
+
+  /// Returns related tracks to extend the queue with when it runs out. Null or
+  /// an empty result simply ends playback.
+  final Future<List<Song>> Function(Song seed)? _fetchAutoplay;
+
+  /// Guards against firing autoplay twice for the same queue-end.
+  bool _loadingAutoplay = false;
 
   StreamSubscription<PlayerState>? _stateSub;
   bool _disposed = false;
@@ -458,13 +493,47 @@ class PlayerController {
 
     final next = _queue.nextIndex(wrap: repeat == LoopMode.all);
     if (next == null) {
-      // End of the queue with repeat off: stop cleanly rather than sitting in
-      // `completed`, which reports as "playing" to the UI.
+      // End of the queue with repeat off: try to keep the music going with
+      // related tracks (autoplay radio) before giving up.
+      if (await _extendWithAutoplay()) {
+        final resumed = _queue.nextIndex(wrap: false);
+        if (resumed != null) {
+          _queue.setIndex(resumed);
+          await _playCurrent();
+          return;
+        }
+      }
+      // Nothing to play next: stop cleanly rather than sitting in `completed`,
+      // which reports as "playing" to the UI.
       await _player.stop();
       return;
     }
     _queue.setIndex(next);
     await _playCurrent();
+  }
+
+  /// Fetches related tracks for the last song and appends them to the queue.
+  /// Returns true if anything new was added.
+  Future<bool> _extendWithAutoplay() async {
+    final fetch = _fetchAutoplay;
+    final seed = _queue.currentSong;
+    if (fetch == null || seed == null || _loadingAutoplay) return false;
+
+    _loadingAutoplay = true;
+    try {
+      final before = _queue.queue.length;
+      final related = await fetch(seed);
+      if (related.isEmpty) return false;
+      _queue.addAllToQueue(related);
+      final added = _queue.queue.length > before;
+      if (added) _log.info('autoplay added ${related.length} related tracks');
+      return added;
+    } catch (error) {
+      _log.warning('autoplay fetch failed: $error');
+      return false;
+    } finally {
+      _loadingAutoplay = false;
+    }
   }
 
   Future<void> playSong(Song song) async {
@@ -557,10 +626,9 @@ class PlayerController {
 
     // Primary engine: YoutubeExplode
     // Resolves signatures, throttling challenges, and client headers automatically.
+    final yt = yt_explode.YoutubeExplode();
     try {
-      final yt = yt_explode.YoutubeExplode();
       final manifest = await yt.videos.streamsClient.getManifest(song.id);
-      yt.close();
       final audioOnly = manifest.audioOnly;
       if (audioOnly.isNotEmpty) {
         final bestAudio = audioOnly.lastWhere(
@@ -581,6 +649,10 @@ class PlayerController {
       _log.warning(
         'YoutubeExplode failed for ${song.id}, falling back to InnertubeClient: $e',
       );
+    } finally {
+      // Always release the client's HTTP resources, even when getManifest threw
+      // — otherwise a run of failing tracks leaks a socket pool each time.
+      yt.close();
     }
 
     // 2. Fallback engine: InnertubeClient mobile client

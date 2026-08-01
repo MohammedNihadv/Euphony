@@ -79,51 +79,15 @@ class SettingsScreen extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: EuSpace.md),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _ModeSelectChip(
-                              label: 'System',
-                              icon: Icons.brightness_auto,
-                              isSelected: theme.mode == ThemeMode.system,
-                              onTap: () =>
-                                  themeController.setMode(ThemeMode.system),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _ModeSelectChip(
-                              label: 'Light',
-                              icon: Icons.light_mode,
-                              isSelected: theme.mode == ThemeMode.light,
-                              onTap: () =>
-                                  themeController.setMode(ThemeMode.light),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _ModeSelectChip(
-                              label: 'Dark',
-                              icon: Icons.dark_mode,
-                              isSelected: theme.mode == ThemeMode.dark,
-                              onTap: () =>
-                                  themeController.setMode(ThemeMode.dark),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Divider(height: 28),
+                      const SizedBox(height: EuSpace.xs),
                       SwitchListTile(
                         activeThumbColor: EuBrutal.accent,
                         contentPadding: EdgeInsets.zero,
                         title: const Text(
-                          'AMOLED True Black',
+                          'AMOLED black',
                           style: TextStyle(fontWeight: FontWeight.w800),
                         ),
-                        subtitle: const Text(
-                          'Use pure black background in dark mode',
-                        ),
+                        subtitle: const Text('Pure black background'),
                         value: theme.amoled,
                         onChanged: (value) =>
                             themeController.setAmoled(value: value),
@@ -132,12 +96,10 @@ class SettingsScreen extends ConsumerWidget {
                         activeThumbColor: EuBrutal.accent,
                         contentPadding: EdgeInsets.zero,
                         title: const Text(
-                          'Dynamic Art Theme',
+                          'Dynamic colours',
                           style: TextStyle(fontWeight: FontWeight.w800),
                         ),
-                        subtitle: const Text(
-                          'Extract accent colors from active album cover',
-                        ),
+                        subtitle: const Text('Tint the player from the artwork'),
                         value: theme.source == ColourSource.artwork,
                         onChanged: (value) => themeController.setColourSource(
                           value ? ColourSource.artwork : ColourSource.fixed,
@@ -200,14 +162,14 @@ class SettingsScreen extends ConsumerWidget {
                           decoration: BoxDecoration(
                             color: EuBrutal.highlight,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: EuBrutal.ink, width: 1.5),
+                            border: Border.all(color: EuBrutal.onHighlight, width: 1.5),
                           ),
                           child: Text(
                             settings.audioQuality,
                             style: const TextStyle(
+                              color: EuBrutal.onHighlight,
                               fontWeight: FontWeight.w900,
                               fontSize: 12,
-                              color: EuBrutal.ink,
                             ),
                           ),
                         ),
@@ -450,9 +412,9 @@ class SettingsScreen extends ConsumerWidget {
                                 width: 2,
                               ),
                             ),
-                            child: Icon(
+                            child: const Icon(
                               Icons.graphic_eq,
-                              color: themeData.colorScheme.onSurface,
+                              color: EuBrutal.onHighlight,
                               size: 28,
                             ),
                           ),
@@ -470,7 +432,8 @@ class SettingsScreen extends ConsumerWidget {
                                       ),
                                 ),
                                 const Text(
-                                  'v1.0.0 • Neo-Brutalist Edition',
+                                  'v${UpdateChecker.currentVersion} • '
+                                  'Neo-Brutalist Edition',
                                   style: TextStyle(
                                     fontWeight: FontWeight.w800,
                                     fontSize: 12,
@@ -484,12 +447,17 @@ class SettingsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: EuSpace.md),
                       Text(
-                        'Euphony is built with a layered Flutter architecture, InnerTube parser engine, Drift SQLite storage, LRCLIB synced lyrics, and a pixel-perfect Neo-Brutalist design identity.',
+                        'Music deserves better than interruptions.\n\n'
+                        'Euphony is a free, open-source music player that '
+                        'simply gets out of your way — no ads, no paywalls, '
+                        'just your music. Built by the community, for the '
+                        'community.',
                         style: themeData.textTheme.bodyMedium?.copyWith(
                           color: themeData.colorScheme.onSurface.withValues(
                             alpha: 0.8,
                           ),
                           fontWeight: FontWeight.w600,
+                          height: 1.5,
                         ),
                       ),
                     ],
@@ -618,65 +586,6 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-class _ModeSelectChip extends StatelessWidget {
-  const _ModeSelectChip({
-    required this.label,
-    required this.icon,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final themeData = Theme.of(context);
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? EuBrutal.accent
-              : themeData.colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: EuBrutal.ink, width: isSelected ? 2.5 : 1),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: isSelected ? EuBrutal.ink : themeData.iconTheme.color,
-            ),
-            const SizedBox(width: 4),
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 12,
-                  color: isSelected
-                      ? EuBrutal.ink
-                      : themeData.textTheme.bodyMedium?.color,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _AppUpdateCard extends ConsumerStatefulWidget {
   const _AppUpdateCard();
 
@@ -745,32 +654,35 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Current Version: v${UpdateChecker.currentVersion}',
-                        style: TextStyle(fontWeight: FontWeight.w800),
-                      ),
-                      if (info != null && info.hasUpdate)
-                        Text(
-                          'New version available: v${info.latestVersion}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w900,
-                            color: EuBrutal.accent,
-                          ),
-                        )
-                      else
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                         const Text(
-                          'Up to date • Auto-preserves all data',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                            color: Colors.grey,
-                          ),
+                          'Current Version: v${UpdateChecker.currentVersion}',
+                          style: TextStyle(fontWeight: FontWeight.w800),
                         ),
-                    ],
+                        if (info != null && info.hasUpdate)
+                          Text(
+                            'New version available: v${info.latestVersion}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              color: EuBrutal.accent,
+                            ),
+                          )
+                        else
+                          const Text(
+                            'Up to date • Auto-preserves all data',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: EuSpace.md),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: (info != null && info.hasUpdate)

@@ -65,12 +65,10 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           indicator: BoxDecoration(
             color: EuBrutal.highlight,
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: EuBrutal.ink, width: 2),
-            boxShadow: const [
-              BoxShadow(color: EuBrutal.ink, offset: Offset(2, 2)),
-            ],
+            border: Border.all(color: EuBrutal.onHighlight, width: 2),
+            boxShadow: EuBrutal.smHardShadow,
           ),
-          labelColor: EuBrutal.ink,
+          labelColor: EuBrutal.onHighlight,
           unselectedLabelColor: EuBrutal.ink,
           tabs: const [
             Tab(
@@ -213,10 +211,13 @@ class _LikedSongsTab extends ConsumerWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: EuBrutal.highlight,
-                      foregroundColor: EuBrutal.ink,
+                      foregroundColor: EuBrutal.onHighlight,
                       shape: const CircleBorder(),
                       padding: const EdgeInsets.all(14),
-                      side: const BorderSide(color: EuBrutal.ink, width: 2),
+                      side: const BorderSide(
+                        color: EuBrutal.onHighlight,
+                        width: 2,
+                      ),
                       elevation: 0,
                     ),
                     child: const Icon(Icons.play_arrow, size: 28),
@@ -261,18 +262,18 @@ class _LikedSongsTab extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: EuBrutal.highlight,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: EuBrutal.ink, width: 2),
+                    border: Border.all(color: EuBrutal.onHighlight, width: 2),
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.sort, size: 18, color: EuBrutal.ink),
+                      Icon(Icons.sort, size: 18, color: EuBrutal.onHighlight),
                       SizedBox(width: 4),
                       Text(
                         'Recent',
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 12,
-                          color: EuBrutal.ink,
+                          color: EuBrutal.onHighlight,
                         ),
                       ),
                     ],
@@ -399,7 +400,7 @@ class _SavedPlaylistsTab extends ConsumerWidget {
                     subtitle: entry.author ?? '${entry.trackCount ?? 0} tracks',
                     artworkUrl: entry.artworkUrl,
                     leadingIcon: Icons.playlist_play,
-                    onTap: () => context.go('/playlist/${entry.id}'),
+                    onTap: () => context.push('/playlist/${entry.id}'),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete_outline, size: 20),
                       onPressed: () => dao.remove(entry.id),
@@ -486,7 +487,7 @@ class _SavedAlbumsTab extends ConsumerWidget {
         subtitle: entry.artists,
         artworkUrl: entry.artworkUrl,
         leadingIcon: Icons.album,
-        onTap: () => context.go('/album/${entry.browseId}'),
+        onTap: () => context.push('/album/${entry.browseId}'),
         trailing: IconButton(
           icon: const Icon(Icons.delete_outline, size: 20),
           onPressed: () => dao.remove(entry.browseId),
@@ -714,7 +715,7 @@ class _DownloadsTab extends ConsumerWidget {
                       height: 18,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        color: EuBrutal.ink,
+                        color: EuBrutal.onHighlight,
                       ),
                     ),
                     const SizedBox(width: EuSpace.sm),
@@ -724,7 +725,7 @@ class _DownloadsTab extends ConsumerWidget {
                         style: const TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 13,
-                          color: EuBrutal.ink,
+                          color: EuBrutal.onHighlight,
                         ),
                       ),
                     ),
