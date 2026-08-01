@@ -47,15 +47,23 @@ class BackupService {
         return false;
       }
 
+      final bytes = await dbFile.readAsBytes();
       final destPath = await FilePicker.platform.saveFile(
         dialogTitle: 'Save Euphony Backup',
         fileName: 'euphony_backup.sqlite',
         type: FileType.any,
+        bytes: bytes,
       );
 
       if (destPath == null) return false; // User canceled
 
-      await dbFile.copy(destPath);
+      if (destPath.isNotEmpty) {
+        try {
+          await dbFile.copy(destPath);
+        } catch (_) {
+          // If copy fails (e.g. content URI on Android), bytes were already written by saveFile.
+        }
+      }
       _log.info('Backup exported to $destPath');
       return true;
     } catch (e) {
@@ -70,18 +78,23 @@ class BackupService {
       final result = await FilePicker.platform.pickFiles(
         dialogTitle: 'Select Euphony Backup',
         type: FileType.any,
+        withData: true,
       );
 
       if (result == null || result.files.isEmpty) return false;
 
-      final sourcePath = result.files.single.path;
-      if (sourcePath == null) return false;
-
+      final file = result.files.single;
       final dbFile = await _databaseTarget();
 
-      // Copy the backup over the existing DB, in whichever directory Drift uses.
-      await File(sourcePath).copy(dbFile.path);
-      _log.info('Backup imported from $sourcePath');
+      if (file.bytes != null) {
+        await dbFile.writeAsBytes(file.bytes!, flush: true);
+      } else if (file.path != null) {
+        await File(file.path!).copy(dbFile.path);
+      } else {
+        return false;
+      }
+
+      _log.info('Backup imported');
       return true;
     } catch (e) {
       _log.severe('Import failed: $e');

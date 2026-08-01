@@ -16,9 +16,9 @@ void showSongOptionsSheet(BuildContext context, Song song) {
     context: context,
     isScrollControlled: true,
     backgroundColor: Theme.of(context).colorScheme.surface,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      side: BorderSide(color: EuBrutal.ink, width: 2.5),
+    shape: RoundedRectangleBorder(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      side: BorderSide(color: context.eu.ink, width: 2.5),
     ),
     builder: (context) =>
         SingleChildScrollView(child: _SongOptionsSheetBody(song: song)),
@@ -47,7 +47,7 @@ class _SongOptionsSheetBody extends ConsumerWidget {
                   height: 56,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: EuBrutal.ink, width: 2),
+                    border: Border.all(color: context.eu.ink, width: 2),
                     color: Theme.of(
                       context,
                     ).colorScheme.surfaceContainerHighest,
@@ -97,7 +97,7 @@ class _SongOptionsSheetBody extends ConsumerWidget {
               ],
             ),
           ),
-          const Divider(color: EuBrutal.ink, thickness: 2, height: 2),
+          Divider(color: context.eu.ink, thickness: 2, height: 2),
           ListTile(
             leading: const Icon(Icons.playlist_add, color: EuBrutal.accent),
             title: const Text(
@@ -110,7 +110,7 @@ class _SongOptionsSheetBody extends ConsumerWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.playlist_play, color: EuBrutal.ink),
+            leading: Icon(Icons.playlist_play, color: context.eu.ink),
             title: const Text(
               'Play Next',
               style: TextStyle(fontWeight: FontWeight.w800),
@@ -124,7 +124,7 @@ class _SongOptionsSheetBody extends ConsumerWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.queue_music, color: EuBrutal.ink),
+            leading: Icon(Icons.queue_music, color: context.eu.ink),
             title: const Text(
               'Add to Queue',
               style: TextStyle(fontWeight: FontWeight.w800),
@@ -144,7 +144,7 @@ class _SongOptionsSheetBody extends ConsumerWidget {
               return ListTile(
                 leading: Icon(
                   isLiked ? Icons.favorite : Icons.favorite_border,
-                  color: isLiked ? EuBrutal.alert : EuBrutal.ink,
+                  color: isLiked ? EuBrutal.alert : context.eu.ink,
                 ),
                 title: Text(
                   isLiked ? 'Remove from Favorites' : 'Add to Favorites',
@@ -224,9 +224,9 @@ class _SongOptionsSheetBody extends ConsumerWidget {
           ),
           if (song.artistNames.isNotEmpty)
             ListTile(
-              leading: const Icon(
+              leading: Icon(
                 Icons.person_search_outlined,
-                color: EuBrutal.ink,
+                color: context.eu.ink,
               ),
               title: Text(
                 'Search "${song.artistNames}"',
@@ -247,13 +247,14 @@ class _SongOptionsSheetBody extends ConsumerWidget {
 }
 
 void _showAddToPlaylistSheet(BuildContext context, Song song) {
+  final inkColor = context.eu.ink;
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Theme.of(context).colorScheme.surface,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      side: BorderSide(color: EuBrutal.ink, width: 2.5),
+    shape: RoundedRectangleBorder(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      side: BorderSide(color: inkColor, width: 2.5),
     ),
     builder: (context) {
       return Consumer(
@@ -279,8 +280,8 @@ void _showAddToPlaylistSheet(BuildContext context, Song song) {
                           ),
                         ),
                       ),
-                      const Divider(
-                        color: EuBrutal.ink,
+                      Divider(
+                        color: context.eu.divider,
                         thickness: 2,
                         height: 1,
                       ),
@@ -293,7 +294,7 @@ void _showAddToPlaylistSheet(BuildContext context, Song song) {
                           ),
                           child: const Icon(
                             Icons.add,
-                            color: Colors.white,
+                            color: EuBrutal.onAccent,
                             size: 20,
                           ),
                         ),
@@ -320,9 +321,9 @@ void _showAddToPlaylistSheet(BuildContext context, Song song) {
                       else
                         for (final playlist in playlists)
                           ListTile(
-                            leading: const Icon(
+                            leading: Icon(
                               Icons.playlist_play,
-                              color: EuBrutal.ink,
+                              color: context.eu.ink,
                             ),
                             title: Text(
                               playlist.title,
@@ -386,7 +387,7 @@ void _showNewPlaylistDialog(BuildContext context, Song song) {
         scrollable: true,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: EuBrutal.ink, width: 2.5),
+          side: BorderSide(color: context.eu.ink, width: 2.5),
         ),
         title: const Text(
           'NEW PLAYLIST',
@@ -411,7 +412,7 @@ void _showNewPlaylistDialog(BuildContext context, Song song) {
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: EuBrutal.accent,
-              foregroundColor: Colors.white,
+              foregroundColor: EuBrutal.onAccent,
             ),
             onPressed: () async {
               final name = controller.text.trim();

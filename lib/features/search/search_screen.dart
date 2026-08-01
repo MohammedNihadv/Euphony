@@ -432,7 +432,7 @@ class _SearchLanding extends ConsumerWidget {
                               size: 56,
                               color:
                                   (item.color.computeLuminance() > 0.5
-                                          ? EuBrutal.ink
+                                          ? const Color(0xFF0D0D14)
                                           : Colors.white)
                                       .withValues(alpha: 0.28),
                             ),
@@ -445,7 +445,7 @@ class _SearchLanding extends ConsumerWidget {
                             // every label clears contrast without a hardcoded
                             // per-colour lookup.
                             color: item.color.computeLuminance() > 0.5
-                                ? EuBrutal.ink
+                                ? const Color(0xFF0D0D14)
                                 : Colors.white,
                             fontWeight: FontWeight.w800,
                             fontSize: 16,
@@ -579,8 +579,8 @@ class _ResultSlivers extends StatelessWidget {
                             borderRadius: BorderRadius.circular(18),
                             border: Border.all(
                               color: isSelected
-                                  ? EuBrutal.ink
-                                  : EuBrutal.ink.withValues(alpha: 0.35),
+                                  ? context.eu.ink
+                                  : context.eu.ink.withValues(alpha: 0.35),
                               width: isSelected ? 2 : 1.5,
                             ),
                             boxShadow: isSelected
@@ -609,12 +609,14 @@ class _ResultSlivers extends StatelessWidget {
         ),
       );
     }
-
     if (results.topResult != null) {
       children.add(
         Padding(
           padding: const EdgeInsets.only(bottom: EuSpace.lg),
-          child: _TopResultCard(item: results.topResult!),
+          child: _TopResultCard(
+            item: results.topResult!,
+            sectionItems: results.sections.expand((s) => s.items).toList(),
+          ),
         ),
       );
     }
@@ -654,7 +656,7 @@ class _SectionBlock extends StatelessWidget {
         children: [
           Text(section.title, style: Theme.of(context).textTheme.sectionTitle),
           const SizedBox(height: EuSpace.sm),
-          for (final item in section.items) _MusicItemTile(item: item),
+          for (final item in section.items) _MusicItemTile(item: item, sectionItems: section.items),
           if (section.hasMore)
             Align(
               alignment: Alignment.centerLeft,
@@ -671,9 +673,10 @@ class _SectionBlock extends StatelessWidget {
 }
 
 class _TopResultCard extends ConsumerWidget {
-  const _TopResultCard({required this.item});
+  const _TopResultCard({required this.item, this.sectionItems});
 
   final MusicItem item;
+  final List<MusicItem>? sectionItems;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -681,15 +684,18 @@ class _TopResultCard extends ConsumerWidget {
 
     return Container(
       decoration: EuBrutal.boxDecoration(
-        color: scheme.surfaceContainerLow,
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(16),
         shadows: EuBrutal.hardShadow,
       ),
       child: Material(
-        color: Colors.transparent,
+        type: MaterialType.canvas,
+        color: scheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: () => _navigateToItem(ref, context, item),
+          onTap: () => _navigateToItem(ref, context, item, sectionItems),
           onLongPress: () {
             if (item is SongItem) {
               showSongOptionsSheet(context, (item as SongItem).song);
@@ -752,14 +758,10 @@ class _TopResultCard extends ConsumerWidget {
                   IconButton.filled(
                     style: IconButton.styleFrom(
                       backgroundColor: EuBrutal.accent,
-                      side: const BorderSide(color: EuBrutal.ink, width: 2),
+                      side: BorderSide(color: context.eu.ink, width: 2),
                     ),
-                    icon: const Icon(Icons.play_arrow, color: Colors.white),
-                    onPressed: () {
-                      if (item case SongItem(:final song)) {
-                        ref.read(playerControllerProvider).playSong(song);
-                      }
-                    },
+                    icon: const Icon(Icons.play_arrow, color: EuBrutal.onAccent),
+                    onPressed: () => _navigateToItem(ref, context, item, sectionItems),
                   )
                 else
                   Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
@@ -773,9 +775,10 @@ class _TopResultCard extends ConsumerWidget {
 }
 
 class _MusicItemTile extends ConsumerWidget {
-  const _MusicItemTile({required this.item});
+  const _MusicItemTile({required this.item, this.sectionItems});
 
   final MusicItem item;
+  final List<MusicItem>? sectionItems;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -791,7 +794,7 @@ class _MusicItemTile extends ConsumerWidget {
         color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
         child: ListTile(
-          onTap: () => _navigateToItem(ref, context, item),
+          onTap: () => _navigateToItem(ref, context, item, sectionItems),
           onLongPress: () {
             if (item is SongItem) {
               showSongOptionsSheet(context, (item as SongItem).song);
@@ -821,8 +824,8 @@ class _MusicItemTile extends ConsumerWidget {
                         size: 32,
                       ),
                       onPressed: () {
-                        if (item case SongItem(:final song)) {
-                          ref.read(playerControllerProvider).playSong(song);
+                        if (item is SongItem) {
+                          _navigateToItem(ref, context, item, sectionItems);
                         }
                       },
                     ),
@@ -862,7 +865,7 @@ class _Artwork extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         borderRadius: EuShape.artwork,
-        border: Border.all(color: EuBrutal.ink, width: 2),
+        border: Border.all(color: context.eu.ink, width: 2),
         color: scheme.surfaceContainerHighest,
       ),
       clipBehavior: Clip.antiAlias,
@@ -1114,10 +1117,26 @@ String _formatDuration(Duration duration) {
   return '$minutes:${seconds.toString().padLeft(2, '0')}';
 }
 
-void _navigateToItem(WidgetRef ref, BuildContext context, MusicItem item) {
+void _navigateToItem(
+  WidgetRef ref,
+  BuildContext context,
+  MusicItem item, [
+  List<MusicItem>? sectionItems,
+]) {
   switch (item) {
     case SongItem(:final song):
-      ref.read(playerControllerProvider).playSong(song);
+      if (sectionItems != null) {
+        final songs =
+            sectionItems.whereType<SongItem>().map((e) => e.song).toList();
+        final idx = songs.indexWhere((s) => s.id == song.id);
+        if (idx >= 0) {
+          ref.read(playerControllerProvider).playQueue(songs, startIndex: idx);
+        } else {
+          ref.read(playerControllerProvider).playSong(song);
+        }
+      } else {
+        ref.read(playerControllerProvider).playSong(song);
+      }
     case AlbumItem(:final album):
       context.push('/album/${album.browseId}');
     case ArtistItem(:final artist):

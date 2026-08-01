@@ -14,6 +14,7 @@ import '../data/providers.dart';
 import '../data/remote/innertube/innertube_client.dart';
 import '../data/remote/innertube/innertube_utils.dart';
 import '../domain/song.dart';
+import '../features/settings/settings_provider.dart';
 
 final _log = logFor('playback');
 
@@ -246,6 +247,9 @@ final queueProvider = NotifierProvider<PlaybackNotifier, QueueState>(
 
 final audioPlayerProvider = Provider<AudioPlayer>((ref) {
   final player = AudioPlayer();
+  player.setSkipSilenceEnabled(
+    ref.read(settingsRepositoryProvider).skipSilence,
+  );
   ref.onDispose(player.dispose);
   return player;
 });
@@ -366,8 +370,15 @@ class PlaybackSpeedNotifier extends Notifier<double> {
 }
 
 final playerControllerProvider = Provider<PlayerController>((ref) {
+  final player = ref.read(audioPlayerProvider);
+  ref.listen(settingsControllerProvider, (prev, next) {
+    if (prev?.skipSilence != next.skipSilence) {
+      player.setSkipSilenceEnabled(next.skipSilence);
+    }
+  });
+
   final controller = PlayerController(
-    player: ref.read(audioPlayerProvider),
+    player: player,
     queue: ref.read(queueProvider.notifier),
     client: ref.read(innertubeClientProvider),
     repeatMode: () => ref.read(repeatModeProvider),
@@ -577,8 +588,15 @@ class PlayerController {
     final song = _queue.currentSong;
     if (song == null) return;
 
-    unawaited(ensureNotificationPermission());
     final generation = ++_loadGeneration;
+    try {
+      // Explicitly stop the player before doing anything else.
+      // Rapidly switching audio sources without stopping can cause
+      // ExoPlayer native crashes on some devices.
+      await _player.stop();
+    } catch (_) {}
+
+    unawaited(ensureNotificationPermission());
     final source = await _resolveStream(song);
 
     // A newer load started while this one was in flight; its result wins.
@@ -631,12 +649,19 @@ class PlayerController {
     final yt = yt_explode.YoutubeExplode();
     try {
       final manifest = await yt.videos.streamsClient.getManifest(song.id);
-      final audioOnly = manifest.audioOnly;
+      final audioOnly = manifest.audioOnly.toList();
       if (audioOnly.isNotEmpty) {
-        final bestAudio = audioOnly.lastWhere(
-          (item) => item.tag == 251 || item.tag == 140,
-          orElse: () => audioOnly.first,
-        );
+        audioOnly.sort((a, b) => b.bitrate.compareTo(a.bitrate));
+        final qualitySetting =
+            _queue.ref.read(settingsRepositoryProvider).audioQuality;
+        final bestAudio = switch (qualitySetting) {
+          'LOW' => audioOnly.last,
+          'STANDARD' => audioOnly.firstWhere(
+            (item) => item.tag == 140 || item.bitrate.bitsPerSecond <= 130000,
+            orElse: () => audioOnly[audioOnly.length ~/ 2],
+          ),
+          _ => audioOnly.first,
+        };
         final url = bestAudio.url.toString();
         if (url.isNotEmpty) {
           _log.info(
@@ -666,7 +691,10 @@ class PlayerController {
           _log.warning('no streamingData for ${song.id}');
           return null;
         }
-        final url = pickAudioStreamUrl(streamingData);
+        final url = pickAudioStreamUrl(
+          streamingData,
+          quality: _queue.ref.read(settingsRepositoryProvider).audioQuality,
+        );
         if (url == null) {
           _log.warning('no playable audio format for ${song.id}');
           return null;
@@ -743,7 +771,10 @@ class PlayerController {
 /// (common for music videos), and skips anything whose URL is ciphered, since
 /// Euphony does not implement signature deciphering.
 @visibleForTesting
-String? pickAudioStreamUrl(Map<String, dynamic> streamingData) {
+String? pickAudioStreamUrl(
+  Map<String, dynamic> streamingData, {
+  String quality = 'HIGH',
+}) {
   final adaptive = streamingData['adaptiveFormats'];
   final muxed = streamingData['formats'];
 
@@ -781,7 +812,13 @@ String? pickAudioStreamUrl(Map<String, dynamic> streamingData) {
   // Audio-only first: smaller, and the whole point for a music client.
   final audioOnly = allFormats.where(isAudio).where(isPlayable).toList()
     ..sort((a, b) => bitrateOf(b).compareTo(bitrateOf(a)));
-  if (audioOnly.isNotEmpty) return audioOnly.first['url'] as String;
+  if (audioOnly.isNotEmpty) {
+    if (quality == 'LOW') return audioOnly.last['url'] as String;
+    if (quality == 'STANDARD') {
+      return audioOnly[audioOnly.length ~/ 2]['url'] as String;
+    }
+    return audioOnly.first['url'] as String;
+  }
 
   // Any playable format as fallback
   final fallback = allFormats.where(isPlayable).toList()

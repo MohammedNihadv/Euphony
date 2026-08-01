@@ -72,7 +72,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
           _loading = false;
         }),
         (failure) => setState(() {
-          _error = failure.message ?? 'Failed to load playlist';
+          _error = failure.userMessage;
           _loading = false;
         }),
       );
@@ -87,7 +87,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
           _loading = false;
         }),
         (failure) => setState(() {
-          _error = failure.message ?? 'Failed to load album';
+          _error = failure.userMessage;
           _loading = false;
         }),
       );
@@ -166,7 +166,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                           height: 140,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: EuBrutal.ink, width: 2.5),
+                            border: Border.all(color: context.eu.ink, width: 2.5),
                             color: EuBrutal.highlight,
                           ),
                           clipBehavior: Clip.antiAlias,
@@ -204,8 +204,8 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                             const SizedBox(width: EuSpace.md),
                             OutlinedButton.icon(
                               style: OutlinedButton.styleFrom(
-                                side: const BorderSide(
-                                  color: EuBrutal.ink,
+                                side: BorderSide(
+                                  color: context.eu.ink,
                                   width: 2,
                                 ),
                               ),
@@ -268,44 +268,47 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                       ),
                     )
                   else
-                    for (final song in _tracks)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: EuSpace.sm),
-                        decoration: EuBrutal.boxDecoration(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                          shadows: EuBrutal.smHardShadow,
-                        ),
-                        child: Material(
-                          type: MaterialType.canvas,
-                          color: theme.colorScheme.surfaceContainerLow,
-                          borderRadius: BorderRadius.circular(12),
-                          child: ListTile(
-                            onTap: () => ref
-                                .read(playerControllerProvider)
-                                .playSong(song),
-                            onLongPress: () =>
-                                showSongOptionsSheet(context, song),
-                            title: Text(
-                              song.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                              ),
+                    for (int i = 0; i < _tracks.length; i++)
+                      Builder(
+                        builder: (context) {
+                          final song = _tracks[i];
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: EuSpace.sm),
+                            decoration: EuBrutal.boxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                              shadows: EuBrutal.smHardShadow,
                             ),
-                            subtitle: Text(song.artistNames),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.play_circle_fill,
-                                    color: EuBrutal.accent,
-                                    size: 32,
+                            child: Material(
+                              type: MaterialType.canvas,
+                              color: theme.colorScheme.surfaceContainerLow,
+                              borderRadius: BorderRadius.circular(12),
+                              child: ListTile(
+                                onTap: () => ref
+                                    .read(playerControllerProvider)
+                                    .playQueue(_tracks, startIndex: i),
+                                onLongPress: () =>
+                                    showSongOptionsSheet(context, song),
+                                title: Text(
+                                  song.title,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
                                   ),
-                                  onPressed: () => ref
-                                      .read(playerControllerProvider)
-                                      .playSong(song),
                                 ),
+                                subtitle: Text(song.artistNames),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.play_circle_fill,
+                                        color: EuBrutal.accent,
+                                        size: 32,
+                                      ),
+                                      onPressed: () => ref
+                                          .read(playerControllerProvider)
+                                          .playQueue(_tracks, startIndex: i),
+                                    ),
                                 if (isLocal)
                                   IconButton(
                                     icon: const Icon(
@@ -344,7 +347,9 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                             ),
                           ),
                         ),
-                      ),
+                      );
+                    },
+                  ),
                 ],
               ),
       ),

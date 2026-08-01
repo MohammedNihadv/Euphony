@@ -96,7 +96,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                           height: 80,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: EuBrutal.ink, width: 2.5),
+                            border: Border.all(color: context.eu.ink, width: 2.5),
                             color: EuBrutal.highlight,
                           ),
                           clipBehavior: Clip.antiAlias,
@@ -127,7 +127,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                                   _artist!.subscribers!,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color: EuBrutal.ink.withValues(alpha: 0.7),
+                                    color: context.eu.ink.withValues(alpha: 0.7),
                                   ),
                                 ),
                             ],
@@ -147,36 +147,41 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                       ),
                     ),
                     const SizedBox(height: EuSpace.md),
-                    for (final song in section.songs)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: EuSpace.sm),
-                        decoration: EuBrutal.boxDecoration(
-                          color: Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                          shadows: EuBrutal.smHardShadow,
-                        ),
-                        child: Material(
-                          type: MaterialType.canvas,
-                          color: theme.colorScheme.surfaceContainerLow,
-                          borderRadius: BorderRadius.circular(12),
-                          child: ListTile(
-                            onTap: () => ref
-                                .read(playerControllerProvider)
-                                .playSong(song),
-                            title: Text(
-                              song.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
+                    for (int i = 0; i < section.songs.length; i++)
+                      Builder(
+                        builder: (context) {
+                          final song = section.songs[i];
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: EuSpace.sm),
+                            decoration: EuBrutal.boxDecoration(
+                              color: Colors.transparent,
+                              borderRadius: BorderRadius.circular(12),
+                              shadows: EuBrutal.smHardShadow,
+                            ),
+                            child: Material(
+                              type: MaterialType.canvas,
+                              color: theme.colorScheme.surfaceContainerLow,
+                              borderRadius: BorderRadius.circular(12),
+                              child: ListTile(
+                                onTap: () => ref
+                                    .read(playerControllerProvider)
+                                    .playQueue(section.songs, startIndex: i),
+                                title: Text(
+                                  song.title,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                subtitle: Text(song.artistNames),
+                                trailing: const Icon(
+                                  Icons.play_circle_fill,
+                                  color: EuBrutal.accent,
+                                  size: 32,
+                                ),
                               ),
                             ),
-                            subtitle: Text(song.artistNames),
-                            trailing: const Icon(
-                              Icons.play_circle_fill,
-                              color: EuBrutal.accent,
-                              size: 32,
-                            ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     const SizedBox(height: EuSpace.xl),
                   ],

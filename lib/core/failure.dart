@@ -83,6 +83,28 @@ class Failure implements Exception {
     FailureKind.unknown => false,
   };
 
+  /// A user-friendly error message suitable for displaying in the UI.
+  String get userMessage {
+    switch (kind) {
+      case FailureKind.network:
+        return 'Network connection failed. Please check your internet.';
+      case FailureKind.http:
+        return 'Server error (HTTP ${statusCode ?? 'Unknown'}). Please try again later.';
+      case FailureKind.notFound:
+        return message ?? 'The requested content could not be found.';
+      case FailureKind.unavailable:
+        return message ?? 'This content is unavailable or region-locked.';
+      case FailureKind.parse:
+        return 'App requires an update to read this content.';
+      default:
+        // Exclude raw URLs or JSON dumps from the UI.
+        if (message != null && !message!.startsWith('http') && message!.length < 100) {
+          return message!;
+        }
+        return 'Something went wrong. Please try again.';
+    }
+  }
+
   @override
   String toString() {
     final buffer = StringBuffer('Failure(${kind.name}');

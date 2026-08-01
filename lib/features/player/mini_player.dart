@@ -29,7 +29,13 @@ class MiniPlayer extends ConsumerWidget {
         ? (position.inSeconds / total.inSeconds).clamp(0.0, 1.0)
         : 0.0;
 
-    return GestureDetector(
+    return Dismissible(
+      key: const ValueKey('mini-player'),
+      direction: DismissDirection.horizontal,
+      onDismissed: (_) {
+        ref.read(playerControllerProvider).stop();
+      },
+      child: GestureDetector(
       onTap: () => Navigator.of(context).push(_buildPlayerRoute()),
       child: Container(
         margin: const EdgeInsets.fromLTRB(
@@ -58,7 +64,7 @@ class MiniPlayer extends ConsumerWidget {
                       height: 48,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: EuBrutal.ink, width: 2),
+                        border: Border.all(color: context.eu.ink, width: 2),
                         color: theme.colorScheme.surfaceContainerHighest,
                       ),
                       clipBehavior: Clip.antiAlias,
@@ -97,7 +103,7 @@ class MiniPlayer extends ConsumerWidget {
                             overflow: TextOverflow.ellipsis,
                             style: theme.textTheme.bodySmall?.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: EuBrutal.ink.withValues(alpha: 0.7),
+                              color: context.eu.ink.withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -122,7 +128,18 @@ class MiniPlayer extends ConsumerWidget {
                       ref.read(playerControllerProvider).skipNext();
                     },
                   ),
-                  const SizedBox(width: 4),
+                  IconButton(
+                    icon: Icon(
+                      Icons.close,
+                      size: 20,
+                      color: context.eu.ink.withValues(alpha: 0.5),
+                    ),
+                    tooltip: 'Stop',
+                    onPressed: () {
+                      ref.read(playerControllerProvider).stop();
+                    },
+                  ),
+                  const SizedBox(width: 2),
                 ],
               ),
             ),
@@ -136,11 +153,12 @@ class MiniPlayer extends ConsumerWidget {
                 value: progress,
                 minHeight: 4,
                 backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                color: EuBrutal.alert,
+                color: EuBrutal.accent,
               ),
             ),
           ],
         ),
+      ),
       ),
     );
   }

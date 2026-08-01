@@ -182,7 +182,7 @@ class _TrackHeader extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: EuBrutal.ink.withValues(alpha: 0.7),
+                    color: context.eu.ink.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -304,7 +304,7 @@ class _BottomActionBar extends ConsumerWidget {
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: EuBrutal.ink, width: 2),
+          border: Border.all(color: context.eu.ink, width: 2),
           boxShadow: EuBrutal.smHardShadow,
         ),
         child: Row(
@@ -417,7 +417,7 @@ class _SpeedButton extends StatelessWidget {
                 ? EuBrutal.highlight
                 : themeData.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: isCustom ? EuBrutal.onHighlight : EuBrutal.ink, width: isCustom ? 1.5 : 1),
+            border: Border.all(color: isCustom ? EuBrutal.onHighlight : context.eu.ink, width: isCustom ? 1.5 : 1),
           ),
           child: Text(
             '${speed}x',
@@ -439,12 +439,13 @@ void _showSpeedSheet(BuildContext context, WidgetRef ref) {
   final currentSpeed = ref.read(playbackSpeedProvider);
   final speeds = [0.75, 1.0, 1.25, 1.5, 2.0];
 
+  final inkColor = context.eu.ink;
   showModalBottomSheet<void>(
     context: context,
     backgroundColor: Theme.of(context).colorScheme.surface,
-    shape: const RoundedRectangleBorder(
+    shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      side: BorderSide(color: EuBrutal.ink, width: 2.5),
+      side: BorderSide(color: inkColor, width: 2.5),
     ),
     builder: (context) {
       return SafeArea(
@@ -492,12 +493,13 @@ void _showSpeedSheet(BuildContext context, WidgetRef ref) {
 void _showSleepTimerSheet(BuildContext context, WidgetRef ref) {
   final currentPreset = ref.read(sleepTimerProvider).preset;
 
+  final inkColor2 = context.eu.ink;
   showModalBottomSheet<void>(
     context: context,
     backgroundColor: Theme.of(context).colorScheme.surface,
-    shape: const RoundedRectangleBorder(
+    shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      side: BorderSide(color: EuBrutal.ink, width: 2.5),
+      side: BorderSide(color: inkColor2, width: 2.5),
     ),
     builder: (context) {
       return SafeArea(
@@ -767,10 +769,10 @@ class _ToggleButton extends StatelessWidget {
         backgroundColor: active ? EuBrutal.accent : Colors.transparent,
         foregroundColor: active
             ? EuBrutal.onAccent
-            : EuBrutal.ink.withValues(alpha: 0.7),
+            : context.eu.ink.withValues(alpha: 0.7),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
-          side: active ? EuBrutal.thinSide : BorderSide.none,
+          side: active ? context.eu.thinSide : BorderSide.none,
         ),
       ),
       icon: Icon(icon),

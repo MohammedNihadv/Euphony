@@ -174,14 +174,77 @@ MusicItem? _parseTopResult(Map<String, dynamic> card) {
         : subtitleRuns.sublist(2),
   );
 
-  final browseId = navOrNull<String>(
-    card,
-    const JsonPath(['title', 'runs', 0]) + P.navigationBrowseId.steps,
-  );
-  final videoId = navOrNull<String>(
-    card,
-    const JsonPath(['onTap', 'watchEndpoint', 'videoId']),
-  );
+  final browseId =
+      navOrNull<String>(
+        card,
+        const JsonPath(['title', 'runs', 0]) + P.navigationBrowseId.steps,
+      ) ??
+      navOrNull<String>(
+        card,
+        const JsonPath(['onTap', 'browseEndpoint', 'browseId']),
+      ) ??
+      navOrNull<String>(card, P.navigationBrowseId) ??
+      navOrNull<String>(
+        card,
+        const JsonPath([
+          'buttons',
+          0,
+          'buttonRenderer',
+          'command',
+          'browseEndpoint',
+          'browseId',
+        ]),
+      ) ??
+      navOrNull<String>(
+        card,
+        const JsonPath([
+          'buttons',
+          0,
+          'buttonRenderer',
+          'navigationEndpoint',
+          'browseEndpoint',
+          'browseId',
+        ]),
+      );
+  final videoId =
+      navOrNull<String>(
+        card,
+        const JsonPath(['onTap', 'watchEndpoint', 'videoId']),
+      ) ??
+      navOrNull<String>(
+        card,
+        const JsonPath([
+          'title',
+          'runs',
+          0,
+          'navigationEndpoint',
+          'watchEndpoint',
+          'videoId',
+        ]),
+      ) ??
+      navOrNull<String>(
+        card,
+        const JsonPath([
+          'buttons',
+          0,
+          'buttonRenderer',
+          'command',
+          'watchEndpoint',
+          'videoId',
+        ]),
+      ) ??
+      navOrNull<String>(
+        card,
+        const JsonPath([
+          'buttons',
+          0,
+          'buttonRenderer',
+          'navigationEndpoint',
+          'watchEndpoint',
+          'videoId',
+        ]),
+      ) ??
+      navOrNull<String>(card, P.navigationVideoId);
 
   switch (kind) {
     case 'artist':

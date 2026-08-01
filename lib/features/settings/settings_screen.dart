@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/remote/update_checker.dart';
-import '../../data/repository/settings_repository.dart';
 import '../../design/theme/theme_controller.dart';
 import '../../design/tokens/brutal.dart';
 import '../../design/tokens/tokens.dart';
@@ -79,7 +82,37 @@ class SettingsScreen extends ConsumerWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: EuSpace.xs),
+                      const SizedBox(height: EuSpace.md),
+                      const Text(
+                        'Theme',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: EuSpace.sm),
+                      Row(
+                        children: [
+                          _ThemeModeButton(
+                            title: 'System',
+                            isSelected: theme.mode == ThemeMode.system,
+                            onTap: () => themeController.setMode(ThemeMode.system),
+                          ),
+                          const SizedBox(width: 8),
+                          _ThemeModeButton(
+                            title: 'Light',
+                            isSelected: theme.mode == ThemeMode.light,
+                            onTap: () => themeController.setMode(ThemeMode.light),
+                          ),
+                          const SizedBox(width: 8),
+                          _ThemeModeButton(
+                            title: 'Dark',
+                            isSelected: theme.mode == ThemeMode.dark,
+                            onTap: () => themeController.setMode(ThemeMode.dark),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: EuSpace.sm),
                       SwitchListTile(
                         activeThumbColor: EuBrutal.accent,
                         contentPadding: EdgeInsets.zero,
@@ -87,23 +120,10 @@ class SettingsScreen extends ConsumerWidget {
                           'AMOLED black',
                           style: TextStyle(fontWeight: FontWeight.w800),
                         ),
-                        subtitle: const Text('Pure black background'),
+                        subtitle: const Text('Pure black background in dark mode'),
                         value: theme.amoled,
                         onChanged: (value) =>
                             themeController.setAmoled(value: value),
-                      ),
-                      SwitchListTile(
-                        activeThumbColor: EuBrutal.accent,
-                        contentPadding: EdgeInsets.zero,
-                        title: const Text(
-                          'Dynamic colours',
-                          style: TextStyle(fontWeight: FontWeight.w800),
-                        ),
-                        subtitle: const Text('Tint the player from the artwork'),
-                        value: theme.source == ColourSource.artwork,
-                        onChanged: (value) => themeController.setColourSource(
-                          value ? ColourSource.artwork : ColourSource.fixed,
-                        ),
                       ),
                     ],
                   ),
@@ -217,7 +237,7 @@ class SettingsScreen extends ConsumerWidget {
                           style: TextStyle(fontWeight: FontWeight.w800),
                         ),
                         subtitle: Text(settings.contentRegion),
-                        trailing: const Icon(Icons.public, color: EuBrutal.ink),
+                        trailing: Icon(Icons.public, color: context.eu.ink),
                         onTap: () => _showCountryDialog(
                           context,
                           settings.contentRegion,
@@ -272,24 +292,12 @@ class SettingsScreen extends ConsumerWidget {
                         subtitle: const Text('32.4 MB temporary data'),
                         trailing: OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                              color: EuBrutal.ink,
+                            side: BorderSide(
+                              color: context.eu.ink,
                               width: 1.5,
                             ),
                           ),
-                          onPressed: () {
-                            PaintingBinding.instance.imageCache.clear();
-                            PaintingBinding.instance.imageCache
-                                .clearLiveImages();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'All cached artwork and audio buffers cleared!',
-                                ),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          },
+                          onPressed: () => _clearCache(context),
                           child: const Text(
                             'CLEAR',
                             style: TextStyle(fontWeight: FontWeight.w900),
@@ -488,35 +496,51 @@ class SettingsScreen extends ConsumerWidget {
 
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: EuBrutal.ink, width: 2.5),
-        ),
-        title: const Text(
-          'SELECT AUDIO QUALITY',
-          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: options.map((opt) {
-            final isSelected = opt.$1 == current;
-            return ListTile(
-              title: Text(
-                opt.$2,
-                style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        child: Container(
+          decoration: EuBrutal.boxDecoration(
+            color: context.eu.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: context.eu.ink, width: 2.5),
+            shadows: EuBrutal.hardShadow,
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Material(
+            color: Colors.transparent,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'SELECT AUDIO QUALITY',
+                  style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1, fontSize: 18),
                 ),
-              ),
-              trailing: isSelected
-                  ? const Icon(Icons.check, color: EuBrutal.accent)
-                  : null,
-              onTap: () {
-                controller.setAudioQuality(opt.$1);
-                Navigator.pop(context);
-              },
-            );
-          }).toList(),
+                const SizedBox(height: 16),
+                ...options.map((opt) {
+                  final isSelected = opt.$1 == current;
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      opt.$2,
+                      style: TextStyle(
+                        fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? const Icon(Icons.check, color: EuBrutal.accent)
+                        : null,
+                    onTap: () {
+                      controller.setAudioQuality(opt.$1);
+                      Navigator.pop(context);
+                    },
+                  );
+                }),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -540,49 +564,93 @@ class SettingsScreen extends ConsumerWidget {
 
     showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: EuBrutal.ink, width: 2.5),
-        ),
-        title: const Text(
-          'SELECT CONTENT REGION',
-          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
-        ),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: countries.length,
-            itemBuilder: (context, index) {
-              final country = countries[index];
-              final isSelected = country == currentRegion;
-              return ListTile(
-                title: Text(
-                  country,
-                  style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+        child: Container(
+          decoration: EuBrutal.boxDecoration(
+            color: context.eu.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: context.eu.ink, width: 2.5),
+            shadows: EuBrutal.hardShadow,
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Material(
+            color: Colors.transparent,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Text(
+                  'SELECT CONTENT REGION',
+                  style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1, fontSize: 18),
+                ),
+                const SizedBox(height: 16),
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: countries.length,
+                    itemBuilder: (context, index) {
+                      final country = countries[index];
+                      final isSelected = country == currentRegion;
+                      return ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          country,
+                          style: TextStyle(
+                            fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                          ),
+                        ),
+                        trailing: isSelected
+                            ? const Icon(Icons.check, color: EuBrutal.accent)
+                            : null,
+                        onTap: () {
+                          controller.setContentRegion(country);
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Content region set to $country'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
-                trailing: isSelected
-                    ? const Icon(Icons.check, color: EuBrutal.accent)
-                    : null,
-                onTap: () {
-                  controller.setContentRegion(country);
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Content region set to $country'),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-              );
-            },
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _clearCache(BuildContext context) async {
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
+    try {
+      final tempDir = await getTemporaryDirectory();
+      if (tempDir.existsSync()) {
+        final files = tempDir.listSync(recursive: true);
+        for (final file in files) {
+          if (file is File) {
+            try {
+              file.deleteSync();
+            } catch (_) {}
+          }
+        }
+      }
+    } catch (_) {}
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('All cached artwork and temporary disk data cleared!'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }
 
@@ -691,7 +759,7 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
                       foregroundColor: (info != null && info.hasUpdate)
                           ? Colors.white
                           : themeData.colorScheme.onSurface,
-                      side: const BorderSide(color: EuBrutal.ink, width: 2),
+                      side: BorderSide(color: context.eu.ink, width: 2),
                     ),
                     onPressed: _checking
                         ? null
@@ -737,7 +805,7 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
         scrollable: true,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: EuBrutal.ink, width: 2.5),
+          side: BorderSide(color: context.eu.ink, width: 2.5),
         ),
         title: Text(
           'UPDATE AVAILABLE (v${info.latestVersion})',
@@ -800,9 +868,14 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
               backgroundColor: EuBrutal.accent,
               foregroundColor: Colors.white,
             ),
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              context.push(info.releaseUrl);
+              final uri = Uri.tryParse(
+                info.apkUrl ?? info.releaseUrl,
+              );
+              if (uri != null && await canLaunchUrl(uri)) {
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              }
             },
             child: const Text(
               'Download Release',
@@ -810,6 +883,47 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ThemeModeButton extends StatelessWidget {
+  const _ThemeModeButton({
+    required this.title,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String title;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: EuBrutal.boxDecoration(
+            color: isSelected ? EuBrutal.accent : context.eu.surface,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: context.eu.ink,
+              width: isSelected ? 2.5 : 1.5,
+            ),
+            shadows: isSelected ? EuBrutal.smHardShadow : [],
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            title,
+            style: TextStyle(
+              fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+              color: isSelected ? EuBrutal.onAccent : context.eu.ink,
+            ),
+          ),
+        ),
       ),
     );
   }

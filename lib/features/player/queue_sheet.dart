@@ -57,7 +57,7 @@ class QueueSheet extends ConsumerWidget {
                   '${entries.length} track${entries.length == 1 ? '' : 's'}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: EuBrutal.ink.withValues(alpha: 0.7),
+                    color: context.eu.ink.withValues(alpha: 0.7),
                   ),
                 ),
                 if (entries.isNotEmpty)
@@ -151,7 +151,7 @@ class _QueueRow extends ConsumerWidget {
             : theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(10),
         shadows: isCurrent ? EuBrutal.smHardShadow : const [],
-        border: EuBrutal.thinBorder,
+        border: context.eu.thinBorder,
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -209,7 +209,7 @@ class _QueueRow extends ConsumerWidget {
                             fontWeight: FontWeight.w600,
                             color: isCurrent
                                 ? EuBrutal.onHighlight.withValues(alpha: 0.75)
-                                : EuBrutal.ink.withValues(alpha: 0.7),
+                                : context.eu.ink.withValues(alpha: 0.7),
                           ),
                         ),
                     ],
@@ -231,7 +231,7 @@ class _QueueRow extends ConsumerWidget {
                       formatPlaybackDuration(duration!),
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: EuBrutal.ink.withValues(alpha: 0.6),
+                        color: context.eu.ink.withValues(alpha: 0.6),
                       ),
                     ),
                   ),
@@ -250,7 +250,7 @@ class _QueueRow extends ConsumerWidget {
                     Icons.drag_handle,
                     color: isCurrent
                         ? EuBrutal.onHighlight
-                        : EuBrutal.ink.withValues(alpha: 0.5),
+                        : context.eu.ink.withValues(alpha: 0.5),
                   ),
                 ),
               ],

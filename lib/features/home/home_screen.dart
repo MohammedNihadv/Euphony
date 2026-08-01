@@ -212,7 +212,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ),
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final song = _feed!.quickPicks[index];
-                        return _QuickPickTile(song: song);
+                        return _QuickPickTile(song: song, queueSongs: _feed!.quickPicks);
                       }, childCount: _feed!.quickPicks.length.clamp(0, 6)),
                     ),
                   ),
@@ -250,7 +250,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     // Unselected: a quiet surface pill with the light frame and light text —
     // both read clearly on the dark canvas.
     final bg = isSelected ? EuBrutal.highlight : scheme.surfaceContainerHigh;
-    final fg = isSelected ? EuBrutal.onHighlight : scheme.onSurface;
+    final fg = isSelected ? EuBrutal.onHighlight : context.eu.ink;
 
     return GestureDetector(
       onTap: () => setState(() => _selectedCategory = label),
@@ -261,7 +261,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           color: bg,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? EuBrutal.ink : EuBrutal.ink.withValues(alpha: 0.35),
+            color: isSelected ? context.eu.ink : context.eu.ink.withValues(alpha: 0.35),
             width: isSelected ? 2 : 1.5,
           ),
           boxShadow: isSelected ? EuBrutal.smHardShadow : null,
@@ -346,9 +346,9 @@ class _HeroBannerState extends State<_HeroBanner>
           decoration: BoxDecoration(
             color: EuBrutal.accent,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: EuBrutal.ink, width: 2.5),
-            boxShadow: const [
-              BoxShadow(color: EuBrutal.ink, offset: Offset(5, 5)),
+            border: Border.all(color: context.eu.ink, width: 2.5),
+            boxShadow: [
+              BoxShadow(color: context.eu.ink, offset: const Offset(5, 5)),
             ],
           ),
           child: Row(
@@ -361,7 +361,7 @@ class _HeroBannerState extends State<_HeroBanner>
                     Text(
                       widget.greeting,
                       style: theme.textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
+                        color: context.eu.ink,
                         fontWeight: FontWeight.w900,
                         letterSpacing: -0.3,
                       ),
@@ -372,7 +372,7 @@ class _HeroBannerState extends State<_HeroBanner>
                     Text(
                       'Quick picks, trending tracks & recommendations',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: context.eu.ink.withValues(alpha: 0.9),
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
                       ),
@@ -408,27 +408,38 @@ class _HeroBannerState extends State<_HeroBanner>
 
 /// Horizontal Quick Pick tile matching Image 3 (Neo-Brutalist card layout with black border and offset shadow).
 class _QuickPickTile extends ConsumerWidget {
-  const _QuickPickTile({required this.song});
+  const _QuickPickTile({required this.song, this.queueSongs});
   final Song song;
+  final List<Song>? queueSongs;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final artworkUrl = song.artwork?.medium ?? song.artworkUrl;
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? theme.colorScheme.surfaceContainerLow : Colors.white,
+        color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: EuBrutal.ink, width: 2),
-        boxShadow: const [BoxShadow(color: EuBrutal.ink, offset: Offset(2, 2))],
+        border: Border.all(color: context.eu.ink, width: 2),
+        boxShadow: [BoxShadow(color: context.eu.ink, offset: const Offset(2, 2))],
       ),
       child: Material(
         type: MaterialType.transparency,
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: () => ref.read(playerControllerProvider).playSong(song),
+          onTap: () {
+            if (queueSongs != null) {
+              final idx = queueSongs!.indexWhere((s) => s.id == song.id);
+              if (idx >= 0) {
+                ref.read(playerControllerProvider).playQueue(queueSongs!, startIndex: idx);
+              } else {
+                ref.read(playerControllerProvider).playSong(song);
+              }
+            } else {
+              ref.read(playerControllerProvider).playSong(song);
+            }
+          },
           onLongPress: () => showSongOptionsSheet(context, song),
           child: Padding(
             padding: const EdgeInsets.all(5),
@@ -440,7 +451,7 @@ class _QuickPickTile extends ConsumerWidget {
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      border: Border.all(color: EuBrutal.ink, width: 1.5),
+                      border: Border.all(color: context.eu.ink, width: 1.5),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: artworkUrl != null
@@ -477,9 +488,7 @@ class _QuickPickTile extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: isDark
-                              ? theme.colorScheme.onSurface
-                              : EuBrutal.ink,
+                          color: context.eu.ink,
                           fontWeight: FontWeight.w900,
                           fontSize: 12,
                         ),
@@ -490,11 +499,7 @@ class _QuickPickTile extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color:
-                              (isDark
-                                      ? theme.colorScheme.onSurface
-                                      : EuBrutal.ink)
-                                  .withValues(alpha: 0.7),
+                          color: context.eu.ink.withValues(alpha: 0.7),
                           fontWeight: FontWeight.w600,
                           fontSize: 10,
                         ),
@@ -564,7 +569,7 @@ class _AnimatedMusicBarsState extends State<_AnimatedMusicBars>
                 width: 5,
                 height: height,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.eu.ink,
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
@@ -596,14 +601,16 @@ class _HomeSectionBlock extends ConsumerWidget {
         ),
         const SizedBox(height: EuSpace.md),
         SizedBox(
-          height: 192,
+          height: 220,
           child: ListView.separated(
+            clipBehavior: Clip.none,
+            padding: const EdgeInsets.only(bottom: 8, left: 2, right: 16),
             scrollDirection: Axis.horizontal,
             itemCount: section.items.length,
             separatorBuilder: (_, index) => const SizedBox(width: EuSpace.md),
             itemBuilder: (context, index) {
               final item = section.items[index];
-              return _HomeItemCard(item: item);
+              return _HomeItemCard(item: item, sectionItems: section.items);
             },
           ),
         ),
@@ -613,9 +620,10 @@ class _HomeSectionBlock extends ConsumerWidget {
 }
 
 class _HomeItemCard extends ConsumerWidget {
-  const _HomeItemCard({required this.item});
+  const _HomeItemCard({required this.item, this.sectionItems});
 
   final MusicItem item;
+  final List<MusicItem>? sectionItems;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -635,7 +643,20 @@ class _HomeItemCard extends ConsumerWidget {
           onTap: () {
             switch (item) {
               case SongItem(:final song):
-                ref.read(playerControllerProvider).playSong(song);
+                if (sectionItems != null) {
+                  final songs = sectionItems!
+                      .whereType<SongItem>()
+                      .map((e) => e.song)
+                      .toList();
+                  final idx = songs.indexWhere((s) => s.id == song.id);
+                  if (idx >= 0) {
+                    ref.read(playerControllerProvider).playQueue(songs, startIndex: idx);
+                  } else {
+                    ref.read(playerControllerProvider).playSong(song);
+                  }
+                } else {
+                  ref.read(playerControllerProvider).playSong(song);
+                }
               case AlbumItem(:final album):
                 context.push('/album/${album.browseId}');
               case ArtistItem(:final artist):
@@ -662,12 +683,6 @@ class _HomeItemCard extends ConsumerWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: theme.colorScheme.onSurface.withValues(
-                          alpha: 0.8,
-                        ),
-                        width: 1.8,
-                      ),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: _artworkUrlFor(item) != null
@@ -812,15 +827,15 @@ class _HomeSkeletonFeedState extends State<_HomeSkeletonFeed>
                                 'Euphony Music',
                                 style: Theme.of(context).textTheme.titleMedium
                                     ?.copyWith(
-                                      color: Colors.white,
+                                      color: context.eu.ink,
                                       fontWeight: FontWeight.w900,
                                     ),
                               ),
                               const SizedBox(height: 2),
-                              const Text(
+                              Text(
                                 'Tuning your frequencies... Loading tracks',
                                 style: TextStyle(
-                                  color: Colors.white70,
+                                  color: context.eu.ink.withValues(alpha: 0.7),
                                   fontSize: 12,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -828,13 +843,13 @@ class _HomeSkeletonFeedState extends State<_HomeSkeletonFeed>
                             ],
                           ),
                         ),
-                        const SizedBox(
+                        SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2.5,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
+                              context.eu.ink,
                             ),
                           ),
                         ),
@@ -874,7 +889,7 @@ class _HomeSkeletonFeedState extends State<_HomeSkeletonFeed>
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.12),
+                            color: context.eu.ink.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
@@ -888,7 +903,7 @@ class _HomeSkeletonFeedState extends State<_HomeSkeletonFeed>
                                 width: 160,
                                 height: 13,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.12),
+                                  color: context.eu.ink.withValues(alpha: 0.12),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                               ),
@@ -897,7 +912,7 @@ class _HomeSkeletonFeedState extends State<_HomeSkeletonFeed>
                                 width: 90,
                                 height: 11,
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.1),
+                                  color: context.eu.ink.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                               ),

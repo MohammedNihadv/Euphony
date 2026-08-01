@@ -7,14 +7,15 @@ import '../../domain/song.dart';
 
 /// Shows a Neo-Brutalist lyrics modal sheet for the given [song].
 void showLyricsSheet(BuildContext context, Song song) {
+  final inkColor = context.eu.ink;
   showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Theme.of(context).colorScheme.surface,
     barrierColor: Colors.black54,
-    shape: const RoundedRectangleBorder(
+    shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      side: BorderSide(color: EuBrutal.ink, width: 2.5),
+      side: BorderSide(color: inkColor, width: 2.5),
     ),
     builder: (context) => _LyricsSheet(song: song),
   );
@@ -135,7 +136,7 @@ class _LyricsSheetState extends State<_LyricsSheet> {
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: EuBrutal.ink.withValues(alpha: 0.7),
+                          color: context.eu.ink.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -144,7 +145,7 @@ class _LyricsSheetState extends State<_LyricsSheet> {
               ],
             ),
           ),
-          const Divider(height: 1, color: EuBrutal.ink, thickness: 1.5),
+          Divider(height: 1, color: context.eu.ink.withValues(alpha: 0.2), thickness: 1.5),
           Expanded(
             child: _loading
                 ? const Center(

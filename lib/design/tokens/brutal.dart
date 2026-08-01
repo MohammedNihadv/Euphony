@@ -135,3 +135,81 @@ abstract final class EuBrutal {
         0.0722 * channel(color.b);
   }
 }
+
+// ---------------------------------------------------------------------------
+// Adaptive tokens — resolve light vs dark at runtime via BuildContext.
+// ---------------------------------------------------------------------------
+
+/// Adaptive Neo-Brutalist design tokens that resolve for the current brightness.
+///
+/// Usage: `final eu = context.eu;`  then  `eu.ink`, `eu.border`, `eu.hardShadow`.
+class EuBrutalTokens {
+  const EuBrutalTokens._(this._brightness);
+
+  final Brightness _brightness;
+
+  bool get _isLight => _brightness == Brightness.light;
+
+  /// Text, icons and the brutalist frame — flips between dark ink (light mode)
+  /// and light ink (dark mode).
+  Color get ink => _isLight ? const Color(0xFF0D0D14) : const Color(0xFFF4F3FA);
+
+  /// The app canvas background.
+  Color get canvas =>
+      _isLight ? const Color(0xFFFAF7F2) : const Color(0xFF0D0D14);
+
+  /// Standard raised surface.
+  Color get surface =>
+      _isLight ? Colors.white : const Color(0xFF17171F);
+
+  /// Elevated surface.
+  Color get surfaceHigh =>
+      _isLight ? const Color(0xFFFFFBEB) : const Color(0xFF20202C);
+
+  /// Hard 2px slab border — dark ink in light mode, light ink in dark mode.
+  Border get border => Border.fromBorderSide(side);
+
+  /// Thin 1.5px slab border.
+  Border get thinBorder => Border.fromBorderSide(thinSide);
+
+  /// 2px border side.
+  BorderSide get side => BorderSide(color: ink, width: 2);
+
+  /// 1.5px border side.
+  BorderSide get thinSide => BorderSide(color: ink, width: 1.5);
+
+  /// Hard 4px offset box shadow — always near-black.
+  List<BoxShadow> get hardShadow => EuBrutal.hardShadow;
+
+  /// Smaller 2.5px offset box shadow.
+  List<BoxShadow> get smHardShadow => EuBrutal.smHardShadow;
+
+  /// Large 6px offset box shadow.
+  List<BoxShadow> get lgHardShadow => EuBrutal.lgHardShadow;
+
+  /// A slab: flat fill, adaptive frame, hard shadow.
+  BoxDecoration boxDecoration({
+    required Color color,
+    BorderRadiusGeometry borderRadius = const BorderRadius.all(
+      Radius.circular(14),
+    ),
+    List<BoxShadow>? shadows,
+    Border? border,
+  }) => BoxDecoration(
+    color: color,
+    borderRadius: borderRadius,
+    border: border ?? this.border,
+    boxShadow: shadows ?? hardShadow,
+  );
+
+  /// Divider color: 12% ink opacity.
+  Color get divider => ink.withValues(alpha: 0.12);
+}
+
+/// Extension that exposes adaptive Neo-Brutalist tokens from any [BuildContext].
+extension EuBrutalContext on BuildContext {
+  /// Returns adaptive design tokens for the current brightness.
+  EuBrutalTokens get eu => EuBrutalTokens._(
+        Theme.of(this).brightness,
+      );
+}
