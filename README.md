@@ -4,13 +4,6 @@
 
 <br>
 
-[![Flutter](https://img.shields.io/badge/Flutter-3.44+-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
-[![Release](https://img.shields.io/badge/Release-v0.2.0-6A4BE8?style=for-the-badge&logo=github&logoColor=white)](https://github.com/MohammedNihadv/Euphony/releases)
-[![License](https://img.shields.io/badge/License-GPL--3.0-24292E?style=for-the-badge&logo=open-source-initiative&logoColor=white)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/MohammedNihadv/Euphony?style=for-the-badge&color=F5C518)](https://github.com/MohammedNihadv/Euphony)
-
-<br>
-
 <p align="center">
   <a href="https://euphonymusic.vercel.app/">
     <img src="https://img.shields.io/badge/Visit%20Official%20Website-6A4BE8?style=for-the-badge&logo=vercel&logoColor=white" alt="Official Website"/>
