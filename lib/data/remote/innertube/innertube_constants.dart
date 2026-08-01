@@ -31,8 +31,9 @@ abstract final class Innertube {
       devProxy.isEmpty ? domain : '${devProxy.replaceAll(RegExp(r'/+$'), '')}/';
 
   static String get baseUrl => '${requestBase}youtubei/v1/';
-  static final String apiKey =
-      utf8.decode(base64.decode('QUl6YVN5QzlYTDNaandkZFh5YTZYNzRkSm9DVEwtV0VZRkROWDMw'));
+  static final String apiKey = utf8.decode(
+    base64.decode('QUl6YVN5QzlYTDNaandkZFh5YTZYNzRkSm9DVEwtV0VZRkROWDMw'),
+  );
   static String get fixedParams => '?prettyPrint=false&alt=json&key=$apiKey';
 
   static const String userAgent =

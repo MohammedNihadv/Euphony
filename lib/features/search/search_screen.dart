@@ -656,7 +656,8 @@ class _SectionBlock extends StatelessWidget {
         children: [
           Text(section.title, style: Theme.of(context).textTheme.sectionTitle),
           const SizedBox(height: EuSpace.sm),
-          for (final item in section.items) _MusicItemTile(item: item, sectionItems: section.items),
+          for (final item in section.items)
+            _MusicItemTile(item: item, sectionItems: section.items),
           if (section.hasMore)
             Align(
               alignment: Alignment.centerLeft,
@@ -760,8 +761,12 @@ class _TopResultCard extends ConsumerWidget {
                       backgroundColor: EuBrutal.accent,
                       side: BorderSide(color: context.eu.ink, width: 2),
                     ),
-                    icon: const Icon(Icons.play_arrow, color: EuBrutal.onAccent),
-                    onPressed: () => _navigateToItem(ref, context, item, sectionItems),
+                    icon: const Icon(
+                      Icons.play_arrow,
+                      color: EuBrutal.onAccent,
+                    ),
+                    onPressed: () =>
+                        _navigateToItem(ref, context, item, sectionItems),
                   )
                 else
                   Icon(Icons.chevron_right, color: scheme.onSurfaceVariant),
@@ -1126,8 +1131,10 @@ void _navigateToItem(
   switch (item) {
     case SongItem(:final song):
       if (sectionItems != null) {
-        final songs =
-            sectionItems.whereType<SongItem>().map((e) => e.song).toList();
+        final songs = sectionItems
+            .whereType<SongItem>()
+            .map((e) => e.song)
+            .toList();
         final idx = songs.indexWhere((s) => s.id == song.id);
         if (idx >= 0) {
           ref.read(playerControllerProvider).playQueue(songs, startIndex: idx);

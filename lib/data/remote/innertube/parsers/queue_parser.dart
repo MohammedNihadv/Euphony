@@ -70,13 +70,19 @@ Song? _parsePanelVideo(Map<String, dynamic> data) {
   if (videoId == null || title == null) return null;
 
   final meta = parseSongRuns(
-    navOrNull<List<dynamic>>(data, const JsonPath(['longBylineText', 'runs'])) ??
+    navOrNull<List<dynamic>>(
+          data,
+          const JsonPath(['longBylineText', 'runs']),
+        ) ??
         const [],
   );
   final duration =
       meta.duration ??
       parseDuration(
-        navOrNull<String>(data, const JsonPath(['lengthText', 'runs', 0, 'text'])),
+        navOrNull<String>(
+          data,
+          const JsonPath(['lengthText', 'runs', 0, 'text']),
+        ),
       );
 
   final thumbnails = navOrNull<List<dynamic>>(

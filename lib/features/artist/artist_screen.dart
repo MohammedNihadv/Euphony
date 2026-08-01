@@ -96,7 +96,10 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                           height: 80,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: context.eu.ink, width: 2.5),
+                            border: Border.all(
+                              color: context.eu.ink,
+                              width: 2.5,
+                            ),
                             color: EuBrutal.highlight,
                           ),
                           clipBehavior: Clip.antiAlias,
@@ -127,7 +130,9 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                                   _artist!.subscribers!,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color: context.eu.ink.withValues(alpha: 0.7),
+                                    color: context.eu.ink.withValues(
+                                      alpha: 0.7,
+                                    ),
                                   ),
                                 ),
                             ],

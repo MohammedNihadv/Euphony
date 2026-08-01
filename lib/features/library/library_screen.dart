@@ -54,11 +54,11 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           dividerColor: Colors.transparent,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           labelPadding: const EdgeInsets.symmetric(horizontal: 18),
-          labelStyle: TextStyle(
+          labelStyle: const TextStyle(
             fontWeight: FontWeight.w900,
             fontSize: 14,
           ),
-          unselectedLabelStyle: TextStyle(
+          unselectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.w700,
             fontSize: 14,
           ),
@@ -113,7 +113,7 @@ class _LikedSongsTab extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.favorite_border,
                   size: 56,
                   color: EuBrutal.alert,
@@ -126,7 +126,7 @@ class _LikedSongsTab extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: EuSpace.xs),
-                Text(
+                const Text(
                   'Songs you heart will appear right here',
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
@@ -176,7 +176,7 @@ class _LikedSongsTab extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: context.eu.ink, width: 2),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.favorite,
                       color: EuBrutal.alert,
                       size: 32,
@@ -216,13 +216,13 @@ class _LikedSongsTab extends ConsumerWidget {
                       foregroundColor: EuBrutal.onHighlight,
                       shape: const CircleBorder(),
                       padding: const EdgeInsets.all(14),
-                      side: BorderSide(
+                      side: const BorderSide(
                         color: EuBrutal.onHighlight,
                         width: 2,
                       ),
                       elevation: 0,
                     ),
-                    child: Icon(Icons.play_arrow, size: 28),
+                    child: const Icon(Icons.play_arrow, size: 28),
                   ),
                 ],
               ),
@@ -239,8 +239,8 @@ class _LikedSongsTab extends ConsumerWidget {
                             .playQueue(songs, shuffle: true);
                       }
                     },
-                    icon: Icon(Icons.shuffle, size: 20),
-                    label: Text(
+                    icon: const Icon(Icons.shuffle, size: 20),
+                    label: const Text(
                       'SHUFFLE PLAY',
                       style: TextStyle(fontWeight: FontWeight.w900),
                     ),
@@ -292,10 +292,11 @@ class _LikedSongsTab extends ConsumerWidget {
                   title: entries[i].title,
                   subtitle: entries[i].artists,
                   artworkUrl: entries[i].artworkUrl,
-                  onTap: () =>
-                      ref.read(playerControllerProvider).playQueue(songs, startIndex: i),
+                  onTap: () => ref
+                      .read(playerControllerProvider)
+                      .playQueue(songs, startIndex: i),
                   trailing: IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.favorite,
                       color: EuBrutal.alert,
                       size: 20,
@@ -348,7 +349,11 @@ class _SavedPlaylistsTab extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: context.eu.ink, width: 2),
                     ),
-                    child: Icon(Icons.add, color: EuBrutal.onAccent, size: 28),
+                    child: const Icon(
+                      Icons.add,
+                      color: EuBrutal.onAccent,
+                      size: 28,
+                    ),
                   ),
                   title: Text(
                     'Create Playlist',
@@ -364,10 +369,7 @@ class _SavedPlaylistsTab extends ConsumerWidget {
                       color: context.eu.ink,
                     ),
                   ),
-                  trailing: Icon(
-                    Icons.chevron_right,
-                    color: context.eu.ink,
-                  ),
+                  trailing: Icon(Icons.chevron_right, color: context.eu.ink),
                 ),
               ),
             ),
@@ -378,7 +380,7 @@ class _SavedPlaylistsTab extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.playlist_play,
                       size: 48,
                       color: EuBrutal.accent,
@@ -404,7 +406,7 @@ class _SavedPlaylistsTab extends ConsumerWidget {
                     leadingIcon: Icons.playlist_play,
                     onTap: () => context.push('/playlist/${entry.id}'),
                     trailing: IconButton(
-                      icon: Icon(Icons.delete_outline, size: 20),
+                      icon: const Icon(Icons.delete_outline, size: 20),
                       onPressed: () => dao.remove(entry.id),
                     ),
                   ),
@@ -425,7 +427,7 @@ class _SavedPlaylistsTab extends ConsumerWidget {
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(color: context.eu.ink, width: 2.5),
         ),
-        title: Text(
+        title: const Text(
           'NEW PLAYLIST',
           style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
         ),
@@ -440,7 +442,7 @@ class _SavedPlaylistsTab extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(
+            child: const Text(
               'Cancel',
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
@@ -464,7 +466,7 @@ class _SavedPlaylistsTab extends ConsumerWidget {
                 if (context.mounted) Navigator.pop(context);
               }
             },
-            child: Text(
+            child: const Text(
               'Create',
               style: TextStyle(fontWeight: FontWeight.w900),
             ),
@@ -491,7 +493,7 @@ class _SavedAlbumsTab extends ConsumerWidget {
         leadingIcon: Icons.album,
         onTap: () => context.push('/album/${entry.browseId}'),
         trailing: IconButton(
-          icon: Icon(Icons.delete_outline, size: 20),
+          icon: const Icon(Icons.delete_outline, size: 20),
           onPressed: () => dao.remove(entry.browseId),
         ),
       ),
@@ -514,7 +516,7 @@ class _SearchHistoryTab extends ConsumerWidget {
         leadingIcon: Icons.history,
         onTap: () => context.go('/search'),
         trailing: IconButton(
-          icon: Icon(Icons.close, size: 18),
+          icon: const Icon(Icons.close, size: 18),
           onPressed: () => dao.remove(entry.query),
         ),
       ),
@@ -634,7 +636,7 @@ class _LibraryTile extends StatelessWidget {
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+            style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
           ),
           subtitle: Text(
             subtitle,
@@ -665,7 +667,7 @@ class _DownloadsTab extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.download_for_offline_outlined,
               size: 64,
               color: EuBrutal.accent,
@@ -725,7 +727,7 @@ class _DownloadsTab extends ConsumerWidget {
                     Expanded(
                       child: Text(
                         'DOWNLOADING (${progressMap.length})',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 13,
                           color: EuBrutal.onHighlight,
@@ -767,7 +769,8 @@ class _DownloadsTab extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(6),
                           child: LinearProgressIndicator(
                             value: entry.value,
-                            backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                            backgroundColor:
+                                theme.colorScheme.surfaceContainerHighest,
                             valueColor: const AlwaysStoppedAnimation<Color>(
                               EuBrutal.accent,
                             ),
@@ -818,7 +821,10 @@ class _DownloadsTab extends ConsumerWidget {
                         color: EuBrutal.accent.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Icon(Icons.music_note, color: EuBrutal.accent),
+                      child: const Icon(
+                        Icons.music_note,
+                        color: EuBrutal.accent,
+                      ),
                     ),
                     title: Row(
                       children: [
@@ -827,14 +833,14 @@ class _DownloadsTab extends ConsumerWidget {
                             song.title,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.w900,
                               fontSize: 15,
                             ),
                           ),
                         ),
                         const SizedBox(width: 6),
-                        Icon(
+                        const Icon(
                           Icons.check_circle,
                           color: Colors.green,
                           size: 18,
@@ -852,7 +858,7 @@ class _DownloadsTab extends ConsumerWidget {
                       ),
                     ),
                     trailing: IconButton(
-                      icon: Icon(
+                      icon: const Icon(
                         Icons.delete_outline,
                         color: Colors.redAccent,
                       ),
@@ -864,7 +870,9 @@ class _DownloadsTab extends ConsumerWidget {
                       },
                     ),
                     onTap: () {
-                      ref.read(playerControllerProvider).playQueue(downloaded, startIndex: i);
+                      ref
+                          .read(playerControllerProvider)
+                          .playQueue(downloaded, startIndex: i);
                     },
                   ),
                 ),

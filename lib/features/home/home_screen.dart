@@ -212,7 +212,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ),
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final song = _feed!.quickPicks[index];
-                        return _QuickPickTile(song: song, queueSongs: _feed!.quickPicks);
+                        return _QuickPickTile(
+                          song: song,
+                          queueSongs: _feed!.quickPicks,
+                        );
                       }, childCount: _feed!.quickPicks.length.clamp(0, 6)),
                     ),
                   ),
@@ -261,7 +264,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           color: bg,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? context.eu.ink : context.eu.ink.withValues(alpha: 0.35),
+            color: isSelected
+                ? context.eu.ink
+                : context.eu.ink.withValues(alpha: 0.35),
             width: isSelected ? 2 : 1.5,
           ),
           boxShadow: isSelected ? EuBrutal.smHardShadow : null,
@@ -422,7 +427,9 @@ class _QuickPickTile extends ConsumerWidget {
         color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: context.eu.ink, width: 2),
-        boxShadow: [BoxShadow(color: context.eu.ink, offset: const Offset(2, 2))],
+        boxShadow: [
+          BoxShadow(color: context.eu.ink, offset: const Offset(2, 2)),
+        ],
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -432,7 +439,9 @@ class _QuickPickTile extends ConsumerWidget {
             if (queueSongs != null) {
               final idx = queueSongs!.indexWhere((s) => s.id == song.id);
               if (idx >= 0) {
-                ref.read(playerControllerProvider).playQueue(queueSongs!, startIndex: idx);
+                ref
+                    .read(playerControllerProvider)
+                    .playQueue(queueSongs!, startIndex: idx);
               } else {
                 ref.read(playerControllerProvider).playSong(song);
               }
@@ -650,7 +659,9 @@ class _HomeItemCard extends ConsumerWidget {
                       .toList();
                   final idx = songs.indexWhere((s) => s.id == song.id);
                   if (idx >= 0) {
-                    ref.read(playerControllerProvider).playQueue(songs, startIndex: idx);
+                    ref
+                        .read(playerControllerProvider)
+                        .playQueue(songs, startIndex: idx);
                   } else {
                     ref.read(playerControllerProvider).playSong(song);
                   }

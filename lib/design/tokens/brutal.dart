@@ -159,8 +159,7 @@ class EuBrutalTokens {
       _isLight ? const Color(0xFFFAF7F2) : const Color(0xFF0D0D14);
 
   /// Standard raised surface.
-  Color get surface =>
-      _isLight ? Colors.white : const Color(0xFF17171F);
+  Color get surface => _isLight ? Colors.white : const Color(0xFF17171F);
 
   /// Elevated surface.
   Color get surfaceHigh =>
@@ -209,7 +208,5 @@ class EuBrutalTokens {
 /// Extension that exposes adaptive Neo-Brutalist tokens from any [BuildContext].
 extension EuBrutalContext on BuildContext {
   /// Returns adaptive design tokens for the current brightness.
-  EuBrutalTokens get eu => EuBrutalTokens._(
-        Theme.of(this).brightness,
-      );
+  EuBrutalTokens get eu => EuBrutalTokens._(Theme.of(this).brightness);
 }

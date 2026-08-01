@@ -35,7 +35,9 @@ class EuphonyShell extends ConsumerWidget {
           Container(
             decoration: BoxDecoration(
               color: context.eu.ink,
-              border: Border(top: BorderSide(color: context.eu.ink, width: 2.5)),
+              border: Border(
+                top: BorderSide(color: context.eu.ink, width: 2.5),
+              ),
             ),
             child: Theme(
               data: Theme.of(context).copyWith(

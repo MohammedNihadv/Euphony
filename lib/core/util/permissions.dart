@@ -14,7 +14,9 @@ Future<void> ensureNotificationPermission() async {
   try {
     final status = await Permission.notification.status;
     if (status.isDenied) {
-      _log.info('requesting Android notification permission for media controls');
+      _log.info(
+        'requesting Android notification permission for media controls',
+      );
       final result = await Permission.notification.request();
       _log.info('notification permission status: $result');
     }

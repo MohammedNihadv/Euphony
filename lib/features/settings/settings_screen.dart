@@ -96,19 +96,22 @@ class SettingsScreen extends ConsumerWidget {
                           _ThemeModeButton(
                             title: 'System',
                             isSelected: theme.mode == ThemeMode.system,
-                            onTap: () => themeController.setMode(ThemeMode.system),
+                            onTap: () =>
+                                themeController.setMode(ThemeMode.system),
                           ),
                           const SizedBox(width: 8),
                           _ThemeModeButton(
                             title: 'Light',
                             isSelected: theme.mode == ThemeMode.light,
-                            onTap: () => themeController.setMode(ThemeMode.light),
+                            onTap: () =>
+                                themeController.setMode(ThemeMode.light),
                           ),
                           const SizedBox(width: 8),
                           _ThemeModeButton(
                             title: 'Dark',
                             isSelected: theme.mode == ThemeMode.dark,
-                            onTap: () => themeController.setMode(ThemeMode.dark),
+                            onTap: () =>
+                                themeController.setMode(ThemeMode.dark),
                           ),
                         ],
                       ),
@@ -120,7 +123,9 @@ class SettingsScreen extends ConsumerWidget {
                           'AMOLED black',
                           style: TextStyle(fontWeight: FontWeight.w800),
                         ),
-                        subtitle: const Text('Pure black background in dark mode'),
+                        subtitle: const Text(
+                          'Pure black background in dark mode',
+                        ),
                         value: theme.amoled,
                         onChanged: (value) =>
                             themeController.setAmoled(value: value),
@@ -182,7 +187,10 @@ class SettingsScreen extends ConsumerWidget {
                           decoration: BoxDecoration(
                             color: EuBrutal.highlight,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: EuBrutal.onHighlight, width: 1.5),
+                            border: Border.all(
+                              color: EuBrutal.onHighlight,
+                              width: 1.5,
+                            ),
                           ),
                           child: Text(
                             settings.audioQuality,
@@ -292,10 +300,7 @@ class SettingsScreen extends ConsumerWidget {
                         subtitle: const Text('32.4 MB temporary data'),
                         trailing: OutlinedButton(
                           style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: context.eu.ink,
-                              width: 1.5,
-                            ),
+                            side: BorderSide(color: context.eu.ink, width: 1.5),
                           ),
                           onPressed: () => _clearCache(context),
                           child: const Text(
@@ -516,7 +521,11 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 const Text(
                   'SELECT AUDIO QUALITY',
-                  style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1, fontSize: 18),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                    fontSize: 18,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 ...options.map((opt) {
@@ -526,7 +535,9 @@ class SettingsScreen extends ConsumerWidget {
                     title: Text(
                       opt.$2,
                       style: TextStyle(
-                        fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                        fontWeight: isSelected
+                            ? FontWeight.w900
+                            : FontWeight.w700,
                       ),
                     ),
                     trailing: isSelected
@@ -584,7 +595,11 @@ class SettingsScreen extends ConsumerWidget {
               children: [
                 const Text(
                   'SELECT CONTENT REGION',
-                  style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1, fontSize: 18),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                    fontSize: 18,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Flexible(
@@ -599,7 +614,9 @@ class SettingsScreen extends ConsumerWidget {
                         title: Text(
                           country,
                           style: TextStyle(
-                            fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                            fontWeight: isSelected
+                                ? FontWeight.w900
+                                : FontWeight.w700,
                           ),
                         ),
                         trailing: isSelected
@@ -870,9 +887,7 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
             ),
             onPressed: () async {
               Navigator.pop(context);
-              final uri = Uri.tryParse(
-                info.apkUrl ?? info.releaseUrl,
-              );
+              final uri = Uri.tryParse(info.apkUrl ?? info.releaseUrl);
               if (uri != null && await canLaunchUrl(uri)) {
                 await launchUrl(uri, mode: LaunchMode.externalApplication);
               }

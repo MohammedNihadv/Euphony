@@ -1,12 +1,12 @@
 <div align="center">
 
-<img src="assets/images/app.icon.png" width="140" alt="Euphony"/>
+<img src="docs/screenshots/banner.png" alt="Euphony Open Source Neo-Brutalist Music Player Banner" width="100%"/>
 
 # Euphony
 
 ### *Music deserves better than interruptions.*
 
-A modern, open-source music player built with Flutter.
+A modern, open-source music player built with Flutter, featuring Light & Dark Neo-Brutalist themes.
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.44+-02569B?logo=flutter&logoColor=white)](https://flutter.dev)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)

@@ -66,8 +66,9 @@ abstract final class EuTheme {
     final base = ThemeData(colorScheme: scheme, useMaterial3: true);
     final text = EuType.build(base.textTheme);
     // Adaptive ink: dark in light mode, light in dark mode.
-    final inkColor =
-        isLight ? const Color(0xFF0D0D14) : const Color(0xFFF4F3FA);
+    final inkColor = isLight
+        ? const Color(0xFF0D0D14)
+        : const Color(0xFFF4F3FA);
     final inkSide = BorderSide(color: inkColor, width: 2);
     final inkThinSide = BorderSide(color: inkColor, width: 1.5);
 
@@ -92,10 +93,7 @@ abstract final class EuTheme {
         elevation: EuElevation.flat,
         color: scheme.surfaceContainerLow,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(
-          borderRadius: EuShape.md,
-          side: inkSide,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: EuShape.md, side: inkSide),
         clipBehavior: Clip.antiAlias,
       ),
 
@@ -201,10 +199,7 @@ abstract final class EuTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: scheme.surfaceContainerHigh,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: EuShape.lg,
-          side: inkSide,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: EuShape.lg, side: inkSide),
         titleTextStyle: text.headlineSmall?.copyWith(
           color: scheme.onSurface,
           fontWeight: FontWeight.w900,
@@ -238,10 +233,7 @@ abstract final class EuTheme {
           color: scheme.onInverseSurface,
           fontWeight: FontWeight.w700,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: EuShape.md,
-          side: inkSide,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: EuShape.md, side: inkSide),
         insetPadding: const EdgeInsets.all(EuSpace.lg),
       ),
 

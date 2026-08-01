@@ -166,7 +166,10 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                           height: 140,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: context.eu.ink, width: 2.5),
+                            border: Border.all(
+                              color: context.eu.ink,
+                              width: 2.5,
+                            ),
                             color: EuBrutal.highlight,
                           ),
                           clipBehavior: Clip.antiAlias,
@@ -309,47 +312,48 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                                           .read(playerControllerProvider)
                                           .playQueue(_tracks, startIndex: i),
                                     ),
-                                if (isLocal)
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.remove_circle_outline,
-                                      size: 22,
-                                      color: EuBrutal.alert,
-                                    ),
-                                    tooltip: 'Remove from playlist',
-                                    onPressed: () async {
-                                      await ref
-                                          .read(
-                                            localPlaylistTracksProvider
-                                                .notifier,
-                                          )
-                                          .removeSongFromPlaylist(
-                                            widget.id,
-                                            song.id,
-                                          );
-                                      final updated = ref
-                                          .read(
-                                            localPlaylistTracksProvider
-                                                .notifier,
-                                          )
-                                          .getPlaylistTracks(widget.id);
-                                      await ref
-                                          .read(savedPlaylistsDaoProvider)
-                                          .save(
-                                            id: widget.id,
-                                            title: _title ?? 'Custom Playlist',
-                                            artworkUrl: _artworkUrl,
-                                            trackCount: updated.length,
-                                          );
-                                    },
-                                  ),
-                              ],
+                                    if (isLocal)
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.remove_circle_outline,
+                                          size: 22,
+                                          color: EuBrutal.alert,
+                                        ),
+                                        tooltip: 'Remove from playlist',
+                                        onPressed: () async {
+                                          await ref
+                                              .read(
+                                                localPlaylistTracksProvider
+                                                    .notifier,
+                                              )
+                                              .removeSongFromPlaylist(
+                                                widget.id,
+                                                song.id,
+                                              );
+                                          final updated = ref
+                                              .read(
+                                                localPlaylistTracksProvider
+                                                    .notifier,
+                                              )
+                                              .getPlaylistTracks(widget.id);
+                                          await ref
+                                              .read(savedPlaylistsDaoProvider)
+                                              .save(
+                                                id: widget.id,
+                                                title:
+                                                    _title ?? 'Custom Playlist',
+                                                artworkUrl: _artworkUrl,
+                                                trackCount: updated.length,
+                                              );
+                                        },
+                                      ),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                          );
+                        },
+                      ),
                 ],
               ),
       ),

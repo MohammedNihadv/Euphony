@@ -98,7 +98,9 @@ class Failure implements Exception {
         return 'App requires an update to read this content.';
       default:
         // Exclude raw URLs or JSON dumps from the UI.
-        if (message != null && !message!.startsWith('http') && message!.length < 100) {
+        if (message != null &&
+            !message!.startsWith('http') &&
+            message!.length < 100) {
           return message!;
         }
         return 'Something went wrong. Please try again.';

@@ -89,11 +89,7 @@ class _SplashOverlayState extends State<SplashOverlay>
                     ensureNotificationPermission();
                   }
                 },
-                child: _SplashContent(
-                  pop: _pop,
-                  fade: _fade,
-                  bars: _bars,
-                ),
+                child: _SplashContent(pop: _pop, fade: _fade, bars: _bars),
               ),
             ),
           ),
@@ -123,10 +119,7 @@ class _SplashContent extends StatelessWidget {
           children: [
             ScaleTransition(
               scale: pop,
-              child: FadeTransition(
-                opacity: fade,
-                child: _LogoSlab(),
-              ),
+              child: FadeTransition(opacity: fade, child: _LogoSlab()),
             ),
             const SizedBox(height: 28),
             FadeTransition(
@@ -151,9 +144,7 @@ class _LogoSlab extends StatelessWidget {
         color: EuBrutal.highlight,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: EuBrutal.ink, width: 3),
-        boxShadow: const [
-          BoxShadow(color: EuBrutal.ink, offset: Offset(6, 6)),
-        ],
+        boxShadow: const [BoxShadow(color: EuBrutal.ink, offset: Offset(6, 6))],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

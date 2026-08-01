@@ -62,9 +62,9 @@ class InnertubeClient {
     DateTime Function()? clock,
     this._language = 'en',
     this._region = 'US',
-  })  : _dio = dio ?? Dio(),
-        _visitorIds = visitorIdStore ?? MemoryVisitorIdStore(),
-        _now = clock ?? DateTime.now;
+  }) : _dio = dio ?? Dio(),
+       _visitorIds = visitorIdStore ?? MemoryVisitorIdStore(),
+       _now = clock ?? DateTime.now;
 
   final Dio _dio;
   final VisitorIdStore _visitorIds;
@@ -258,18 +258,16 @@ class InnertubeClient {
   /// of related tracks that keep the music going after the current queue ends.
   /// The `RDAMVM<videoId>` playlist id and `wAEB` params are the radio-mode
   /// values YouTube's own client sends (ported from Harmony's getWatchPlaylist).
-  Future<Result<Map<String, dynamic>>> next(String videoId) => post(
-    Innertube.next,
-    {
-      ...context,
-      'videoId': videoId,
-      'playlistId': 'RDAMVM$videoId',
-      'isAudioOnly': true,
-      'enablePersistentPlaylistPanel': true,
-      'tunerSettingValue': 'AUTOMIX_SETTING_NORMAL',
-      'params': 'wAEB',
-    },
-  );
+  Future<Result<Map<String, dynamic>>> next(String videoId) =>
+      post(Innertube.next, {
+        ...context,
+        'videoId': videoId,
+        'playlistId': 'RDAMVM$videoId',
+        'isAudioOnly': true,
+        'enablePersistentPlaylistPanel': true,
+        'tunerSettingValue': 'AUTOMIX_SETTING_NORMAL',
+        'params': 'wAEB',
+      });
 
   /// Fetches player metadata and streaming formats for [videoId].
   ///

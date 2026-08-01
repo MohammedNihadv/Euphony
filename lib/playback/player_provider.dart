@@ -383,6 +383,7 @@ final playerControllerProvider = Provider<PlayerController>((ref) {
     client: ref.read(innertubeClientProvider),
     repeatMode: () => ref.read(repeatModeProvider),
     shuffleEnabled: () => ref.read(shuffleModeProvider),
+    audioQuality: () => ref.read(settingsRepositoryProvider).audioQuality,
     onEnableShuffle: () {
       if (!ref.read(shuffleModeProvider)) {
         ref.read(shuffleModeProvider.notifier).toggle();
@@ -425,6 +426,7 @@ class PlayerController {
     required InnertubeClient client,
     required LoopMode Function() repeatMode,
     required bool Function() shuffleEnabled,
+    required String Function() audioQuality,
     void Function()? onEnableShuffle,
     void Function(String message)? onError,
     Future<List<Song>> Function(Song seed)? fetchAutoplay,
@@ -439,6 +441,8 @@ class PlayerController {
        // ignore: prefer_initializing_formals
        _shuffleEnabled = shuffleEnabled,
        // ignore: prefer_initializing_formals
+       _audioQuality = audioQuality,
+       // ignore: prefer_initializing_formals
        _onEnableShuffle = onEnableShuffle,
        // ignore: prefer_initializing_formals
        _onError = onError,
@@ -452,6 +456,7 @@ class PlayerController {
   final InnertubeClient _client;
   final LoopMode Function() _repeatMode;
   final bool Function() _shuffleEnabled;
+  final String Function() _audioQuality;
   final void Function()? _onEnableShuffle;
   final void Function(String message)? _onError;
 
@@ -652,8 +657,7 @@ class PlayerController {
       final audioOnly = manifest.audioOnly.toList();
       if (audioOnly.isNotEmpty) {
         audioOnly.sort((a, b) => b.bitrate.compareTo(a.bitrate));
-        final qualitySetting =
-            _queue.ref.read(settingsRepositoryProvider).audioQuality;
+        final qualitySetting = _audioQuality();
         final bestAudio = switch (qualitySetting) {
           'LOW' => audioOnly.last,
           'STANDARD' => audioOnly.firstWhere(
@@ -691,10 +695,7 @@ class PlayerController {
           _log.warning('no streamingData for ${song.id}');
           return null;
         }
-        final url = pickAudioStreamUrl(
-          streamingData,
-          quality: _queue.ref.read(settingsRepositoryProvider).audioQuality,
-        );
+        final url = pickAudioStreamUrl(streamingData, quality: _audioQuality());
         if (url == null) {
           _log.warning('no playable audio format for ${song.id}');
           return null;

@@ -68,9 +68,7 @@ class EuphonyAudioHandler extends BaseAudioHandler with SeekHandler {
           if (playing) MediaControl.pause else MediaControl.play,
           MediaControl.skipToNext,
         ],
-        systemActions: const {
-          MediaAction.seek,
-        },
+        systemActions: const {MediaAction.seek},
         // Collapsed notification shows prev, play/pause, next
         androidCompactActionIndices: const [0, 1, 2],
         processingState: _mapProcessingState(_player.processingState),

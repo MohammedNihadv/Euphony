@@ -14,7 +14,7 @@ void showLyricsSheet(BuildContext context, Song song) {
     backgroundColor: Theme.of(context).colorScheme.surface,
     barrierColor: Colors.black54,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       side: BorderSide(color: inkColor, width: 2.5),
     ),
     builder: (context) => _LyricsSheet(song: song),
@@ -145,7 +145,11 @@ class _LyricsSheetState extends State<_LyricsSheet> {
               ],
             ),
           ),
-          Divider(height: 1, color: context.eu.ink.withValues(alpha: 0.2), thickness: 1.5),
+          Divider(
+            height: 1,
+            color: context.eu.ink.withValues(alpha: 0.2),
+            thickness: 1.5,
+          ),
           Expanded(
             child: _loading
                 ? const Center(

@@ -417,7 +417,10 @@ class _SpeedButton extends StatelessWidget {
                 ? EuBrutal.highlight
                 : themeData.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: isCustom ? EuBrutal.onHighlight : context.eu.ink, width: isCustom ? 1.5 : 1),
+            border: Border.all(
+              color: isCustom ? EuBrutal.onHighlight : context.eu.ink,
+              width: isCustom ? 1.5 : 1,
+            ),
           ),
           child: Text(
             '${speed}x',
@@ -444,7 +447,7 @@ void _showSpeedSheet(BuildContext context, WidgetRef ref) {
     context: context,
     backgroundColor: Theme.of(context).colorScheme.surface,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       side: BorderSide(color: inkColor, width: 2.5),
     ),
     builder: (context) {
@@ -498,7 +501,7 @@ void _showSleepTimerSheet(BuildContext context, WidgetRef ref) {
     context: context,
     backgroundColor: Theme.of(context).colorScheme.surface,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       side: BorderSide(color: inkColor2, width: 2.5),
     ),
     builder: (context) {
