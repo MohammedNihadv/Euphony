@@ -66,7 +66,7 @@ class LogExporter {
       await tempFile.writeAsBytes(bytes, flush: true);
 
       if (destPath.startsWith('content://')) {
-        final plugin = const MethodChannel('com.mhdni.euphony/export');
+        const plugin = MethodChannel('com.mhdni.euphony/export');
         await plugin.invokeMethod('writeToContentUri', {
           'uri': destPath,
           'sourcePath': tempFile.path,
