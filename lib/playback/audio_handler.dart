@@ -68,7 +68,14 @@ class EuphonyAudioHandler extends BaseAudioHandler with SeekHandler {
           if (playing) MediaControl.pause else MediaControl.play,
           MediaControl.skipToNext,
         ],
-        systemActions: const {MediaAction.seek},
+        systemActions: const {
+          MediaAction.seek,
+          MediaAction.play,
+          MediaAction.pause,
+          MediaAction.skipToNext,
+          MediaAction.skipToPrevious,
+          MediaAction.stop,
+        },
         // Collapsed notification shows prev, play/pause, next
         androidCompactActionIndices: const [0, 1, 2],
         processingState: _mapProcessingState(_player.processingState),
@@ -90,6 +97,19 @@ class EuphonyAudioHandler extends BaseAudioHandler with SeekHandler {
         ProcessingState.completed => AudioProcessingState.completed,
       };
 
+  Uri? _parseArtUri(String? url) {
+    if (url == null || url.trim().isEmpty) return null;
+    var formatted = url.trim();
+    if (formatted.startsWith('//')) {
+      formatted = 'https:$formatted';
+    } else if (!formatted.startsWith('http://') &&
+        !formatted.startsWith('https://') &&
+        !formatted.startsWith('file://')) {
+      formatted = 'https://$formatted';
+    }
+    return Uri.tryParse(formatted);
+  }
+
   MediaItem _toMediaItem(Song song) {
     // Prefer the highest resolution artwork (600x600) for clean, crisp media notification images
     final artworkStr =
@@ -100,7 +120,7 @@ class EuphonyAudioHandler extends BaseAudioHandler with SeekHandler {
       artist: song.artistNames,
       album: song.albumTitle,
       duration: song.duration,
-      artUri: artworkStr == null ? null : Uri.tryParse(artworkStr),
+      artUri: _parseArtUri(artworkStr),
       extras: const {
         // Use our signature Neo-Brutalist Electric Violet accent (#6A4BE8) so
         // Android/ColorOS tints the media controls in our brand aesthetic.

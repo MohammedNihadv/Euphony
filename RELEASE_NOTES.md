@@ -1,3 +1,14 @@
+## Euphony v0.2.3 — Media Notifications & Export Bug Fixes 🚀
+
+Euphony v0.2.3 resolves critical bugs regarding media notifications and data export on modern Android devices.
+
+### ✨ What's New & Fixed
+
+- **Media Notification Fix**: Fixed an issue where the app would completely crash on track changes due to R8 shrinking notification icons (`ic_stat_*`) out of the release build. Notification actions (play/pause/skip) are fully visible again.
+- **Export Data Fix**: Implemented native Android Secure Access Framework (SAF) `MethodChannel` bridging. Exporting error logs and backing up the database to secure Android directories (like Downloads or Documents) now works perfectly and no longer results in empty 0-byte files or `MissingPluginException` errors.
+
+---
+
 ## Euphony v0.2.2 — Dynamic App Versioning & SEO Polish 🎶
 
 Euphony v0.2.2 introduces dynamic app version resolution, ensuring update notifications always match your installed build perfectly.

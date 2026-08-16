@@ -19,6 +19,7 @@ import '../../domain/search_results.dart';
 import '../../domain/song.dart';
 import '../../playback/player_provider.dart';
 import '../common/song_options_sheet.dart';
+import '../settings/log_exporter.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key});
@@ -1018,6 +1019,42 @@ class _SettingsSheet extends ConsumerWidget {
             onChanged: (value) => controller.setColourSource(
               value ? ColourSource.artwork : ColourSource.fixed,
             ),
+          ),
+        ),
+        const Divider(height: 16),
+        Material(
+          type: MaterialType.transparency,
+          child: ListTile(
+            leading: const Icon(Icons.bug_report_outlined),
+            title: const Text('Export Error Logs'),
+            subtitle: const Text('Download log file to report issues'),
+            onTap: () async {
+              Navigator.of(context).pop();
+              final success = await LogExporter.exportLogs();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? 'Logs saved successfully! Share with developers.'
+                          : 'Log export failed or cancelled.',
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
+        ),
+        Material(
+          type: MaterialType.transparency,
+          child: ListTile(
+            leading: const Icon(Icons.settings_outlined),
+            title: const Text('All Settings'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () {
+              Navigator.of(context).pop();
+              context.push('/settings');
+            },
           ),
         ),
       ],

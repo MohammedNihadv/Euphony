@@ -595,9 +595,10 @@ class PlayerController {
 
     final generation = ++_loadGeneration;
     try {
-      // Explicitly stop the player before doing anything else.
+      // Explicitly pause and stop the player before doing anything else.
       // Rapidly switching audio sources without stopping can cause
       // ExoPlayer native crashes on some devices.
+      await _player.pause();
       await _player.stop();
     } catch (_) {}
 
@@ -613,7 +614,12 @@ class PlayerController {
     }
 
     try {
-      await _player.setAudioSource(AudioSource.uri(Uri.parse(source.url)));
+      final uri = Uri.tryParse(source.url);
+      if (uri == null) {
+        _fail('Could not play "${song.title}".');
+        return;
+      }
+      await _player.setAudioSource(AudioSource.uri(uri));
       if (_disposed || generation != _loadGeneration) return;
       await _player.play();
       _log.info('playing: ${song.title}');

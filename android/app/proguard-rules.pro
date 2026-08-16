@@ -17,6 +17,7 @@
 # audio_service's media session is declared in the manifest and started by the
 # OS, so nothing in the compiled code references it.
 -keep class com.ryanheise.audioservice.** { *; }
+-keep class com.ryanheise.just_audio.** { *; }
 
 # --- Database -----------------------------------------------------------
 # sqlite3_flutter_libs loads the native library through JNI.

@@ -11,6 +11,7 @@ import '../../design/theme/theme_controller.dart';
 import '../../design/tokens/brutal.dart';
 import '../../design/tokens/tokens.dart';
 import 'backup_service.dart';
+import 'log_exporter.dart';
 import 'settings_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -385,6 +386,32 @@ class SettingsScreen extends ConsumerWidget {
                                   success
                                       ? 'Backup imported! Please restart the app.'
                                       : 'Import failed or cancelled.',
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                      const Divider(height: 16),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: const Text(
+                          'Export Error Logs',
+                          style: TextStyle(fontWeight: FontWeight.w800),
+                        ),
+                        subtitle: const Text(
+                          'Download app logs to report issues to developers',
+                        ),
+                        trailing: const Icon(Icons.bug_report_outlined),
+                        onTap: () async {
+                          final success = await LogExporter.exportLogs();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  success
+                                      ? 'Logs saved successfully! Share with developers.'
+                                      : 'Log export failed or cancelled.',
                                 ),
                               ),
                             );
