@@ -1,7 +1,7 @@
 name: euphony
 description: "Euphony — a music streaming client for Android."
 publish_to: 'none'
-version: 0.2.3+1
+version: 0.2.4+1
 
 environment:
   sdk: ^3.12.1
@@ -27,10 +27,7 @@ dependencies:
   shared_preferences: ^2.5.5
   url_launcher: ^6.3.1
   uuid: ^4.5.1
-  youtube_explode_dart:
-    git:
-      url: https://github.com/anandnet/youtube_explode_dart.git
-      ref: 1d9ec9baa806705b1d859260eeb389ec28c6b024
+  youtube_explode_dart: ^3.1.0
 
 dev_dependencies:
   flutter_test:
