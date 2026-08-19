@@ -1,14 +1,16 @@
-## Euphony v0.2.5 — Music plays again 🎵
+## Euphony v0.2.6 — Playback fixed for real 🎧
 
-YouTube changed how it serves audio, which stopped songs from loading in recent versions. This release fixes playback properly and adds update notifications so you never get stuck on a broken version again.
+Songs now load and play. Earlier versions could resolve a track but then fail to actually play it ("Source error"), because YouTube's media servers reject the kind of large, open-ended download request the Android player makes by default.
 
 ### 🔧 Fixed
-- **Songs load and play reliably again.** Rebuilt the audio engine against YouTube's latest changes and hardened how streams are fetched, so tracks stop failing to load.
+- **Music plays reliably again.** Euphony now streams audio in small chunks that YouTube's servers accept, instead of one big request they refuse. This fixes tracks that spun forever or failed to load — including on mobile data, IPv6, and networks with ad-blockers or proxies.
+- **Switching songs no longer gets stuck.**
 
-### ✨ New
-- **Update notifications.** When a new version is out, Euphony now tells you right when you open the app — with the release notes and a one-tap way to grab it. No more hunting in Settings.
+### ✨ Also in recent updates
+- Update notifications when you open the app.
+- A cleaner look and a fixed logo.
 
-If a song still won't play, please [let us know](https://github.com/MohammedNihadv/Euphony/issues).
+If a track still won't play, please [tell us](https://github.com/MohammedNihadv/Euphony/issues).
 
 ### 📥 Which APK should I download?
 

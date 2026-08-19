@@ -24,7 +24,7 @@ class SettingsScreen extends ConsumerWidget {
     final settings = ref.watch(settingsControllerProvider);
     final settingsController = ref.read(settingsControllerProvider.notifier);
     final themeData = Theme.of(context);
-    final appVersion = ref.watch(appVersionProvider).asData?.value ?? '0.2.5';
+    final appVersion = ref.watch(appVersionProvider).asData?.value ?? '0.2.6';
 
     return Scaffold(
       appBar: AppBar(
@@ -771,7 +771,7 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Current Version: v${info?.currentVersion ?? ref.watch(appVersionProvider).asData?.value ?? '0.2.5'}',
+                          'Current Version: v${info?.currentVersion ?? ref.watch(appVersionProvider).asData?.value ?? '0.2.6'}',
                           style: const TextStyle(fontWeight: FontWeight.w800),
                         ),
                         if (info != null && info.hasUpdate)

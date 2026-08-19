@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  just_audio streams remote audio through a tiny local HTTP proxy on 127.0.0.1
+  so the fetch shares the app's own network stack (the same one that resolved
+  the URL) — which keeps the googlevideo IP binding consistent and avoids 403s
+  on proxied / IPv6 / mobile networks. That proxy is plain HTTP on loopback, so
+  cleartext must be permitted for localhost only. All other traffic stays
+  HTTPS-only.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">localhost</domain>
+    </domain-config>
+    <base-config cleartextTrafficPermitted="false"/>
+</network-security-config>

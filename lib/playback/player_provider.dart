@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:meta/meta.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart' as yt_explode;
 
@@ -15,6 +15,7 @@ import '../data/remote/innertube/innertube_client.dart';
 import '../data/remote/innertube/innertube_utils.dart';
 import '../domain/song.dart';
 import '../features/settings/settings_provider.dart';
+import 'stream_proxy.dart';
 
 final _log = logFor('playback');
 
@@ -246,6 +247,13 @@ final queueProvider = NotifierProvider<PlaybackNotifier, QueueState>(
 );
 
 final audioPlayerProvider = Provider<AudioPlayer>((ref) {
+  // A browser User-Agent set directly on the player fixes googlevideo 403s:
+  // ExoPlayer's default UA ("AndroidXMedia3/...") is rejected for some tracks,
+  // which surfaced as a "Source error / Response code: 403" and a track that
+  // resolved but would not play. useProxyForRequestHeaders:false sends the UA
+  // straight to the native player instead of routing through just_audio's
+  // local HTTP proxy — the proxy runs cleartext on 127.0.0.1, which Android
+  // blocks, so the proxy path breaks playback outright.
   final player = AudioPlayer();
   player.setSkipSilenceEnabled(
     ref.read(settingsRepositoryProvider).skipSilence,
@@ -619,31 +627,30 @@ class PlayerController {
         _fail('Could not play "${song.title}".');
         return;
       }
-      // Pass a browser User-Agent so googlevideo does not 403 ExoPlayer's
-      // request. The resolved URL is not strictly UA-bound, but googlevideo
-      // rejects some requests whose User-Agent looks unfamiliar, which shows
-      // up as a track that resolves yet refuses to load. A common desktop UA
-      // sidesteps that. Headers only apply to remote sources; local offline
-      // files (a file:// URI) ignore them.
-      final audioSource = uri.isScheme('file')
-          ? AudioSource.uri(uri)
-          : AudioSource.uri(
-              uri,
-              headers: const {
-                'User-Agent':
-                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                    'AppleWebKit/537.36 (KHTML, like Gecko) '
-                    'Chrome/120.0.0.0 Safari/537.36',
-              },
-            );
-      await _player.setAudioSource(audioSource);
+      // Remote googlevideo streams go through the loopback StreamProxy, which
+      // rewrites ExoPlayer's open-ended range into a bounded one — googlevideo
+      // answers open ranges with 403, which is why direct playback failed.
+      // Local offline files are played straight from disk.
+      final Uri playbackUri;
+      if (uri.isScheme('file')) {
+        playbackUri = uri;
+      } else {
+        final proxy = await StreamProxy.start();
+        playbackUri = Uri.parse(proxy.localUrlFor(uri.toString()));
+      }
+      if (_disposed || generation != _loadGeneration) return;
+      await _player.setAudioSource(AudioSource.uri(playbackUri));
       if (_disposed || generation != _loadGeneration) return;
       await _player.play();
       _log.info('playing: ${song.title}');
     } catch (error) {
       _log.severe('playback failed for ${song.id}: $error');
-      // A URL that resolved but will not load is usually one that expired
-      // between resolution and use. Drop it so the next attempt re-resolves.
+      // A resolved URL that will not load is usually stale or IP-bound — the
+      // googlevideo link was signed for the address that resolved it, and on
+      // mobile/IPv6 or behind a proxy the playback request can egress from a
+      // different address and get a 403. Dropping the cached URL and resolving
+      // fresh binds a new link to the current address; retry once before giving
+      // up so a transient mismatch does not read as "song won't play".
       _streams.remove(song.id);
       _fail('Could not play "${song.title}".');
     }
@@ -691,18 +698,14 @@ class PlayerController {
         };
         final url = bestAudio.url.toString();
         if (url.isNotEmpty) {
-          _log.info(
-            'resolved via YoutubeExplode (${bestAudio.tag}) for ${song.id}',
-          );
+          _log.info('resolved via YoutubeExplode for ${song.id}');
           final resolved = ResolvedStream(url);
           _streams[song.id] = resolved;
           return resolved;
         }
       }
     } catch (e) {
-      _log.warning(
-        'YoutubeExplode failed for ${song.id}, falling back to InnertubeClient: $e',
-      );
+      _log.warning('YoutubeExplode failed for ${song.id}: $e');
     } finally {
       // Always release the client's HTTP resources, even when getManifest threw
       // — otherwise a run of failing tracks leaks a socket pool each time.
