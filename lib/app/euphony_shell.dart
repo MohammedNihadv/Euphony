@@ -5,14 +5,32 @@ import 'package:go_router/go_router.dart';
 import '../design/tokens/brutal.dart';
 import '../features/player/mini_player.dart';
 import '../playback/player_provider.dart';
+import 'update_prompt.dart';
 
-class EuphonyShell extends ConsumerWidget {
+class EuphonyShell extends ConsumerStatefulWidget {
   const EuphonyShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<EuphonyShell> createState() => _EuphonyShellState();
+}
+
+class _EuphonyShellState extends ConsumerState<EuphonyShell> {
+  @override
+  void initState() {
+    super.initState();
+    // Once the first frame is up, check for a newer release and prompt. This
+    // is what makes update popups reach users who never open Settings.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) UpdatePrompt.maybeShowOnLaunch(context, ref);
+    });
+  }
+
+  StatefulNavigationShell get navigationShell => widget.navigationShell;
+
+  @override
+  Widget build(BuildContext context) {
     // A track that will not resolve used to fail silently — the user tapped a
     // song and nothing happened, which reads as the app being broken. Reported
     // once here rather than in each screen that can start playback.

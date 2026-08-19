@@ -619,7 +619,24 @@ class PlayerController {
         _fail('Could not play "${song.title}".');
         return;
       }
-      await _player.setAudioSource(AudioSource.uri(uri));
+      // Pass a browser User-Agent so googlevideo does not 403 ExoPlayer's
+      // request. The resolved URL is not strictly UA-bound, but googlevideo
+      // rejects some requests whose User-Agent looks unfamiliar, which shows
+      // up as a track that resolves yet refuses to load. A common desktop UA
+      // sidesteps that. Headers only apply to remote sources; local offline
+      // files (a file:// URI) ignore them.
+      final audioSource = uri.isScheme('file')
+          ? AudioSource.uri(uri)
+          : AudioSource.uri(
+              uri,
+              headers: const {
+                'User-Agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                    'AppleWebKit/537.36 (KHTML, like Gecko) '
+                    'Chrome/120.0.0.0 Safari/537.36',
+              },
+            );
+      await _player.setAudioSource(audioSource);
       if (_disposed || generation != _loadGeneration) return;
       await _player.play();
       _log.info('playing: ${song.title}');
