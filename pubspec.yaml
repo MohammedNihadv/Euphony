@@ -1,7 +1,7 @@
 name: euphony
 description: "Euphony — a music streaming client for Android."
 publish_to: 'none'
-version: 0.2.6+1
+version: 0.2.7+1
 
 environment:
   sdk: ^3.12.1
@@ -9,6 +9,7 @@ environment:
 dependencies:
   audio_service: ^0.18.17
   collection: ^1.19.1
+  device_info_plus: ^12.4.0
   dio: ^5.10.0
   drift: ^2.34.2
   drift_flutter: ^0.3.1
@@ -20,6 +21,7 @@ dependencies:
   just_audio: ^0.9.46
   logging: ^1.3.0
   meta: ^1.18.0
+  open_filex: ^4.7.0
   package_info_plus: ^8.3.0
   path_provider: ^2.1.6
   permission_handler: ^11.3.1

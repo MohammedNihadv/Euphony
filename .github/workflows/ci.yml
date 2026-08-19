@@ -70,6 +70,26 @@ jobs:
         run: |
           dart run build_runner build
 
+      # Sign every release with one stable key so users can update between
+      # versions (an unsigned/debug build gets a fresh key each run, and Android
+      # refuses to install an update whose signature changed). Falls back to
+      # debug signing when the secret is absent, so forks still build.
+      - name: Set up release signing
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        if: ${{ env.KEYSTORE_B64 != '' }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > android/app/euphony-release.jks
+          {
+            echo "storeFile=euphony-release.jks"
+            echo "storePassword=$KEYSTORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > android/key.properties
+
       - name: Build Release APKs
         run: flutter build apk --release --split-per-abi
 

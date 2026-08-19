@@ -1,11 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import '../../app/update_prompt.dart';
 import '../../data/remote/update_checker.dart';
 import '../../design/theme/theme_controller.dart';
 import '../../design/tokens/brutal.dart';
@@ -24,7 +25,7 @@ class SettingsScreen extends ConsumerWidget {
     final settings = ref.watch(settingsControllerProvider);
     final settingsController = ref.read(settingsControllerProvider.notifier);
     final themeData = Theme.of(context);
-    final appVersion = ref.watch(appVersionProvider).asData?.value ?? '0.2.6';
+    final appVersion = ref.watch(appVersionProvider).asData?.value ?? '0.2.7';
 
     return Scaffold(
       appBar: AppBar(
@@ -771,7 +772,7 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Current Version: v${info?.currentVersion ?? ref.watch(appVersionProvider).asData?.value ?? '0.2.6'}',
+                          'Current Version: v${info?.currentVersion ?? ref.watch(appVersionProvider).asData?.value ?? '0.2.7'}',
                           style: const TextStyle(fontWeight: FontWeight.w800),
                         ),
                         if (info != null && info.hasUpdate)
@@ -809,7 +810,7 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
                         ? null
                         : () async {
                             if (info != null && info.hasUpdate) {
-                              _showUpdateDialog(context, info);
+                              unawaited(showUpdateDialog(context, info));
                             } else {
                               await _checkUpdate();
                             }
@@ -842,92 +843,6 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
     );
   }
 
-  void _showUpdateDialog(BuildContext context, UpdateInfo info) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        scrollable: true,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: context.eu.ink, width: 2.5),
-        ),
-        title: Text(
-          'UPDATE AVAILABLE (v${info.latestVersion})',
-          style: const TextStyle(
-            fontWeight: FontWeight.w900,
-            letterSpacing: 0.8,
-            fontSize: 16,
-          ),
-        ),
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'A new version of Euphony is available!',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(height: EuSpace.sm),
-            const Text(
-              'Updating will preserve all your downloaded songs, liked tracks, playlists, and app settings.',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-            ),
-            if (info.releaseNotes != null && info.releaseNotes!.isNotEmpty) ...[
-              const SizedBox(height: EuSpace.md),
-              const Text(
-                'Release Notes:',
-                style: TextStyle(fontWeight: FontWeight.w900),
-              ),
-              const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  info.releaseNotes!,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Later',
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: EuBrutal.accent,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: () async {
-              Navigator.pop(context);
-              final uri = Uri.tryParse(info.apkUrl ?? info.releaseUrl);
-              if (uri != null && await canLaunchUrl(uri)) {
-                await launchUrl(uri, mode: LaunchMode.externalApplication);
-              }
-            },
-            child: const Text(
-              'Download Release',
-              style: TextStyle(fontWeight: FontWeight.w900),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _ThemeModeButton extends StatelessWidget {

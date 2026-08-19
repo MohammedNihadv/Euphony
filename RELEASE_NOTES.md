@@ -1,16 +1,16 @@
-## Euphony v0.2.6 — Playback fixed for real 🎧
+## Euphony v0.2.7 — Update inside the app 📲
 
-Songs now load and play. Earlier versions could resolve a track but then fail to actually play it ("Source error"), because YouTube's media servers reject the kind of large, open-ended download request the Android player makes by default.
+No more hopping to a browser to update. When a new version is out, Euphony can now download and install it for you, right from the app.
 
-### 🔧 Fixed
-- **Music plays reliably again.** Euphony now streams audio in small chunks that YouTube's servers accept, instead of one big request they refuse. This fixes tracks that spun forever or failed to load — including on mobile data, IPv6, and networks with ad-blockers or proxies.
-- **Switching songs no longer gets stuck.**
+### ✨ New
+- **In-app updates.** Tap "Update now" and Euphony downloads the correct build for your phone with a progress bar, then opens the installer — no website trip, no picking the right file yourself.
+- The update prompt appears when you open the app, and is also in Settings → App Updates.
 
-### ✨ Also in recent updates
-- Update notifications when you open the app.
-- A cleaner look and a fixed logo.
+### 🔧 Still included
+- Reliable playback (the chunked-streaming fix from v0.2.6).
+- Update notifications on launch.
 
-If a track still won't play, please [tell us](https://github.com/MohammedNihadv/Euphony/issues).
+> One-time note: this build is signed with Euphony's new permanent key, so you may need to uninstall the old version once before installing. After this, in-app updates install seamlessly.
 
 ### 📥 Which APK should I download?
 

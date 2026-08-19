@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <!-- Install the downloaded APK for in-app updates. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/>
 
     <!-- Background playback. Without these the OS kills audio as soon as the
          app leaves the foreground. FOREGROUND_SERVICE_MEDIA_PLAYBACK is

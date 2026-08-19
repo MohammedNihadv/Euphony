@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../data/remote/app_updater.dart';
 import '../data/remote/update_checker.dart';
 import '../design/tokens/brutal.dart';
 import '../design/tokens/tokens.dart';
@@ -11,8 +12,8 @@ import '../design/tokens/tokens.dart';
 /// Before this, the only place an update was ever checked was the Settings
 /// screen — so a user on an old build had no way to learn a fix had shipped
 /// unless they went looking. This runs the check once per app session and, if
-/// a newer release exists, shows a dismissible dialog with the release notes
-/// and a button to grab it.
+/// a newer release exists, shows a dismissible dialog that downloads and
+/// installs the update in-app.
 class UpdatePrompt {
   UpdatePrompt._();
 
@@ -42,13 +43,78 @@ class UpdatePrompt {
   }
 }
 
-/// The shared "update available" dialog. Opens the release page so the user
-/// sees every APK option (and the friendly notes) rather than being handed a
-/// single architecture that might be wrong for their device.
+/// The shared "update available" dialog. Downloads the matching APK inside the
+/// app and hands it to the system installer — no trip to the browser or the
+/// website — with a progress bar and a "download in browser" fallback.
 Future<void> showUpdateDialog(BuildContext context, UpdateInfo info) {
   return showDialog<void>(
     context: context,
-    builder: (context) => AlertDialog(
+    barrierDismissible: false,
+    builder: (context) => _UpdateDialog(info: info),
+  );
+}
+
+class _UpdateDialog extends StatefulWidget {
+  const _UpdateDialog({required this.info});
+
+  final UpdateInfo info;
+
+  @override
+  State<_UpdateDialog> createState() => _UpdateDialogState();
+}
+
+class _UpdateDialogState extends State<_UpdateDialog> {
+  final _updater = AppUpdater();
+  bool _downloading = false;
+  double _progress = 0;
+  String? _error;
+
+  Future<void> _startUpdate() async {
+    setState(() {
+      _downloading = true;
+      _error = null;
+      _progress = 0;
+    });
+
+    final url = await AppUpdater.pickApkUrl(widget.info);
+    if (url == null) {
+      setState(() {
+        _downloading = false;
+        _error = 'No download is available for this release.';
+      });
+      return;
+    }
+
+    final error = await _updater.downloadAndInstall(
+      url,
+      onProgress: (p) {
+        if (mounted) setState(() => _progress = p);
+      },
+    );
+
+    if (!mounted) return;
+    if (error != null) {
+      setState(() {
+        _downloading = false;
+        _error = error;
+      });
+    } else {
+      // The system installer is now in front; close our dialog.
+      Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _openInBrowser() async {
+    final uri = Uri.tryParse(widget.info.releaseUrl);
+    if (uri != null && await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final info = widget.info;
+    return AlertDialog(
       scrollable: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
@@ -77,38 +143,85 @@ Future<void> showUpdateDialog(BuildContext context, UpdateInfo info) {
               ),
               child: Text(
                 info.releaseNotes!,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+          if (_downloading) ...[
+            const SizedBox(height: EuSpace.lg),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: _progress > 0 ? _progress : null,
+                minHeight: 10,
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest,
+                valueColor: const AlwaysStoppedAnimation(EuBrutal.accent),
+              ),
+            ),
+            const SizedBox(height: EuSpace.xs),
+            Text(
+              _progress > 0
+                  ? 'Downloading… ${(_progress * 100).round()}%'
+                  : 'Starting download…',
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+          ],
+          if (_error != null) ...[
+            const SizedBox(height: EuSpace.md),
+            Text(
+              _error!,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: EuBrutal.alert,
               ),
             ),
           ],
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text(
-            'Later',
-            style: TextStyle(fontWeight: FontWeight.w700),
-          ),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: EuBrutal.accent,
-            foregroundColor: Colors.white,
-          ),
-          onPressed: () async {
-            Navigator.pop(context);
-            final uri = Uri.tryParse(info.releaseUrl);
-            if (uri != null && await canLaunchUrl(uri)) {
-              await launchUrl(uri, mode: LaunchMode.externalApplication);
-            }
-          },
-          child: const Text(
-            'Get update',
-            style: TextStyle(fontWeight: FontWeight.w900),
-          ),
-        ),
-      ],
-    ),
-  );
+      actions: _downloading
+          ? const [
+              Padding(
+                padding: EdgeInsets.all(8),
+                child: Text(
+                  'Please wait…',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+            ]
+          : [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Later',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
+              if (_error != null)
+                TextButton(
+                  onPressed: _openInBrowser,
+                  child: const Text(
+                    'In browser',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: EuBrutal.accent,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: _startUpdate,
+                child: Text(
+                  _error != null ? 'Retry' : 'Update now',
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+              ),
+            ],
+    );
+  }
 }

@@ -8,6 +8,7 @@ class UpdateInfo {
     required this.latestVersion,
     required this.releaseUrl,
     this.apkUrl,
+    this.apkAssets = const {},
     this.releaseNotes,
     required this.hasUpdate,
   });
@@ -16,6 +17,11 @@ class UpdateInfo {
   final String latestVersion;
   final String releaseUrl;
   final String? apkUrl;
+
+  /// Every uploaded APK, keyed by a lowercased asset name so the installer can
+  /// pick the one matching the device's CPU architecture.
+  final Map<String, String> apkAssets;
+
   final String? releaseNotes;
   final bool hasUpdate;
 }
@@ -57,14 +63,16 @@ class UpdateChecker {
       final releaseNotes = data['body'] as String?;
 
       String? apkUrl;
+      final apkAssets = <String, String>{};
       final assets = data['assets'] as List<dynamic>?;
       if (assets != null) {
         for (final asset in assets) {
           if (asset is Map<String, dynamic>) {
             final name = asset['name'] as String? ?? '';
-            if (name.endsWith('.apk')) {
-              apkUrl = asset['browser_download_url'] as String?;
-              break;
+            final downloadUrl = asset['browser_download_url'] as String?;
+            if (name.endsWith('.apk') && downloadUrl != null) {
+              apkAssets[name.toLowerCase()] = downloadUrl;
+              apkUrl ??= downloadUrl;
             }
           }
         }
@@ -77,6 +85,7 @@ class UpdateChecker {
         latestVersion: latestTag.isNotEmpty ? latestTag : currentVersion,
         releaseUrl: releaseUrl,
         apkUrl: apkUrl,
+        apkAssets: apkAssets,
         releaseNotes: releaseNotes,
         hasUpdate: hasUpdate,
       );
