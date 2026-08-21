@@ -2,6 +2,13 @@
 cmake_minimum_required(VERSION 3.14)
 project(euphony LANGUAGES CXX)
 
+# permission_handler_windows still compiles with the deprecated /await option
+# and <experimental/coroutine>, which recent MSVC toolchains promote from a
+# warning to a hard error (STL1011), breaking `flutter build windows`. Microsoft
+# documents this exact define as the way to keep those headers compiling. Set at
+# the top level so every plugin subdirectory added below inherits it.
+add_compile_definitions(_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS)
+
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
 set(BINARY_NAME "euphony")
