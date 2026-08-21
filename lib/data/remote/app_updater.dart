@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -67,9 +68,13 @@ class AppUpdater {
     void Function(double progress)? onProgress,
   }) async {
     try {
-      final dir =
-          await getExternalStorageDirectory() ??
-          await getApplicationSupportDirectory();
+      // getExternalStorageDirectory is Android-only (it throws elsewhere), so
+      // only reach for it on Android; every other platform uses the support dir.
+      Directory? dir;
+      if (!kIsWeb && Platform.isAndroid) {
+        dir = await getExternalStorageDirectory();
+      }
+      dir ??= await getApplicationSupportDirectory();
       final file = File('${dir.path}/euphony-update.apk');
       if (file.existsSync()) {
         await file.delete();

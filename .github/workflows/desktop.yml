@@ -1,0 +1,81 @@
+name: Desktop builds
+
+on:
+  push:
+    branches: [desktop-support]
+    tags: ['v*-desktop']
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: '3.44.1'
+
+jobs:
+  windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: flutter build windows --release
+      - name: Package
+        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath euphony-windows-x64.zip
+      - uses: actions/upload-artifact@v7
+        with:
+          name: euphony-windows
+          path: euphony-windows-x64.zip
+
+  linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install build deps (GTK + libmpv for media_kit)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential clang cmake ninja-build \
+            pkg-config libgtk-3-dev liblzma-dev libmpv-dev mpv
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: flutter build linux --release
+      - name: Package
+        run: |
+          cd build/linux/x64/release/bundle
+          tar -czf $GITHUB_WORKSPACE/euphony-linux-x64.tar.gz .
+      - uses: actions/upload-artifact@v7
+        with:
+          name: euphony-linux
+          path: euphony-linux-x64.tar.gz
+
+  macos:
+    name: Build macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: flutter build macos --release
+      - name: Package
+        run: |
+          cd build/macos/Build/Products/Release
+          APP=$(ls -d *.app | head -1)
+          zip -r -y "$GITHUB_WORKSPACE/euphony-macos.zip" "$APP"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: euphony-macos
+          path: euphony-macos.zip
