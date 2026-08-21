@@ -414,9 +414,14 @@ final playerControllerProvider = Provider<PlayerController>((ref) {
 /// A stream URL together with the moment it stops working.
 @immutable
 class ResolvedStream {
-  const ResolvedStream(this.url);
+  const ResolvedStream(this.url, {this.direct = false});
 
   final String url;
+
+  /// Whether the URL can be handed straight to the player. Muxed (itag 18) and
+  /// offline files are not throttled, so they play directly; throttled
+  /// audio-only URLs must go through [StreamProxy] instead.
+  final bool direct;
 
   /// InnerTube signs stream URLs with an `expire` timestamp and refuses them
   /// afterwards. Re-resolving is cheap; playing a dead URL is a silent failure.
@@ -627,12 +632,12 @@ class PlayerController {
         _fail('Could not play "${song.title}".');
         return;
       }
-      // Remote googlevideo streams go through the loopback StreamProxy, which
-      // rewrites ExoPlayer's open-ended range into a bounded one — googlevideo
-      // answers open ranges with 403, which is why direct playback failed.
-      // Local offline files are played straight from disk.
+      // Non-throttled sources (muxed itag 18, offline files) play straight.
+      // Throttled audio-only URLs go through the loopback StreamProxy, which
+      // fetches them in small bounded chunks YouTube still serves — an
+      // open-ended request to a throttled URL is answered with 403.
       final Uri playbackUri;
-      if (uri.isScheme('file')) {
+      if (source.direct || uri.isScheme('file')) {
         playbackUri = uri;
       } else {
         final proxy = await StreamProxy.start();
@@ -675,15 +680,44 @@ class PlayerController {
       final file = File('${docDir.path}/offline_audio/${song.id}.audio');
       if (file.existsSync()) {
         _log.info('playing ${song.id} offline from ${file.path}');
-        return ResolvedStream(file.uri.toString());
+        return ResolvedStream(file.uri.toString(), direct: true);
       }
     } catch (_) {}
 
-    // Primary engine: YoutubeExplode
-    // Resolves signatures, throttling challenges, and client headers automatically.
+    // Primary engine: YoutubeExplode, forced onto the ANDROID client — the one
+    // that reliably resolves official/music tracks. Its adaptive audio-only
+    // formats are throttled by YouTube to ~1 MB (about a minute) without a
+    // proof-of-origin token, so we prefer the **muxed** format (itag 18): a
+    // combined MP4 whose AAC audio track plays fine and which YouTube does not
+    // throttle, giving full-length playback. just_audio plays the audio out of
+    // the MP4 and ignores the (usually static) video track.
     final yt = yt_explode.YoutubeExplode();
     try {
-      final manifest = await yt.videos.streamsClient.getManifest(song.id);
+      final manifest = await yt.videos.streamsClient.getManifest(
+        song.id,
+        ytClients: [yt_explode.YoutubeApiClient.android],
+      );
+
+      final muxed = manifest.muxed.toList();
+      if (muxed.isNotEmpty) {
+        // itag 18 is the small, universally-available 360p MP4; prefer it, else
+        // take the lowest-bitrate muxed stream to minimise wasted video data.
+        muxed.sort((a, b) => a.bitrate.compareTo(b.bitrate));
+        final chosen = muxed.firstWhere(
+          (s) => s.tag == 18,
+          orElse: () => muxed.first,
+        );
+        final url = chosen.url.toString();
+        if (url.isNotEmpty) {
+          _log.info('resolved muxed (itag ${chosen.tag}) for ${song.id}');
+          final resolved = ResolvedStream(url, direct: true);
+          _streams[song.id] = resolved;
+          return resolved;
+        }
+      }
+
+      // Fallback: audio-only. Higher quality but throttled, so it plays through
+      // StreamProxy which fetches it in small chunks YouTube still serves.
       final audioOnly = manifest.audioOnly.toList();
       if (audioOnly.isNotEmpty) {
         audioOnly.sort((a, b) => b.bitrate.compareTo(a.bitrate));
@@ -698,7 +732,7 @@ class PlayerController {
         };
         final url = bestAudio.url.toString();
         if (url.isNotEmpty) {
-          _log.info('resolved via YoutubeExplode for ${song.id}');
+          _log.info('resolved audio-only (proxied) for ${song.id}');
           final resolved = ResolvedStream(url);
           _streams[song.id] = resolved;
           return resolved;

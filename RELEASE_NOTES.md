@@ -1,16 +1,12 @@
-## Euphony v0.2.7 — Update inside the app 📲
+## Euphony v0.2.8 — Full songs play again 🎶
 
-No more hopping to a browser to update. When a new version is out, Euphony can now download and install it for you, right from the app.
+Fixes the big one: songs cutting out after about a minute.
 
-### ✨ New
-- **In-app updates.** Tap "Update now" and Euphony downloads the correct build for your phone with a progress bar, then opens the installer — no website trip, no picking the right file yourself.
-- The update prompt appears when you open the app, and is also in Settings → App Updates.
+### 🔧 Fixed
+- **Songs now play all the way through.** YouTube had started cutting off the audio-only streams after ~1 minute. Euphony now uses a stream format YouTube serves in full, so tracks play start to finish without going silent.
 
-### 🔧 Still included
-- Reliable playback (the chunked-streaming fix from v0.2.6).
-- Update notifications on launch.
-
-> One-time note: this build is signed with Euphony's new permanent key, so you may need to uninstall the old version once before installing. After this, in-app updates install seamlessly.
+### Good to know
+- Audio comes through a combined stream, so quality is solid (AAC) and playback is reliable. If you ever hit a track that won't play, please [let us know](https://github.com/MohammedNihadv/Euphony/issues).
 
 ### 📥 Which APK should I download?
 
