@@ -22,7 +22,16 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
-      - run: flutter build windows --release
+      - name: Build Windows (capture log)
+        run: |
+          flutter build windows --release -v 2>&1 | Tee-Object -FilePath build_log.txt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-build-log
+          path: build_log.txt
       - name: Package
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath euphony-windows-x64.zip
       - uses: actions/upload-artifact@v7
