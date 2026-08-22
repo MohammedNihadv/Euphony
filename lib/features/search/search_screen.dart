@@ -175,8 +175,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       ),
       body: SafeArea(
         top: false,
-        child: CustomScrollView(
-          slivers: [
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1180),
+            child: CustomScrollView(
+              slivers: [
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(
                 EuSpace.screenGutter,
@@ -272,6 +275,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                 ),
               ),
           ],
+            ),
+          ),
         ),
       ),
     );

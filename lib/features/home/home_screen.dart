@@ -100,8 +100,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         child: RefreshIndicator(
           onRefresh: () => _loadHomeFeed(force: true),
           color: EuBrutal.accent,
-          child: CustomScrollView(
-            slivers: [
+          // Cap content width and centre it so a wide desktop window doesn't
+          // stretch the banner and rows into thin full-bleed strips. No effect
+          // on phones, where the screen is narrower than the cap.
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1180),
+              child: CustomScrollView(
+                slivers: [
               // Category Filter Pills (Spotify-style)
               SliverToBoxAdapter(
                 child: SingleChildScrollView(
@@ -249,7 +255,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
                 const SliverPadding(padding: EdgeInsets.only(bottom: 80.0)),
               ],
-            ],
+                ],
+              ),
+            ),
           ),
         ),
       ),

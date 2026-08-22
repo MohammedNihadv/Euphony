@@ -51,8 +51,11 @@ class SettingsScreen extends ConsumerWidget {
         ),
       ),
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, EuSpace.md, 20, 120),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1180),
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, EuSpace.md, 20, 120),
           children: [
             // Appearance Section Card
             Container(
@@ -511,6 +514,8 @@ class SettingsScreen extends ConsumerWidget {
             // App Updates & Version Card
             const _AppUpdateCard(),
           ],
+        ),
+          ),
         ),
       ),
     );

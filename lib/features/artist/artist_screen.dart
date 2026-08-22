@@ -78,7 +78,10 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
             ? Center(child: Text(_error!, style: theme.textTheme.titleMedium))
             : _artist == null
             ? const Center(child: Text('Artist not found'))
-            : ListView(
+            : Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1100),
+                  child: ListView(
                 padding: const EdgeInsets.all(EuSpace.screenGutter),
                 children: [
                   // Artist Header Card
@@ -191,6 +194,8 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                     const SizedBox(height: EuSpace.xl),
                   ],
                 ],
+              ),
+                ),
               ),
       ),
     );

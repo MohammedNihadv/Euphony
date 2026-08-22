@@ -148,7 +148,10 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                   ),
                 ),
               )
-            : ListView(
+            : Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1100),
+                  child: ListView(
                 padding: const EdgeInsets.all(EuSpace.screenGutter),
                 children: [
                   // Cover & Actions Card
@@ -355,6 +358,8 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                         },
                       ),
                 ],
+              ),
+                ),
               ),
       ),
     );
