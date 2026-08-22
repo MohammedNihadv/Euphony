@@ -157,12 +157,9 @@ class _LogoSlab extends StatelessWidget {
               border: Border.all(color: EuBrutal.onHighlight, width: 2.5),
             ),
             clipBehavior: Clip.antiAlias,
-            child: Transform.scale(
-              scale: 1.62,
-              child: Image.asset(
-                'assets/images/app.icon.png',
-                fit: BoxFit.cover,
-              ),
+            child: Image.asset(
+              'assets/images/app.icon.png',
+              fit: BoxFit.cover,
             ),
           ),
           const SizedBox(width: 14),

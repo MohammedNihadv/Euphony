@@ -674,15 +674,6 @@ class _SectionBlock extends StatelessWidget {
           const SizedBox(height: EuSpace.sm),
           for (final item in section.items)
             _MusicItemTile(item: item, sectionItems: section.items),
-          if (section.hasMore)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton.icon(
-                onPressed: null,
-                icon: const Icon(Icons.more_horiz),
-                label: const Text('More'),
-              ),
-            ),
         ],
       ),
     );

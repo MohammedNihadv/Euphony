@@ -20,13 +20,9 @@ class EuphonyLogoMark extends StatelessWidget {
         boxShadow: EuBrutal.glow(EuBrutal.accent, strength: 0.45),
       ),
       clipBehavior: Clip.antiAlias,
-      // The source PNG carries a wide transparent margin, so it renders tiny
-      // and double-framed at its natural size. Scaling past that padding makes
-      // the real icon fill the tile edge to edge.
-      child: Transform.scale(
-        scale: 1.62,
-        child: Image.asset('assets/images/app.icon.png', fit: BoxFit.cover),
-      ),
+      // The icon is full-bleed (purple tile + waveform), so it fills the frame
+      // directly — no scaling needed.
+      child: Image.asset('assets/images/app.icon.png', fit: BoxFit.cover),
     );
   }
 }
