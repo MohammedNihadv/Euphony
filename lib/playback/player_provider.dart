@@ -15,6 +15,7 @@ import '../data/remote/innertube/innertube_client.dart';
 import '../data/remote/innertube/innertube_utils.dart';
 import '../domain/song.dart';
 import '../features/settings/settings_provider.dart';
+import 'desktop_media_controls.dart';
 import 'stream_proxy.dart';
 
 final _log = logFor('playback');
@@ -490,7 +491,18 @@ class PlayerController {
   /// while the user is already skipping.
   int _loadGeneration = 0;
 
+  /// Windows media-key / SMTC integration. No-op off Windows.
+  final DesktopMediaControls _mediaControls = DesktopMediaControls();
+
   void _setupListeners() {
+    // Wire the OS media keys / SMTC flyout (Windows) to the player.
+    _mediaControls.init(
+      onPlay: () => unawaited(_player.play()),
+      onPause: () => unawaited(_player.pause()),
+      onNext: skipNext,
+      onPrevious: skipPrevious,
+    );
+
     // The old listener mirrored just_audio's `sequenceState.currentIndex` back
     // into the queue. Because each track is loaded as its own single-item
     // source that index is always 0, so playing track 5 immediately reset the
@@ -498,6 +510,7 @@ class PlayerController {
     // the player is told what to play rather than asked.
     _stateSub = _player.playerStateStream.listen((state) {
       if (_disposed) return;
+      _mediaControls.setPlaying(playing: state.playing);
       if (state.processingState == ProcessingState.completed) {
         unawaited(_onTrackCompleted());
       }
@@ -507,6 +520,7 @@ class PlayerController {
   void dispose() {
     _disposed = true;
     unawaited(_stateSub?.cancel());
+    _mediaControls.dispose();
   }
 
   /// Advances when a track plays out, honouring the repeat mode.
@@ -646,6 +660,7 @@ class PlayerController {
       if (_disposed || generation != _loadGeneration) return;
       await _player.setAudioSource(AudioSource.uri(playbackUri));
       if (_disposed || generation != _loadGeneration) return;
+      _mediaControls.updateSong(song);
       await _player.play();
       _log.info('playing: ${song.title}');
     } catch (error) {
