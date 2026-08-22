@@ -116,12 +116,16 @@ jobs:
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
       - run: flutter build windows --release
-      - name: Package
-        run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath euphony-windows-x64.zip
+      - name: Build installer (Inno Setup)
+        shell: pwsh
+        run: |
+          choco install innosetup --no-progress -y
+          $v = "${{ github.ref_name }}".TrimStart('v')
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DAppVersion=$v" installer\windows\euphony.iss
       - uses: actions/upload-artifact@v7
         with:
           name: euphony-windows
-          path: euphony-windows-x64.zip
+          path: installer/windows/installer_out/euphony-windows-setup.exe
           if-no-files-found: error
 
   build-linux:
@@ -144,14 +148,14 @@ jobs:
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
       - run: flutter build linux --release
-      - name: Package
+      - name: Build AppImage
         run: |
-          cd build/linux/x64/release/bundle
-          tar -czf $GITHUB_WORKSPACE/euphony-linux-x64.tar.gz .
+          sudo apt-get install -y wget file
+          bash installer/linux/build_appimage.sh
       - uses: actions/upload-artifact@v7
         with:
           name: euphony-linux
-          path: euphony-linux-x64.tar.gz
+          path: euphony-linux-x86_64.AppImage
           if-no-files-found: error
 
   build-macos:
@@ -169,15 +173,19 @@ jobs:
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
       - run: flutter build macos --release
-      - name: Package
+      - name: Build DMG
         run: |
           cd build/macos/Build/Products/Release
           APP=$(ls -d *.app | head -1)
-          zip -r -y "$GITHUB_WORKSPACE/euphony-macos.zip" "$APP"
+          mkdir -p dmg_stage
+          cp -R "$APP" dmg_stage/
+          ln -s /Applications dmg_stage/Applications
+          hdiutil create -volname Euphony -srcfolder dmg_stage -ov -format UDZO \
+            "$GITHUB_WORKSPACE/euphony-macos.dmg"
       - uses: actions/upload-artifact@v7
         with:
           name: euphony-macos
-          path: euphony-macos.zip
+          path: euphony-macos.dmg
           if-no-files-found: error
 
   publish-release:
@@ -199,9 +207,9 @@ jobs:
         with:
           files: |
             dist/euphony-release-apks/*.apk
-            dist/euphony-windows/*.zip
-            dist/euphony-linux/*.tar.gz
-            dist/euphony-macos/*.zip
+            dist/euphony-windows/*.exe
+            dist/euphony-linux/*.AppImage
+            dist/euphony-macos/*.dmg
           # Human-written, community-friendly notes live in RELEASE_NOTES.md so
           # every release reads for people, not from a raw commit log. Update
           # that file before tagging a new version. Auto-generated notes are off

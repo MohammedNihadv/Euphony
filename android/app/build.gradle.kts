@@ -37,7 +37,7 @@ android {
         // background-audio stack needs.
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
-        versionCode = 3001
+        versionCode = 3002
         versionName = flutter.versionName
     }
 

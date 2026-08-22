@@ -1,28 +1,24 @@
-## Euphony v0.2.9 — Now on your computer 💻
+## Euphony v0.2.10 — Proper desktop installers 📦
 
-Euphony comes to the desktop! Alongside Android, you can now run Euphony on **Windows, macOS and Linux** — same music, same account-free experience, in a proper desktop window.
+Desktop now installs like a real app — no more unzipping. Grab a single file and go.
 
 ### ✨ New
-- **Desktop apps for Windows, macOS & Linux.** A redesigned layout for bigger screens: a sidebar for navigation and a full-width player bar along the bottom.
-- **Refreshed app icon** and a cleaner home screen that adapts to the window size.
+- **Windows installer** — `euphony-windows-setup.exe`: run it, and Euphony installs with Start-menu and (optional) desktop shortcuts.
+- **Linux AppImage** — `euphony-linux-x86_64.AppImage`: one portable file, make it executable and run.
+- **macOS disk image** — `euphony-macos.dmg`: open it and drag Euphony to Applications.
 
-### 🔧 Improvements
-- Tidier Quick Picks and browse layout on wide screens.
+### 🔧 Fixed
+- The app icon now shows everywhere, including the launch screen (splash), which still used the old logo.
 
 ### 📥 Downloads
-**Android**
-| APK | Device |
-| :-- | :-- |
-| `app-arm64-v8a-release.apk` | Most phones (2017+) — **pick this** |
-| `app-armeabi-v7a-release.apk` | Older 32-bit phones |
-| `app-x86_64-release.apk` | Emulators / Chromebooks |
+| Platform | File | How to install |
+| :-- | :-- | :-- |
+| Android | `app-arm64-v8a-release.apk` (most phones) | Tap to install |
+| Windows | `euphony-windows-setup.exe` | Run the installer |
+| macOS | `euphony-macos.dmg` | Open, drag to Applications |
+| Linux | `euphony-linux-x86_64.AppImage` | `chmod +x` then run (needs `libmpv`) |
 
-**Desktop** *(beta — please report anything odd)*
-| File | Platform |
-| :-- | :-- |
-| `euphony-windows-x64.zip` | Windows 10/11 — unzip and run `euphony.exe` |
-| `euphony-macos.zip` | macOS — unzip and open `Euphony.app` |
-| `euphony-linux-x64.tar.gz` | Linux — extract and run `euphony` (needs `libmpv`) |
+Android also has `armeabi-v7a` (older phones) and `x86_64` (emulators).
 
 ---
 
