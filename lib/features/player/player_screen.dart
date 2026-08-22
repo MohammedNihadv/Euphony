@@ -75,13 +75,62 @@ class PlayerScreen extends ConsumerWidget {
           : SafeArea(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  // Dynamically scale artwork so controls always fit on any screen ratio
-                  // without overflow or requiring scrolling.
+                  // On a wide desktop window, split into two panes — a large
+                  // artwork on the left and the info + controls on the right —
+                  // instead of the phone's single narrow centred column.
+                  if (constraints.maxWidth >= 900) {
+                    final artSize =
+                        (constraints.maxHeight * 0.68)
+                            .clamp(240.0, 520.0)
+                            .toDouble();
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        EuSpace.xxxl,
+                        EuSpace.lg,
+                        EuSpace.xxxl,
+                        EuSpace.lg,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 5,
+                            child: Center(
+                              child: _Artwork(song: song, artSize: artSize),
+                            ),
+                          ),
+                          const SizedBox(width: EuSpace.xxxl),
+                          Expanded(
+                            flex: 4,
+                            child: Center(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 560),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    _TrackHeader(song: song),
+                                    const SizedBox(height: EuSpace.xl),
+                                    const _Scrubber(),
+                                    const SizedBox(height: EuSpace.lg),
+                                    const _TransportControls(),
+                                    const SizedBox(height: EuSpace.xl),
+                                    _BottomActionBar(song: song),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // Phone: single centred column. Scale artwork so controls
+                  // always fit without overflow or scrolling.
                   final maxArtSize = (constraints.maxHeight * 0.40).clamp(
                     150.0,
                     360.0,
                   );
-
                   return Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 460),

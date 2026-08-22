@@ -316,6 +316,16 @@ class _SearchLanding extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final dao = ref.watch(searchHistoryDaoProvider);
     final theme = Theme.of(context);
+    // More category columns on wider (desktop) windows so the tiles don't blow
+    // up into a couple of huge blocks.
+    final width = MediaQuery.sizeOf(context).width;
+    final categoryCols = width >= 1500
+        ? 5
+        : width >= 1100
+        ? 4
+        : width >= 720
+        ? 3
+        : 2;
 
     return StreamBuilder(
       stream: dao.watchRecent(limit: 8),
@@ -403,8 +413,8 @@ class _SearchLanding extends ConsumerWidget {
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: categoryCols,
                 childAspectRatio: 2.2,
                 crossAxisSpacing: EuSpace.md,
                 mainAxisSpacing: EuSpace.md,
