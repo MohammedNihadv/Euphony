@@ -79,3 +79,18 @@ jobs:
         with:
           name: euphony-macos
           path: euphony-macos.zip
+
+  ios:
+    name: Build iOS (unsigned)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - name: Build iOS (no code signing)
+        run: flutter build ios --release --no-codesign
