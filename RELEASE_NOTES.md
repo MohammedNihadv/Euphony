@@ -1,24 +1,21 @@
-## Euphony v0.2.10 — Proper desktop installers 📦
+## Euphony v0.2.11 — iOS (sideload) + hardening 🍏
 
-Desktop now installs like a real app — no more unzipping. Grab a single file and go.
+Euphony now has an iOS build you can sideload, plus a security tidy-up of the build pipeline.
 
 ### ✨ New
-- **Windows installer** — `euphony-windows-setup.exe`: run it, and Euphony installs with Start-menu and (optional) desktop shortcuts.
-- **Linux AppImage** — `euphony-linux-x86_64.AppImage`: one portable file, make it executable and run.
-- **macOS disk image** — `euphony-macos.dmg`: open it and drag Euphony to Applications.
+- **iOS app (`euphony-ios.ipa`)** — an unsigned build you can install with **AltStore**, **Sideloadly** or **TrollStore** — no App Store or developer account required. (A signed App Store release is still planned.)
 
-### 🔧 Fixed
-- The app icon now shows everywhere, including the launch screen (splash), which still used the old logo.
+### 🔒 Hardening
+- Locked every CI workflow to least-privilege permissions (resolves the CodeQL "workflow does not contain permissions" warnings).
 
 ### 📥 Downloads
-| Platform | File | How to install |
+| Platform | File | Install |
 | :-- | :-- | :-- |
-| Android | `app-arm64-v8a-release.apk` (most phones) | Tap to install |
+| Android | `app-arm64-v8a-release.apk` | Tap to install |
 | Windows | `euphony-windows-setup.exe` | Run the installer |
 | macOS | `euphony-macos.dmg` | Open, drag to Applications |
-| Linux | `euphony-linux-x86_64.AppImage` | `chmod +x` then run (needs `libmpv`) |
-
-Android also has `armeabi-v7a` (older phones) and `x86_64` (emulators).
+| Linux | `euphony-linux-x86_64.AppImage` | `chmod +x` then run |
+| iOS | `euphony-ios.ipa` | Sideload (AltStore / Sideloadly / TrollStore) |
 
 ---
 

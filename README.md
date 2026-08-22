@@ -30,6 +30,10 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
   <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-linux-x86_64.AppImage">
     <img src="https://img.shields.io/badge/Linux-AppImage-FCC624?style=for-the-badge&labelColor=000000&logo=linux&logoColor=white" alt="Download for Linux"/>
   </a>
+  &nbsp;
+  <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-ios.ipa">
+    <img src="https://img.shields.io/badge/iOS-Sideload%20IPA-000000?style=for-the-badge&labelColor=000000&logo=apple&logoColor=white" alt="Download iOS IPA"/>
+  </a>
 </p>
 
 <p align="center">
@@ -42,7 +46,7 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
   </a>
 </p>
 
-<sub>📱 Android · 🍎 iOS · 🪟 Windows · 🍏 macOS · 🐧 Linux &nbsp;•&nbsp; iOS builds from source (App Store coming)</sub>
+<sub>📱 Android · 🍎 iOS (sideload) · 🪟 Windows · 🍏 macOS · 🐧 Linux</sub>
 
 </div>
 
@@ -77,7 +81,7 @@ Grab the [**latest release**](https://github.com/MohammedNihadv/Euphony/releases
 | 📱 **Android** | `app-arm64-v8a-release.apk` | ⭐ Best for 99% of phones (2017+). Tap to install. |
 | 📱 Android (legacy) | `app-armeabi-v7a-release.apk` | Older 32-bit devices. |
 | 📱 Android (x86) | `app-x86_64-release.apk` | Emulators & Intel Chromebooks. |
-| 🍎 **iOS** | build from source | Requires Xcode + an Apple Developer account (App Store release planned). |
+| 🍎 **iOS** | `euphony-ios.ipa` | Unsigned build — sideload with **AltStore**, **Sideloadly** or **TrollStore** (no App Store account needed). |
 
 ---
 

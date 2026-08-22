@@ -2,9 +2,12 @@ name: Desktop builds
 
 on:
   push:
-    branches: [desktop-support]
     tags: ['v*-desktop']
   workflow_dispatch:
+
+# These are build-only checks; the token needs nothing but read access.
+permissions:
+  contents: read
 
 env:
   FLUTTER_VERSION: '3.44.1'
