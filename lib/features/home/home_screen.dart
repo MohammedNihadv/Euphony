@@ -75,6 +75,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Widget build(BuildContext context) {
     super.build(context); // Required by AutomaticKeepAliveClientMixin
     final theme = Theme.of(context);
+    // Quick Picks are horizontal tiles. On a wide desktop window a 2-column
+    // grid stretched each cell tall and left it mostly empty, so scale the
+    // column count with width and pin the tile height instead.
+    final width = MediaQuery.sizeOf(context).width;
+    final quickCols = width >= 1500
+        ? 4
+        : width >= 1100
+        ? 3
+        : 2;
 
     return Scaffold(
       appBar: AppBar(
@@ -203,20 +212,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       vertical: EuSpace.xs,
                     ),
                     sliver: SliverGrid(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 10,
-                            crossAxisSpacing: 10,
-                            childAspectRatio: 2.7,
-                          ),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: quickCols,
+                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 10,
+                        mainAxisExtent: 84,
+                      ),
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final song = _feed!.quickPicks[index];
                         return _QuickPickTile(
                           song: song,
                           queueSongs: _feed!.quickPicks,
                         );
-                      }, childCount: _feed!.quickPicks.length.clamp(0, 6)),
+                      }, childCount: _feed!.quickPicks.length.clamp(
+                        0,
+                        quickCols >= 3 ? 8 : 6,
+                      )),
                     ),
                   ),
                 ],
