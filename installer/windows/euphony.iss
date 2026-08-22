@@ -10,7 +10,9 @@ AppName=Euphony
 AppVersion={#AppVersion}
 AppPublisher=Euphony (Community)
 AppPublisherURL=https://github.com/MohammedNihadv/Euphony
-DefaultDirName={autopf}\Euphony
+; Per-user install — no UAC/admin prompt, so a plain double-click just works.
+PrivilegesRequired=lowest
+DefaultDirName={localappdata}\Programs\Euphony
 DefaultGroupName=Euphony
 DisableProgramGroupPage=yes
 UninstallDisplayIcon={app}\euphony.exe
