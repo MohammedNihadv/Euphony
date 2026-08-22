@@ -4,23 +4,45 @@
 
 ---
 
-Life already has enough interruptions. Your music doesn't need 30-second unskippable ads for products you'll never buy. **Free, ad-free, and crafted with open-source love.**
+Life already has enough interruptions. Your music doesn't need 30-second unskippable ads for products you'll never buy. **Free, ad-free, and crafted with open-source love — now on every device.**
 
 <br>
 
-<img src="docs/screenshots/banner.png" alt="Euphony Open Source Neo-Brutalist Music Player" width="100%"/>
+<img src="docs/screenshots/banner.png" alt="Euphony Open Source Neo-Brutalist Music Player for Android, iOS, Windows, macOS and Linux" width="100%"/>
 
 <br>
+
+**Get Euphony for your platform**
+
+<p align="center">
+  <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/app-arm64-v8a-release.apk">
+    <img src="https://img.shields.io/badge/Android-Download%20APK-3DDC84?style=for-the-badge&labelColor=000000&logo=android&logoColor=3DDC84" alt="Download for Android"/>
+  </a>
+  &nbsp;
+  <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-windows-setup.exe">
+    <img src="https://img.shields.io/badge/Windows-Installer-0078D6?style=for-the-badge&labelColor=000000&logo=windows&logoColor=white" alt="Download for Windows"/>
+  </a>
+  &nbsp;
+  <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-macos.dmg">
+    <img src="https://img.shields.io/badge/macOS-.dmg-000000?style=for-the-badge&labelColor=000000&logo=apple&logoColor=white" alt="Download for macOS"/>
+  </a>
+  &nbsp;
+  <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-linux-x86_64.AppImage">
+    <img src="https://img.shields.io/badge/Linux-AppImage-FCC624?style=for-the-badge&labelColor=000000&logo=linux&logoColor=white" alt="Download for Linux"/>
+  </a>
+</p>
 
 <p align="center">
   <a href="https://euphonymusic.vercel.app/">
     <img src="https://img.shields.io/badge/WEB-VISIT%20OFFICIAL%20SITE-6A4BE8?style=for-the-badge&labelColor=000000&logo=vercel&logoColor=white" alt="Official Website"/>
   </a>
   &nbsp;
-  <a href="https://github.com/MohammedNihadv/Euphony/releases">
-    <img src="https://img.shields.io/badge/APK-DOWNLOAD%20LATEST%20RELEASE-F5C518?style=for-the-badge&labelColor=000000&logo=android&logoColor=3DDC84" alt="Download APK"/>
+  <a href="https://github.com/MohammedNihadv/Euphony/releases/latest">
+    <img src="https://img.shields.io/badge/All%20Downloads-LATEST%20RELEASE-F5C518?style=for-the-badge&labelColor=000000&logo=github&logoColor=white" alt="All downloads"/>
   </a>
 </p>
+
+<sub>📱 Android · 🍎 iOS · 🪟 Windows · 🍏 macOS · 🐧 Linux &nbsp;•&nbsp; iOS builds from source (App Store coming)</sub>
 
 </div>
 
@@ -43,13 +65,19 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
 
 ---
 
-## Which APK Should I Download?
+## Download & Install
 
-| APK Filename | Target Device | Recommendation |
+Grab the [**latest release**](https://github.com/MohammedNihadv/Euphony/releases/latest) and pick your platform:
+
+| Platform | File | How to install |
 | :--- | :--- | :--- |
-| `app-arm64-v8a-release.apk` | **Modern Android Phones & Tablets** | ⭐ **Recommended for 99% of users** (devices from 2017+). Smallest download size (~42 MB) and optimized 64-bit performance. |
-| `app-armeabi-v7a-release.apk` | **Older / Budget Android Devices** | For legacy 32-bit smartphones or older tablets. |
-| `app-x86_64-release.apk` | **Emulators, PCs & Chromebooks** | For Android Studio / BlueStacks emulators and Intel/AMD Chromebooks. |
+| 🪟 **Windows** 10/11 | `euphony-windows-setup.exe` | Run the installer — no admin needed, adds Start-menu & desktop shortcuts. |
+| 🍏 **macOS** | `euphony-macos.dmg` | Open the disk image and drag **Euphony** to Applications. |
+| 🐧 **Linux** | `euphony-linux-x86_64.AppImage` | `chmod +x` the file and run it (requires `libmpv`). |
+| 📱 **Android** | `app-arm64-v8a-release.apk` | ⭐ Best for 99% of phones (2017+). Tap to install. |
+| 📱 Android (legacy) | `app-armeabi-v7a-release.apk` | Older 32-bit devices. |
+| 📱 Android (x86) | `app-x86_64-release.apk` | Emulators & Intel Chromebooks. |
+| 🍎 **iOS** | build from source | Requires Xcode + an Apple Developer account (App Store release planned). |
 
 ---
 
