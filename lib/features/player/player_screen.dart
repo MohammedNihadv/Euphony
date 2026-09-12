@@ -921,73 +921,98 @@ class _GlassBottomActionBar extends ConsumerWidget {
     final currentSpeed = ref.watch(playbackSpeedProvider);
     final isPlaying = ref.watch(isPlayingProvider);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          decoration: BoxDecoration(
-            // Glass fill
-            color: theme.colorScheme.surfaceContainerLow.withValues(alpha: 0.65),
-            borderRadius: BorderRadius.circular(16),
-            // Brutalist 2px border
-            border: Border.all(color: context.eu.ink, width: 2),
-            // Hard shadow (brutalist) + soft glow
-            boxShadow: [
-              const BoxShadow(color: EuBrutal.shadow, offset: Offset(3, 3)),
-            ],
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(26),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.10),
+            offset: const Offset(0, 8),
+            blurRadius: 24,
+            spreadRadius: -2,
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _BarButton(
-                icon: Icons.playlist_add_rounded,
-                tooltip: 'Add to Playlist',
-                onPressed: () => showSongOptionsSheet(context, song),
+          BoxShadow(
+            color: (isDark ? Colors.white : Colors.black).withValues(
+              alpha: isDark ? 0.05 : 0.02,
+            ),
+            offset: const Offset(0, 1),
+            blurRadius: 4,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(26),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            decoration: BoxDecoration(
+              // Translucent frosted glass
+              color: isDark
+                  ? const Color(0x80141422)
+                  : Colors.white.withValues(alpha: 0.72),
+              borderRadius: BorderRadius.circular(26),
+              // Specular rim border
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.16)
+                    : Colors.white.withValues(alpha: 0.90),
+                width: 1.2,
               ),
-              _BarButton(
-                icon: Icons.timer_outlined,
-                tooltip: 'Sleep Timer',
-                isActive: sleepTimer.isActive,
-                badgeText: sleepTimer.isActive ? 'ON' : null,
-                onPressed: () => _showSleepTimerSheet(context, ref),
-              ),
-              _SpeedBadge(
-                speed: currentSpeed,
-                onPressed: () => _showSpeedSheet(context, ref),
-              ),
-              _BarButton(
-                icon: Icons.lyrics_outlined,
-                tooltip: 'Lyrics',
-                onPressed: () => showLyricsSheet(context, song),
-              ),
-              // Live waveform badge or queue button
-              isPlaying
-                  ? GestureDetector(
-                      onTap: () => showQueueSheet(context),
-                      child: const Tooltip(
-                        message: 'Queue',
-                        child: Padding(
-                          padding: EdgeInsets.all(10),
-                          child: AnimatedWaveform(
-                            playing: true,
-                            color: EuBrutal.accent,
-                            height: 22,
-                            width: 22,
-                            barWidth: 3,
-                            gap: 2,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _BarButton(
+                  icon: Icons.playlist_add_rounded,
+                  tooltip: 'Add to Playlist',
+                  onPressed: () => showSongOptionsSheet(context, song),
+                ),
+                _BarButton(
+                  icon: Icons.timer_outlined,
+                  tooltip: 'Sleep Timer',
+                  isActive: sleepTimer.isActive,
+                  badgeText: sleepTimer.isActive ? 'ON' : null,
+                  onPressed: () => _showSleepTimerSheet(context, ref),
+                ),
+                _SpeedBadge(
+                  speed: currentSpeed,
+                  isDark: isDark,
+                  onPressed: () => _showSpeedSheet(context, ref),
+                ),
+                _BarButton(
+                  icon: Icons.lyrics_outlined,
+                  tooltip: 'Lyrics',
+                  onPressed: () => showLyricsSheet(context, song),
+                ),
+                // Live waveform badge or queue button
+                isPlaying
+                    ? GestureDetector(
+                        onTap: () => showQueueSheet(context),
+                        child: const Tooltip(
+                          message: 'Queue',
+                          child: Padding(
+                            padding: EdgeInsets.all(10),
+                            child: AnimatedWaveform(
+                              playing: true,
+                              color: EuBrutal.accent,
+                              height: 22,
+                              width: 22,
+                              barWidth: 3,
+                              gap: 2,
+                            ),
                           ),
                         ),
+                      )
+                    : _BarButton(
+                        icon: Icons.queue_music_rounded,
+                        tooltip: 'Queue',
+                        onPressed: () => showQueueSheet(context),
                       ),
-                    )
-                  : _BarButton(
-                      icon: Icons.queue_music_rounded,
-                      tooltip: 'Queue',
-                      onPressed: () => showQueueSheet(context),
-                    ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -1024,8 +1049,8 @@ class _BarButton extends StatelessWidget {
             children: [
               Icon(
                 icon,
-                size: 26,
-                color: isActive ? EuBrutal.accent : Theme.of(context).iconTheme.color,
+                size: 24,
+                color: isActive ? EuBrutal.accent : context.eu.ink.withValues(alpha: 0.75),
               ),
               if (badgeText != null) ...[
                 const SizedBox(height: 2),
@@ -1047,9 +1072,14 @@ class _BarButton extends StatelessWidget {
 }
 
 class _SpeedBadge extends StatelessWidget {
-  const _SpeedBadge({required this.speed, required this.onPressed});
+  const _SpeedBadge({
+    required this.speed,
+    required this.isDark,
+    required this.onPressed,
+  });
 
   final double speed;
+  final bool isDark;
   final VoidCallback onPressed;
 
   @override
@@ -1058,30 +1088,35 @@ class _SpeedBadge extends StatelessWidget {
     return Tooltip(
       message: 'Playback Speed',
       child: InkWell(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         onTap: onPressed,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          margin: const EdgeInsets.all(4),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
             color: isCustom
-                ? EuBrutal.highlight
-                : Theme.of(context).colorScheme.surfaceContainerHighest,
+                ? EuBrutal.accent.withValues(alpha: isDark ? 0.35 : 0.18)
+                : (isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : context.eu.ink.withValues(alpha: 0.06)),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: isCustom ? EuBrutal.onHighlight : context.eu.ink,
-              width: isCustom ? 1.5 : 1,
+              color: isCustom
+                  ? EuBrutal.accent
+                  : (isDark
+                      ? Colors.white.withValues(alpha: 0.12)
+                      : context.eu.ink.withValues(alpha: 0.10)),
+              width: 1,
             ),
-            boxShadow: isCustom ? EuBrutal.smHardShadow : null,
           ),
           child: Text(
-            '${speed}x',
+            '${speed == speed.roundToDouble() ? speed.toInt() : speed}x',
             style: TextStyle(
               fontWeight: FontWeight.w900,
-              fontSize: 13,
+              fontSize: 12,
               color: isCustom
-                  ? EuBrutal.onHighlight
-                  : Theme.of(context).textTheme.bodyMedium?.color,
+                  ? EuBrutal.accent
+                  : context.eu.ink.withValues(alpha: 0.8),
             ),
           ),
         ),

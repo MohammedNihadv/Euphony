@@ -23,7 +23,9 @@ import '../common/song_options_sheet.dart';
 import '../settings/log_exporter.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
-  const SearchScreen({super.key});
+  const SearchScreen({super.key, this.initialQuery});
+
+  final String? initialQuery;
 
   @override
   ConsumerState<SearchScreen> createState() => _SearchScreenState();
@@ -42,6 +44,28 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   Failure? _failure;
   var _searching = false;
   String? _activeFilter;
+
+  @override
+  void initState() {
+    super.initState();
+    final q = widget.initialQuery?.trim();
+    if (q != null && q.isNotEmpty) {
+      _controller.text = q;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _search(q);
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(SearchScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final q = widget.initialQuery?.trim();
+    if (q != null && q.isNotEmpty && q != oldWidget.initialQuery?.trim()) {
+      _controller.text = q;
+      _search(q);
+    }
+  }
 
   @override
   void dispose() {
@@ -371,53 +395,61 @@ class _SearchLanding extends ConsumerWidget {
                 runSpacing: 8,
                 children: [
                   for (final row in rows)
-                    GestureDetector(
-                      onTap: () => onSelected(row.query),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerLow,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.3,
-                            ),
-                            width: 1.2,
+                    Material(
+                      color: theme.colorScheme.surfaceContainerLow,
+                      borderRadius: BorderRadius.circular(20),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () => onSelected(row.query),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 8,
                           ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.history,
-                              size: 16,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
                               color: theme.colorScheme.onSurface.withValues(
-                                alpha: 0.7,
+                                alpha: 0.3,
                               ),
+                              width: 1.2,
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              row.query,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            GestureDetector(
-                              onTap: () => dao.remove(row.query),
-                              child: Icon(
-                                Icons.close_rounded,
-                                size: 15,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.history,
+                                size: 16,
                                 color: theme.colorScheme.onSurface.withValues(
-                                  alpha: 0.4,
+                                  alpha: 0.7,
                                 ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 6),
+                              Text(
+                                row.query,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () => dao.remove(row.query),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(2),
+                                  child: Icon(
+                                    Icons.close_rounded,
+                                    size: 15,
+                                    color: theme.colorScheme.onSurface.withValues(
+                                      alpha: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -446,6 +478,7 @@ class _SearchLanding extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final item = _genres[index];
                 return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
                   onTap: () => onSelected(item.title),
                   child: Container(
                     padding: const EdgeInsets.all(EuSpace.md),
@@ -512,7 +545,6 @@ class _SuggestionStrip extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
@@ -526,9 +558,14 @@ class _SuggestionStrip extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+      child: Material(
+        type: MaterialType.canvas,
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
           for (int i = 0; i < suggestions.length; i++) ...[
             ListTile(
               dense: true,
@@ -555,8 +592,9 @@ class _SuggestionStrip extends StatelessWidget {
           ],
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class _ResultSlivers extends StatelessWidget {

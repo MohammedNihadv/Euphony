@@ -222,7 +222,48 @@ class _SongOptionsSheetBody extends ConsumerWidget {
               );
             },
           ),
-          if (song.artistNames.isNotEmpty)
+          if (song.albumId != null &&
+              song.albumTitle != null &&
+              song.albumTitle!.isNotEmpty)
+            ListTile(
+              leading: Icon(Icons.album_outlined, color: context.eu.ink),
+              title: Text(
+                'Go to Album "${song.albumTitle}"',
+                style: const TextStyle(fontWeight: FontWeight.w800),
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+                context.push('/album/${song.albumId}');
+              },
+            ),
+          if (song.artists.isNotEmpty) ...[
+            for (final artist in song.artists)
+              ListTile(
+                leading: Icon(
+                  artist.isNavigable
+                      ? Icons.person_outline
+                      : Icons.person_search_outlined,
+                  color: context.eu.ink,
+                ),
+                title: Text(
+                  artist.isNavigable
+                      ? 'Go to ${artist.name}'
+                      : 'Search "${artist.name}"',
+                  style: const TextStyle(fontWeight: FontWeight.w800),
+                ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  if (artist.isNavigable) {
+                    context.push('/artist/${artist.browseId}');
+                  } else {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    context.go(
+                      '/search?q=${Uri.encodeComponent(artist.name)}',
+                    );
+                  }
+                },
+              ),
+          ] else if (song.artistNames.isNotEmpty)
             ListTile(
               leading: Icon(
                 Icons.person_search_outlined,
@@ -233,7 +274,8 @@ class _SongOptionsSheetBody extends ConsumerWidget {
                 style: const TextStyle(fontWeight: FontWeight.w800),
               ),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.of(context).pop();
+                Navigator.of(context).popUntil((route) => route.isFirst);
                 context.go(
                   '/search?q=${Uri.encodeComponent(song.artistNames)}',
                 );

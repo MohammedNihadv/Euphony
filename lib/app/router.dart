@@ -30,8 +30,11 @@ final routerProvider = GoRouter(
           routes: [
             GoRoute(
               path: '/search',
-              pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: SearchScreen()),
+              pageBuilder: (context, state) => NoTransitionPage(
+                child: SearchScreen(
+                  initialQuery: state.uri.queryParameters['q'],
+                ),
+              ),
             ),
           ],
         ),
