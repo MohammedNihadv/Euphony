@@ -142,21 +142,36 @@ class _NarrowLayout extends ConsumerWidget {
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 460),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: EuSpace.xl,
-            vertical: EuSpace.md,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _Artwork(song: song, artSize: maxArtSize, isPlaying: isPlaying),
-              _TrackHeader(song: song),
-              const _GlassScrubber(),
-              const _TransportControls(),
-              _GlassBottomActionBar(song: song),
-            ],
-          ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: EuSpace.xl,
+                    vertical: EuSpace.md,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _Artwork(
+                          song: song,
+                          artSize: maxArtSize,
+                          isPlaying: isPlaying,
+                        ),
+                        _TrackHeader(song: song),
+                        const _GlassScrubber(),
+                        const _TransportControls(),
+                        _GlassBottomActionBar(song: song),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

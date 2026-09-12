@@ -700,8 +700,9 @@ class _HomeSectionBlock extends ConsumerWidget {
     if (l.contains('tollywood') || l.contains('telugu')) return 'Tollywood';
     if (l.contains('bollywood') || l.contains('hindi')) return 'Bollywood';
     if (l.contains('hollywood') || l.contains('global')) return 'Hollywood';
-    if (l.contains('pakistani') || l.contains('coke studio'))
+    if (l.contains('pakistani') || l.contains('coke studio')) {
       return 'Pakistani';
+    }
     if (l.contains('indie india') || l.contains('indie')) return 'Indie';
     if (l.contains('billboard') || l.contains('hot 100')) return 'Billboard';
     if (l.contains('hip-hop') || l.contains('rap')) return 'Hip-Hop';
