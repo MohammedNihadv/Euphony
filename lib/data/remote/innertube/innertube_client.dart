@@ -364,8 +364,7 @@ class InnertubeClient {
       'context': {
         'client': {
           'clientName': clientName,
-          'clientVersion': clientVersion,
-          '?androidSdkVersion': androidSdkVersion,
+          'androidSdkVersion': ?androidSdkVersion,
           'hl': _language,
           'userAgent': userAgent,
         },

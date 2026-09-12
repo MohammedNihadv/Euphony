@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -193,13 +194,27 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   children: [
                     Text('Search', style: theme.textTheme.screenTitle),
                     const SizedBox(height: EuSpace.md),
+                    // Glass + brutalist search bar
                     Container(
-                      decoration: EuBrutal.boxDecoration(
-                        color: theme.colorScheme.surfaceContainerLow,
+                      decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
-                        shadows: EuBrutal.hardShadow,
+                        boxShadow: EuBrutal.hardShadow,
                       ),
-                      child: SearchBar(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainerLow
+                                  .withValues(alpha: 0.78),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: context.eu.ink,
+                                width: 2,
+                              ),
+                            ),
+                            child: SearchBar(
                         controller: _controller,
                         focusNode: _focusNode,
                         hintText: 'Songs, albums, artists',
@@ -219,8 +234,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                         onSubmitted: _search,
                       ),
                     ),
-                    const SizedBox(height: EuSpace.md),
-                    if (_loadingSuggestions) const LinearProgressIndicator(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: EuSpace.md),
+              if (_loadingSuggestions) const LinearProgressIndicator(),
                     _SuggestionStrip(
                       suggestions: _suggestions,
                       onSelected: (query) {

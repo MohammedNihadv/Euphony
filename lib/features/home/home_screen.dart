@@ -266,12 +266,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
   Widget _buildCategoryChip(String label) {
     final isSelected = _selectedCategory == label;
-    final scheme = Theme.of(context).colorScheme;
-
-    // Selected: the bright highlight slab with dark text and a hard shadow.
-    // Unselected: a quiet surface pill with the light frame and light text —
-    // both read clearly on the dark canvas.
-    final bg = isSelected ? EuBrutal.highlight : scheme.surfaceContainerHigh;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final bg = isSelected
+        ? EuBrutal.highlight
+        : (isDark ? scheme.surfaceContainerHigh : Colors.white);
     final fg = isSelected ? EuBrutal.onHighlight : context.eu.ink;
 
     return GestureDetector(
@@ -385,7 +385,7 @@ class _HeroBannerState extends State<_HeroBanner>
                     Text(
                       widget.greeting,
                       style: theme.textTheme.headlineSmall?.copyWith(
-                        color: context.eu.ink,
+                        color: EuBrutal.onAccent,
                         fontWeight: FontWeight.w900,
                         letterSpacing: -0.3,
                       ),
@@ -396,7 +396,7 @@ class _HeroBannerState extends State<_HeroBanner>
                     Text(
                       'Quick picks, trending tracks & recommendations',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: context.eu.ink.withValues(alpha: 0.9),
+                        color: EuBrutal.onAccent.withValues(alpha: 0.9),
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
                       ),
@@ -597,7 +597,7 @@ class _AnimatedMusicBarsState extends State<_AnimatedMusicBars>
                 width: 5,
                 height: height,
                 decoration: BoxDecoration(
-                  color: context.eu.ink,
+                  color: EuBrutal.onAccent,
                   borderRadius: BorderRadius.circular(3),
                 ),
               ),
@@ -663,6 +663,7 @@ class _HomeItemCard extends ConsumerWidget {
         color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(14),
         shadows: EuBrutal.smHardShadow,
+        border: context.eu.border,
       ),
       child: Material(
         type: MaterialType.transparency,

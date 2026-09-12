@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,8 +10,6 @@ import '../features/player/mini_player.dart';
 import '../playback/player_provider.dart';
 import 'update_prompt.dart';
 
-/// One navigation destination, shared by the mobile bottom bar and the desktop
-/// side rail so both stay in sync.
 class _Dest {
   const _Dest(this.icon, this.selectedIcon, this.label);
   final IconData icon;
@@ -18,15 +18,12 @@ class _Dest {
 }
 
 const _destinations = <_Dest>[
-  _Dest(Icons.home_outlined, Icons.home, 'Home'),
-  _Dest(Icons.search_outlined, Icons.search, 'Search'),
-  _Dest(Icons.my_library_music_outlined, Icons.my_library_music, 'Library'),
-  _Dest(Icons.settings_outlined, Icons.settings, 'Settings'),
+  _Dest(Icons.home_outlined, Icons.home_rounded, 'Home'),
+  _Dest(Icons.search_outlined, Icons.search_rounded, 'Search'),
+  _Dest(Icons.my_library_music_outlined, Icons.my_library_music_rounded, 'Library'),
+  _Dest(Icons.settings_outlined, Icons.settings_rounded, 'Settings'),
 ];
 
-/// Below this width the app uses the phone layout (bottom nav); at or above it
-/// switches to the desktop layout (left sidebar + full-width player bar), which
-/// is what suits a resizable window on Windows, macOS and Linux.
 const double _desktopBreakpoint = 900;
 
 class EuphonyShell extends ConsumerStatefulWidget {
@@ -42,8 +39,6 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
   @override
   void initState() {
     super.initState();
-    // Once the first frame is up, check for a newer release and prompt. This
-    // is what makes update popups reach users who never open Settings.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) UpdatePrompt.maybeShowOnLaunch(context, ref);
     });
@@ -58,9 +53,6 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
 
   @override
   Widget build(BuildContext context) {
-    // A track that will not resolve used to fail silently — the user tapped a
-    // song and nothing happened, which reads as the app being broken. Reported
-    // once here rather than in each screen that can start playback.
     ref.listen<String?>(playbackErrorProvider, (previous, next) {
       if (next == null) return;
       ScaffoldMessenger.of(context)
@@ -81,70 +73,19 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
     );
   }
 
-  // -- Phone layout: bottom navigation with the mini player above it. --------
+  // ── Mobile: glass nav bar floating over content ─────────────────────────
   Widget _buildMobile(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: navigationShell,
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const MiniPlayer(),
-          Container(
-            decoration: BoxDecoration(
-              color: context.eu.ink,
-              border: Border(
-                top: BorderSide(color: context.eu.ink, width: 2.5),
-              ),
-            ),
-            child: Theme(
-              data: Theme.of(context).copyWith(
-                navigationBarTheme: NavigationBarThemeData(
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                  indicatorColor: EuBrutal.accent,
-                  labelTextStyle: WidgetStateProperty.resolveWith((states) {
-                    if (states.contains(WidgetState.selected)) {
-                      return const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w900,
-                        color: EuBrutal.accent,
-                      );
-                    }
-                    return const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    );
-                  }),
-                  iconTheme: WidgetStateProperty.resolveWith((states) {
-                    if (states.contains(WidgetState.selected)) {
-                      return const IconThemeData(
-                        color: EuBrutal.onAccent,
-                        size: 24,
-                      );
-                    }
-                    return const IconThemeData(size: 24);
-                  }),
-                ),
-              ),
-              child: NavigationBar(
-                selectedIndex: navigationShell.currentIndex,
-                onDestinationSelected: _goBranch,
-                destinations: [
-                  for (final d in _destinations)
-                    NavigationDestination(
-                      icon: Icon(d.icon),
-                      selectedIcon: Icon(d.selectedIcon),
-                      label: d.label,
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ],
+      bottomNavigationBar: _GlassBrutalNavBar(
+        selectedIndex: navigationShell.currentIndex,
+        onSelected: _goBranch,
       ),
     );
   }
 
-  // -- Desktop layout: fixed sidebar + content, player bar spanning the bottom.
+  // ── Desktop: glass sidebar + content + full-width player bar ─────────────
   Widget _buildDesktop(BuildContext context) {
     return Scaffold(
       body: Column(
@@ -157,13 +98,10 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
                   selectedIndex: navigationShell.currentIndex,
                   onSelected: _goBranch,
                 ),
-                Expanded(
-                  child: ClipRect(child: navigationShell),
-                ),
+                Expanded(child: ClipRect(child: navigationShell)),
               ],
             ),
           ),
-          // Full-width player bar across the bottom, like a desktop player.
           DecoratedBox(
             decoration: BoxDecoration(
               border: Border(
@@ -178,52 +116,170 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
   }
 }
 
-/// The desktop navigation rail: brand at the top, then the destinations as a
-/// column of highlightable rows.
+// ---------------------------------------------------------------------------
+// _GlassBrutalNavBar — mobile bottom navigation
+// Neo-Brutalist shell (hard shadow + thick top border) + glass interior
+// ---------------------------------------------------------------------------
+
+class _GlassBrutalNavBar extends ConsumerWidget {
+  const _GlassBrutalNavBar({
+    required this.selectedIndex,
+    required this.onSelected,
+  });
+
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Mini player sits above the nav bar
+        const MiniPlayer(),
+
+        // Glass nav bar with brutalist top border
+        ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+            child: Container(
+              decoration: BoxDecoration(
+                // Frosted glass fill with subtle tint
+                color: isDark
+                    ? const Color(0xFF12121C).withValues(alpha: 0.82)
+                    : Colors.white.withValues(alpha: 0.82),
+                // Brutalist top border — the visual "frame" of the nav slab
+                border: Border(
+                  top: BorderSide(color: context.eu.ink, width: 2),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: isDark
+                        ? Colors.black.withValues(alpha: 0.35)
+                        : Colors.black.withValues(alpha: 0.06),
+                    offset: const Offset(0, -3),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              child: Theme(
+                data: theme.copyWith(
+                  navigationBarTheme: NavigationBarThemeData(
+                    labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return TextStyle(
+                          color: context.eu.ink,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 12,
+                        );
+                      }
+                      return TextStyle(
+                        color: context.eu.ink.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      );
+                    }),
+                  ),
+                ),
+                child: NavigationBar(
+                  selectedIndex: selectedIndex,
+                  onDestinationSelected: onSelected,
+                  backgroundColor: Colors.transparent,
+                  surfaceTintColor: Colors.transparent,
+                  elevation: 0,
+                  indicatorColor: EuBrutal.accent,
+                  labelBehavior:
+                      NavigationDestinationLabelBehavior.onlyShowSelected,
+                  destinations: [
+                    for (final d in _destinations)
+                      NavigationDestination(
+                        icon: Icon(
+                          d.icon,
+                          color: context.eu.ink.withValues(alpha: 0.7),
+                        ),
+                        selectedIcon: Icon(
+                          d.selectedIcon,
+                          color: EuBrutal.onAccent,
+                        ),
+                        label: d.label,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Desktop sidebar — glass panel + brutalist right border
+// ---------------------------------------------------------------------------
+
 class _DesktopSidebar extends StatelessWidget {
-  const _DesktopSidebar({required this.selectedIndex, required this.onSelected});
+  const _DesktopSidebar({
+    required this.selectedIndex,
+    required this.onSelected,
+  });
 
   final int selectedIndex;
   final ValueChanged<int> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 232,
-      decoration: BoxDecoration(
-        color: context.eu.surface,
-        border: Border(
-          right: BorderSide(color: context.eu.divider, width: 1.5),
-        ),
-      ),
-      child: SafeArea(
-        right: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Padding(
-              padding: EdgeInsets.fromLTRB(20, 24, 20, 20),
-              child: EuphonyBrandBadge(fontSize: 22),
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: Container(
+          width: 232,
+          decoration: BoxDecoration(
+            // Glass fill
+            color: isDark
+                ? theme.colorScheme.surface.withValues(alpha: 0.75)
+                : Colors.white.withValues(alpha: 0.7),
+            // Brutalist right border
+            border: Border(
+              right: BorderSide(color: context.eu.ink, width: 1.5),
             ),
-            for (var i = 0; i < _destinations.length; i++)
-              _SidebarItem(
-                dest: _destinations[i],
-                selected: i == selectedIndex,
-                onTap: () => onSelected(i),
-              ),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Euphony',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: context.eu.ink.withValues(alpha: 0.35),
+          ),
+          child: SafeArea(
+            right: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 24, 20, 20),
+                  child: EuphonyBrandBadge(fontSize: 22),
                 ),
-              ),
+                for (var i = 0; i < _destinations.length; i++)
+                  _SidebarItem(
+                    dest: _destinations[i],
+                    selected: i == selectedIndex,
+                    onTap: () => onSelected(i),
+                  ),
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    'Euphony',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: context.eu.ink.withValues(alpha: 0.35),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -247,22 +303,36 @@ class _SidebarItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
       child: Material(
-        color: selected ? EuBrutal.accent : Colors.transparent,
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(12),
         child: InkWell(
           borderRadius: BorderRadius.circular(12),
           onTap: onTap,
-          child: Padding(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeInOut,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            decoration: BoxDecoration(
+              // Accent fill for selected — brutalist solid colour
+              color: selected ? EuBrutal.accent : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+              // Hard shadow only when selected
+              boxShadow: selected ? EuBrutal.smHardShadow : null,
+            ),
             child: Row(
               children: [
-                Icon(selected ? dest.selectedIcon : dest.icon, color: fg, size: 22),
+                Icon(
+                  selected ? dest.selectedIcon : dest.icon,
+                  color: fg,
+                  size: 22,
+                ),
                 const SizedBox(width: 14),
                 Text(
                   dest.label,
                   style: TextStyle(
                     fontSize: 15,
-                    fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+                    fontWeight:
+                        selected ? FontWeight.w900 : FontWeight.w700,
                     color: fg,
                   ),
                 ),

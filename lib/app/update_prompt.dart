@@ -133,19 +133,28 @@ class _UpdateDialogState extends State<_UpdateDialog> {
             'downloads, liked songs, playlists and settings.',
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
           ),
-          if (info.releaseNotes != null && info.releaseNotes!.isNotEmpty) ...[
-            const SizedBox(height: EuSpace.md),
+          if (_cleanNotes(info.releaseNotes).isNotEmpty) ...[
+            const SizedBox(height: EuSpace.sm),
             Container(
-              padding: const EdgeInsets.all(10),
+              constraints: const BoxConstraints(maxHeight: 110),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: context.eu.ink.withValues(alpha: 0.15),
+                  width: 1,
+                ),
               ),
-              child: Text(
-                info.releaseNotes!,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
+              child: SingleChildScrollView(
+                child: Text(
+                  _cleanNotes(info.releaseNotes),
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    height: 1.4,
+                    color: context.eu.ink.withValues(alpha: 0.85),
+                  ),
                 ),
               ),
             ),
@@ -224,4 +233,17 @@ class _UpdateDialogState extends State<_UpdateDialog> {
             ],
     );
   }
+}
+
+String _cleanNotes(String? raw) {
+  if (raw == null || raw.trim().isEmpty) return '';
+  final lines = raw
+      .split('\n')
+      .map((l) => l.trim())
+      .where((l) => l.isNotEmpty && !l.startsWith('##') && !l.startsWith('#'))
+      .toList();
+  final bullets =
+      lines.where((l) => l.startsWith('-') || l.startsWith('*')).toList();
+  final listToUse = bullets.isNotEmpty ? bullets : lines;
+  return listToUse.take(3).join('\n');
 }

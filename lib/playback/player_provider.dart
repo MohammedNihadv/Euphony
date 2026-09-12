@@ -846,7 +846,6 @@ class PlayerController {
 /// formats by bitrate, falls back to muxed formats when a track offers none
 /// (common for music videos), and skips anything whose URL is ciphered, since
 /// Euphony does not implement signature deciphering.
-@visibleForTesting
 String? pickAudioStreamUrl(
   Map<String, dynamic> streamingData, {
   String quality = 'HIGH',

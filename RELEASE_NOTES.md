@@ -1,12 +1,11 @@
-## Euphony v0.2.11 — iOS (sideload) + hardening 🍏
+## Euphony v0.3.0 — Downloads Fixed, Glassmorphic Nav & Light Mode Polish 🎨⚡
 
-Euphony now has an iOS build you can sideload, plus a security tidy-up of the build pipeline.
-
-### ✨ New
-- **iOS app (`euphony-ios.ipa`)** — an unsigned build you can install with **AltStore**, **Sideloadly** or **TrollStore** — no App Store or developer account required. (A signed App Store release is still planned.)
-
-### 🔒 Hardening
-- Locked every CI workflow to least-privilege permissions (resolves the CodeQL "workflow does not contain permissions" warnings).
+### 🔧 Fixes & Enhancements
+- **Rock-Solid Downloads** — Fixed download stream resolution and eliminated 403 Forbidden / 1% stuck downloads using chunked Range streaming (`itag 18` muxed unthrottled streams + 512 KB chunk relays with Content-Length auto-detection).
+- **Glassmorphic Footer Navigation** — Enabled `extendBody` on mobile shells with frosted `BackdropFilter` glass blur, translucent brutalist surface tint, and sharp contrast borders.
+- **Light Theme Contrast** — Fixed hero banner text & equalizer bars, category filter chips, and item card borders for clean, high-contrast readability in light/white mode.
+- **Reordered Library Tabs** — Reorganized library navigation with **Liked Songs** 1st and **Downloads** 2nd for quick access.
+- **Concise Update Popups** — Automated in-app new release dialogs with clean, concise bullet highlights instead of wall-of-text changelogs.
 
 ### 📥 Downloads
 | Platform | File | Install |

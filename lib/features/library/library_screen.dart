@@ -71,11 +71,11 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           labelColor: EuBrutal.onHighlight,
           unselectedLabelColor: context.eu.ink,
           tabs: const [
+            Tab(icon: Icon(Icons.favorite_rounded, size: 20), text: 'Liked'),
             Tab(
               icon: Icon(Icons.download_done_rounded, size: 20),
               text: 'Downloads',
             ),
-            Tab(icon: Icon(Icons.favorite_rounded, size: 20), text: 'Liked'),
             Tab(
               icon: Icon(Icons.queue_music_rounded, size: 20),
               text: 'Playlists',
@@ -88,8 +88,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
       body: TabBarView(
         controller: _tabController,
         children: [
-          _DownloadsTab(),
           _LikedSongsTab(),
+          _DownloadsTab(),
           _SavedPlaylistsTab(),
           _SavedAlbumsTab(),
           _SearchHistoryTab(),
