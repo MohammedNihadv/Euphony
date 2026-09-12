@@ -141,10 +141,37 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
             ? Center(
                 child: Padding(
                   padding: const EdgeInsets.all(EuSpace.xl),
-                  child: Text(
-                    _error!,
-                    style: theme.textTheme.titleMedium,
-                    textAlign: TextAlign.center,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline_rounded,
+                        size: 48,
+                        color: EuBrutal.alert,
+                      ),
+                      const SizedBox(height: EuSpace.md),
+                      Text(
+                        _error!,
+                        style: theme.textTheme.titleMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: EuSpace.lg),
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: EuBrutal.accent,
+                          foregroundColor: EuBrutal.onAccent,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _loading = true;
+                            _error = null;
+                          });
+                          _loadDetails();
+                        },
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Try Again'),
+                      ),
+                    ],
                   ),
                 ),
               )

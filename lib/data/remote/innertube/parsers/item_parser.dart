@@ -2,6 +2,7 @@ import '../../../../core/failure.dart';
 import '../../../../core/result.dart';
 import '../../../../domain/album.dart';
 import '../../../../domain/artist.dart';
+import '../../../../domain/artist_ref.dart';
 import '../../../../domain/music_item.dart';
 import '../../../../domain/playlist.dart';
 import '../../../../domain/song.dart';
@@ -226,3 +227,147 @@ String? _artwork(Map<String, dynamic> renderer) {
   final largest = thumbnails.last;
   return largest is Map<String, dynamic> ? largest['url'] as String? : null;
 }
+
+/// Parses a `musicTwoRowItemRenderer` — the card shape used by home-page
+/// carousels, new-release shelves, and "recommended for you" grids.
+///
+/// These cards always have:
+///   title.runs[0].text   → display title
+///   subtitle.runs[*].text → artist / album / type label
+///   thumbnailRenderer.musicThumbnailRenderer.thumbnail.thumbnails → artwork
+///   navigationEndpoint → either watchEndpoint (song/video) or browseEndpoint
+///     (album / playlist / artist / station depending on pageType).
+Result<MusicItem> parseTwoRowItem(Map<String, dynamic> renderer) {
+  final title = navOrNull<String>(renderer, P.titleText);
+  if (title == null) {
+    return const Err(ParseFailure('twoRowItem.title'));
+  }
+
+  final artworkUrl = _artwork(renderer);
+
+  // --- Navigation endpoint ---------------------------------------------------
+  final navEndpoint =
+      renderer['navigationEndpoint'] as Map<String, dynamic>? ?? {};
+
+  // 1. watchEndpoint → treat as song/video.
+  final watchEndpoint =
+      navEndpoint['watchEndpoint'] as Map<String, dynamic>?;
+  if (watchEndpoint != null) {
+    final videoId = watchEndpoint['videoId'] as String?;
+    if (videoId == null) {
+      return const Err(ParseFailure('twoRowItem.watchEndpoint.videoId'));
+    }
+    final subtitleRuns =
+        (renderer['subtitle'] as Map<String, dynamic>?)?['runs']
+            as List<dynamic>? ??
+        const [];
+    final artistName = subtitleRuns
+        .whereType<Map<String, dynamic>>()
+        .map((r) => r['text'] as String? ?? '')
+        .where((t) => t.trim().isNotEmpty && t.trim() != '•')
+        .join(', ');
+
+    return Ok(
+      SongItem(
+        Song(
+          id: videoId,
+          title: title,
+          artists: artistName.isNotEmpty
+              ? [ArtistRef(name: artistName)]
+              : const [],
+          artworkUrl: artworkUrl,
+          kind: SongKind.song,
+        ),
+      ),
+    );
+  }
+
+  // 2. browseEndpoint → album / playlist / artist / station.
+  final browseEndpoint =
+      navEndpoint['browseEndpoint'] as Map<String, dynamic>?;
+  if (browseEndpoint != null) {
+    final browseId = browseEndpoint['browseId'] as String?;
+    if (browseId == null) {
+      return const Err(ParseFailure('twoRowItem.browseEndpoint.browseId'));
+    }
+
+    // pageType is nested inside browseEndpointContextSupportedConfigs.
+    final pageType = navOrNull<String>(browseEndpoint, P.pageType);
+
+    final subtitleRuns =
+        (renderer['subtitle'] as Map<String, dynamic>?)?['runs']
+            as List<dynamic>? ??
+        const [];
+    final subtitleText = subtitleRuns
+        .whereType<Map<String, dynamic>>()
+        .map((r) => r['text'] as String? ?? '')
+        .where((t) => t.trim().isNotEmpty && t.trim() != '•')
+        .join(' ');
+
+    switch (pageType) {
+      case 'MUSIC_PAGE_TYPE_ALBUM' ||
+            'MUSIC_PAGE_TYPE_SINGLE' ||
+            'MUSIC_PAGE_TYPE_EP':
+        return Ok(
+          AlbumItem(
+            Album(
+              browseId: browseId,
+              title: title,
+              artworkUrl: artworkUrl,
+            ),
+          ),
+        );
+
+      case 'MUSIC_PAGE_TYPE_ARTIST':
+        return Ok(
+          ArtistItem(
+            Artist(browseId: browseId, name: title, artworkUrl: artworkUrl),
+          ),
+        );
+
+      case 'MUSIC_PAGE_TYPE_PLAYLIST' || 'MUSIC_PAGE_TYPE_PODCAST' || null:
+        // null pageType falls back to playlist / station.
+        if (browseId.startsWith('MPREb') || browseId.startsWith('FEmusic')) {
+          // Treat as a radio/station.
+          return Ok(
+            StationItem(
+              title: title,
+              playlistId: browseId,
+              artworkUrl: artworkUrl,
+            ),
+          );
+        }
+        return Ok(
+          PlaylistItem(
+            Playlist(
+              id: normalisePlaylistId(browseId),
+              title: title,
+              artworkUrl: artworkUrl,
+              author: subtitleText.isNotEmpty ? subtitleText : null,
+            ),
+          ),
+        );
+
+      default:
+        return Ok(
+          PlaylistItem(
+            Playlist(
+              id: normalisePlaylistId(browseId),
+              title: title,
+              artworkUrl: artworkUrl,
+            ),
+          ),
+        );
+    }
+  }
+
+  // No recognised endpoint.
+  return Err(
+    ParseFailure(
+      'twoRowItem.navigationEndpoint',
+      message: 'neither watchEndpoint nor browseEndpoint found; '
+          'keys: ${_runTexts(null)}',
+    ),
+  );
+}
+

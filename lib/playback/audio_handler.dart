@@ -147,6 +147,33 @@ class EuphonyAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> skipToPrevious() => _controller.skipPrevious();
 
   @override
+  Future<void> fastForward([Duration interval = const Duration(seconds: 10)]) async {
+    final current = _player.position;
+    final total = _player.duration ?? Duration.zero;
+    final target = current + interval;
+    await _controller.seek(target > total ? total : target);
+  }
+
+  @override
+  Future<void> rewind([Duration interval = const Duration(seconds: 10)]) async {
+    final current = _player.position;
+    final target = current - interval;
+    await _controller.seek(target < Duration.zero ? Duration.zero : target);
+  }
+
+  @override
+  Future<void> click([MediaButton button = MediaButton.media]) async {
+    switch (button) {
+      case MediaButton.media:
+        await _controller.togglePlayPause();
+      case MediaButton.next:
+        await _controller.skipNext();
+      case MediaButton.previous:
+        await _controller.skipPrevious();
+    }
+  }
+
+  @override
   Future<void> stop() async {
     await _controller.stop();
     await super.stop();

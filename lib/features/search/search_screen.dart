@@ -205,118 +205,121 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             constraints: const BoxConstraints(maxWidth: 1180),
             child: CustomScrollView(
               slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                EuSpace.screenGutter,
-                EuSpace.sm,
-                EuSpace.screenGutter,
-                EuSpace.lg,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Search', style: theme.textTheme.screenTitle),
-                    const SizedBox(height: EuSpace.md),
-                    // Glass + brutalist search bar
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: EuBrutal.hardShadow,
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainerLow
-                                  .withValues(alpha: 0.78),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: context.eu.ink,
-                                width: 2,
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    EuSpace.screenGutter,
+                    EuSpace.sm,
+                    EuSpace.screenGutter,
+                    EuSpace.lg,
+                  ),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Search', style: theme.textTheme.screenTitle),
+                        const SizedBox(height: EuSpace.md),
+                        // Glass + brutalist search bar
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: EuBrutal.hardShadow,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: theme.colorScheme.surfaceContainerLow
+                                      .withValues(alpha: 0.78),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(
+                                    color: context.eu.ink,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: SearchBar(
+                                  controller: _controller,
+                                  focusNode: _focusNode,
+                                  hintText: 'Songs, albums, artists',
+                                  leading: const Icon(Icons.search, size: 24),
+                                  trailing: [
+                                    if (_controller.text.isNotEmpty)
+                                      IconButton(
+                                        tooltip: 'Clear',
+                                        icon: const Icon(Icons.close),
+                                        onPressed: _clearSearch,
+                                      ),
+                                  ],
+                                  onChanged: (value) {
+                                    setState(() {});
+                                    _queueSuggestions(value);
+                                  },
+                                  onSubmitted: _search,
+                                ),
                               ),
                             ),
-                            child: SearchBar(
-                        controller: _controller,
-                        focusNode: _focusNode,
-                        hintText: 'Songs, albums, artists',
-                        leading: const Icon(Icons.search, size: 24),
-                        trailing: [
-                          if (_controller.text.isNotEmpty)
-                            IconButton(
-                              tooltip: 'Clear',
-                              icon: const Icon(Icons.close),
-                              onPressed: _clearSearch,
-                            ),
-                        ],
-                        onChanged: (value) {
-                          setState(() {});
-                          _queueSuggestions(value);
-                        },
-                        onSubmitted: _search,
+                          ),
+                        ),
+                        const SizedBox(height: EuSpace.md),
+                        if (_loadingSuggestions)
+                          const LinearProgressIndicator(),
+                        _SuggestionStrip(
+                          suggestions: _suggestions,
+                          onSelected: (query) {
+                            _controller.text = query;
+                            _search(query);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (_searching)
+                  const SliverToBoxAdapter(child: LinearProgressIndicator())
+                else if (_failure != null)
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: EuSpace.screenGutter,
+                    ),
+                    sliver: SliverToBoxAdapter(
+                      child: _FailurePanel(
+                        failure: _failure!,
+                        onRetry: () => _search(
+                          _controller.text,
+                          filterLabel: _activeFilter,
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: EuSpace.md),
-              if (_loadingSuggestions) const LinearProgressIndicator(),
-                    _SuggestionStrip(
-                      suggestions: _suggestions,
-                      onSelected: (query) {
-                        _controller.text = query;
-                        _search(query);
-                      },
+                  )
+                else if (_results == null)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(
+                      EuSpace.screenGutter,
+                      0,
+                      EuSpace.screenGutter,
+                      EuSpace.xxxl,
                     ),
-                  ],
-                ),
-              ),
-            ),
-            if (_searching)
-              const SliverToBoxAdapter(child: LinearProgressIndicator())
-            else if (_failure != null)
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: EuSpace.screenGutter,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: _FailurePanel(
-                    failure: _failure!,
-                    onRetry: () =>
-                        _search(_controller.text, filterLabel: _activeFilter),
+                    sliver: SliverToBoxAdapter(
+                      child: _SearchLanding(
+                        onSelected: (query) {
+                          _controller.text = query;
+                          _search(query);
+                        },
+                      ),
+                    ),
+                  )
+                else
+                  _ResultSlivers(
+                    results: _results!,
+                    activeFilter: _activeFilter,
+                    onFilterSelected: (label, params) => _search(
+                      _results!.query,
+                      params: params,
+                      filterLabel: label,
+                    ),
                   ),
-                ),
-              )
-            else if (_results == null)
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(
-                  EuSpace.screenGutter,
-                  0,
-                  EuSpace.screenGutter,
-                  EuSpace.xxxl,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: _SearchLanding(
-                    onSelected: (query) {
-                      _controller.text = query;
-                      _search(query);
-                    },
-                  ),
-                ),
-              )
-            else
-              _ResultSlivers(
-                results: _results!,
-                activeFilter: _activeFilter,
-                onFilterSelected: (label, params) => _search(
-                  _results!.query,
-                  params: params,
-                  filterLabel: label,
-                ),
-              ),
-          ],
+              ],
             ),
           ),
         ),
@@ -442,9 +445,8 @@ class _SearchLanding extends ConsumerWidget {
                                   child: Icon(
                                     Icons.close_rounded,
                                     size: 15,
-                                    color: theme.colorScheme.onSurface.withValues(
-                                      alpha: 0.5,
-                                    ),
+                                    color: theme.colorScheme.onSurface
+                                        .withValues(alpha: 0.5),
                                   ),
                                 ),
                               ),
@@ -566,35 +568,37 @@ class _SuggestionStrip extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-          for (int i = 0; i < suggestions.length; i++) ...[
-            ListTile(
-              dense: true,
-              leading: Icon(
-                Icons.north_west_rounded,
-                size: 18,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-              title: Text(
-                suggestions[i],
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
+            for (int i = 0; i < suggestions.length; i++) ...[
+              ListTile(
+                dense: true,
+                leading: Icon(
+                  Icons.north_west_rounded,
+                  size: 18,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
+                title: Text(
+                  suggestions[i],
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                onTap: () => onSelected(suggestions[i]),
               ),
-              onTap: () => onSelected(suggestions[i]),
-            ),
-            if (i < suggestions.length - 1)
-              Divider(
-                height: 1,
-                indent: 52,
-                endIndent: 16,
-                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.4),
-              ),
+              if (i < suggestions.length - 1)
+                Divider(
+                  height: 1,
+                  indent: 52,
+                  endIndent: 16,
+                  color: theme.colorScheme.outlineVariant.withValues(
+                    alpha: 0.4,
+                  ),
+                ),
+            ],
           ],
-        ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
 
 class _ResultSlivers extends StatelessWidget {

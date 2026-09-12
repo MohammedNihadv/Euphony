@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../features/settings/settings_provider.dart';
 import 'db/dao/liked_songs_dao.dart';
 import 'db/dao/saved_albums_dao.dart';
 import 'db/dao/saved_playlists_dao.dart';
@@ -51,9 +52,11 @@ SettingsRepository settingsRepository(Ref ref) =>
     SettingsRepository(ref.watch(sharedPreferencesProvider));
 
 final innertubeClientProvider = riverpod.Provider<InnertubeClient>((ref) {
-  final settings = ref.watch(settingsRepositoryProvider);
+  final contentRegion = ref.watch(
+    settingsControllerProvider.select((s) => s.contentRegion),
+  );
   // Extract country code from format "US - United States"
-  final regionCode = settings.contentRegion.split(' ').first;
+  final regionCode = contentRegion.split(' ').first;
   final client = InnertubeClient(region: regionCode);
   ref.onDispose(client.close);
   return client;

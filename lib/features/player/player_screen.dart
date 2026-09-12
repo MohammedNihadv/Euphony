@@ -186,7 +186,11 @@ class _WideLayout extends ConsumerWidget {
           Expanded(
             flex: 5,
             child: Center(
-              child: _Artwork(song: song, artSize: artSize, isPlaying: isPlaying),
+              child: _Artwork(
+                song: song,
+                artSize: artSize,
+                isPlaying: isPlaying,
+              ),
             ),
           ),
           const SizedBox(width: EuSpace.xxxl),
@@ -367,9 +371,10 @@ class _PulsingGlowRingState extends State<_PulsingGlowRing>
       vsync: this,
       duration: const Duration(milliseconds: 2200),
     );
-    _glow = Tween<double>(begin: 0.08, end: 0.28).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _glow = Tween<double>(
+      begin: 0.08,
+      end: 0.28,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
     if (widget.isPlaying) _ctrl.repeat(reverse: true);
   }
 
@@ -443,9 +448,7 @@ class _TrackHeader extends ConsumerWidget {
                 position: Tween<Offset>(
                   begin: const Offset(0, 0.15),
                   end: Offset.zero,
-                ).animate(
-                  CurvedAnimation(parent: anim, curve: Curves.easeOut),
-                ),
+                ).animate(CurvedAnimation(parent: anim, curve: Curves.easeOut)),
                 child: child,
               ),
             ),
@@ -503,7 +506,9 @@ class _LikeButton extends ConsumerWidget {
       builder: (context, snapshot) {
         final isLiked = snapshot.data ?? false;
         return _AnimatedIconButton(
-          icon: isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+          icon: isLiked
+              ? Icons.favorite_rounded
+              : Icons.favorite_border_rounded,
           color: isLiked ? EuBrutal.alert : null,
           onPressed: () {
             if (isLiked) {
@@ -554,15 +559,13 @@ class _DownloadButton extends ConsumerWidget {
               value: progress,
               strokeWidth: 2.5,
               color: EuBrutal.accent,
-              backgroundColor:
-                  Theme.of(context).colorScheme.surfaceContainerHighest,
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
             ),
             Text(
               '${(progress * 100).toInt()}',
-              style: const TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w900,
-              ),
+              style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w900),
             ),
           ],
         ),
@@ -696,11 +699,11 @@ class _GlassScrubberState extends ConsumerState<_GlassScrubber> {
                 data: SliderTheme.of(context).copyWith(
                   trackHeight: 6,
                   activeTrackColor: EuBrutal.accent,
-                  inactiveTrackColor:
-                      theme.colorScheme.surfaceContainerHighest,
+                  inactiveTrackColor: theme.colorScheme.surfaceContainerHighest,
                   thumbColor: EuBrutal.accent,
-                  thumbShape:
-                      const RoundSliderThumbShape(enabledThumbRadius: 7),
+                  thumbShape: const RoundSliderThumbShape(
+                    enabledThumbRadius: 7,
+                  ),
                   overlayShape: SliderComponentShape.noOverlay,
                 ),
                 child: Slider(
@@ -803,10 +806,7 @@ class _TransportControls extends ConsumerWidget {
 
 /// The big central play/pause — brutalist circle with glass-accent glow.
 class _LargePlayButton extends ConsumerWidget {
-  const _LargePlayButton({
-    required this.isPlaying,
-    required this.isBuffering,
-  });
+  const _LargePlayButton({required this.isPlaying, required this.isBuffering});
 
   final bool isPlaying;
   final bool isBuffering;
@@ -1050,7 +1050,9 @@ class _BarButton extends StatelessWidget {
               Icon(
                 icon,
                 size: 24,
-                color: isActive ? EuBrutal.accent : context.eu.ink.withValues(alpha: 0.75),
+                color: isActive
+                    ? EuBrutal.accent
+                    : context.eu.ink.withValues(alpha: 0.75),
               ),
               if (badgeText != null) ...[
                 const SizedBox(height: 2),
@@ -1097,15 +1099,15 @@ class _SpeedBadge extends StatelessWidget {
             color: isCustom
                 ? EuBrutal.accent.withValues(alpha: isDark ? 0.35 : 0.18)
                 : (isDark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : context.eu.ink.withValues(alpha: 0.06)),
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : context.eu.ink.withValues(alpha: 0.06)),
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: isCustom
                   ? EuBrutal.accent
                   : (isDark
-                      ? Colors.white.withValues(alpha: 0.12)
-                      : context.eu.ink.withValues(alpha: 0.10)),
+                        ? Colors.white.withValues(alpha: 0.12)
+                        : context.eu.ink.withValues(alpha: 0.10)),
               width: 1,
             ),
           ),

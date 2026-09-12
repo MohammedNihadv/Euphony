@@ -39,7 +39,8 @@ class MusicDetailRepository {
 
   /// Fetches playlist details for [playlistId].
   Future<Result<PlaylistDetails>> fetchPlaylist(String playlistId) async {
-    final response = await _client.browse(playlistId);
+    final browseId = playlistId.startsWith('VL') ? playlistId : 'VL$playlistId';
+    final response = await _client.browse(browseId);
     return response.flatMap((root) => parsePlaylistDetails(root, playlistId));
   }
 }

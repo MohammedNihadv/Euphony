@@ -257,9 +257,7 @@ class _SongOptionsSheetBody extends ConsumerWidget {
                     context.push('/artist/${artist.browseId}');
                   } else {
                     Navigator.of(context).popUntil((route) => route.isFirst);
-                    context.go(
-                      '/search?q=${Uri.encodeComponent(artist.name)}',
-                    );
+                    context.go('/search?q=${Uri.encodeComponent(artist.name)}');
                   }
                 },
               ),

@@ -81,14 +81,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
 
     // Auto-reload home feed when user switches region in Settings
-    ref.listen(
-      settingsControllerProvider.select((s) => s.contentRegion),
-      (prev, next) {
-        if (prev != next) {
-          _loadHomeFeed(force: true);
-        }
-      },
-    );
+    ref.listen(settingsControllerProvider.select((s) => s.contentRegion), (
+      prev,
+      next,
+    ) {
+      if (prev != next) {
+        _loadHomeFeed(force: true);
+      }
+    });
 
     // Quick Picks are horizontal tiles. On a wide desktop window a 2-column
     // grid stretched each cell tall and left it mostly empty, so scale the
@@ -123,172 +123,182 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               constraints: const BoxConstraints(maxWidth: 1180),
               child: CustomScrollView(
                 slivers: [
-              // Category Filter Pills (Spotify-style)
-              SliverToBoxAdapter(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.fromLTRB(
-                    EuSpace.screenGutter,
-                    EuSpace.sm,
-                    EuSpace.screenGutter,
-                    EuSpace.md,
-                  ),
-                  child: Row(
-                    children: [
-                      _buildCategoryChip('All'),
-                      const SizedBox(width: EuSpace.sm),
-                      _buildCategoryChip('Music'),
-                      const SizedBox(width: EuSpace.sm),
-                      _buildCategoryChip('Playlists'),
-                      const SizedBox(width: EuSpace.sm),
-                      _buildCategoryChip('New Releases'),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Hero Banner (Neo-Brutalist)
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: EuSpace.screenGutter,
-                ),
-                sliver: SliverToBoxAdapter(
-                  child: StreamBuilder<void>(
-                    stream: Stream<void>.periodic(const Duration(minutes: 1)),
-                    builder: (context, _) =>
-                        _HeroBanner(
-                          greeting: _greetingMessage(),
-                          region: currentRegion,
-                        ),
-                  ),
-                ),
-              ),
-
-              // Quick Access Bento Grid (Liked Songs + Top 5 Picks - Spotify style)
-              if (_feed != null &&
-                  _feed!.quickPicks.isNotEmpty &&
-                  (_selectedCategory == 'All' || _selectedCategory == 'Music'))
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(
-                    EuSpace.screenGutter,
-                    EuSpace.md,
-                    EuSpace.screenGutter,
-                    EuSpace.xs,
-                  ),
-                  sliver: SliverToBoxAdapter(
-                    child: _QuickAccessBentoGrid(quickPicks: _feed!.quickPicks),
-                  ),
-                ),
-
-              SliverToBoxAdapter(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 400),
-                  switchInCurve: Curves.easeOut,
-                  switchOutCurve: Curves.easeIn,
-                  transitionBuilder: (child, anim) =>
-                      FadeTransition(opacity: anim, child: child),
-                  child: _loading
-                      ? const SizedBox(key: ValueKey('loading'))
-                      : _error != null
-                      ? Padding(
-                          key: const ValueKey('error'),
-                          padding: const EdgeInsets.all(EuSpace.xl),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const SizedBox(height: 40),
-                              const Icon(
-                                Icons.error_outline,
-                                size: 48,
-                                color: EuBrutal.alert,
-                              ),
-                              const SizedBox(height: EuSpace.md),
-                              Text(
-                                _error!,
-                                style: theme.textTheme.titleMedium,
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: EuSpace.md),
-                              FilledButton.icon(
-                                onPressed: _loadHomeFeed,
-                                icon: const Icon(Icons.refresh),
-                                label: const Text('Try Again'),
-                              ),
-                            ],
-                          ),
-                        )
-                      : const SizedBox(key: ValueKey('content')),
-                ),
-              ),
-
-              if (_loading)
-                const _HomeSkeletonFeed()
-              else if (_error != null)
-                const SliverToBoxAdapter(child: SizedBox.shrink())
-              else if (_feed != null) ...[
-                // Quick Picks Grid (Image 3)
-                if (_feed!.quickPicks.isNotEmpty &&
-                    (_selectedCategory == 'All' ||
-                        _selectedCategory == 'Music')) ...[
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(
-                      EuSpace.screenGutter,
-                      EuSpace.lg,
-                      EuSpace.screenGutter,
-                      EuSpace.sm,
-                    ),
-                    sliver: SliverToBoxAdapter(
-                      child: Text(
-                        'Quick Picks',
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
+                  // Category Filter Pills (Spotify-style)
+                  SliverToBoxAdapter(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.fromLTRB(
+                        EuSpace.screenGutter,
+                        EuSpace.sm,
+                        EuSpace.screenGutter,
+                        EuSpace.md,
+                      ),
+                      child: Row(
+                        children: [
+                          _buildCategoryChip('All'),
+                          const SizedBox(width: EuSpace.sm),
+                          _buildCategoryChip('Music'),
+                          const SizedBox(width: EuSpace.sm),
+                          _buildCategoryChip('Playlists'),
+                          const SizedBox(width: EuSpace.sm),
+                          _buildCategoryChip('New Releases'),
+                        ],
                       ),
                     ),
                   ),
+
+                  // Hero Banner (Neo-Brutalist)
                   SliverPadding(
                     padding: const EdgeInsets.symmetric(
                       horizontal: EuSpace.screenGutter,
-                      vertical: EuSpace.xs,
                     ),
-                    sliver: SliverGrid(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: quickCols,
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 10,
-                        mainAxisExtent: 72,
+                    sliver: SliverToBoxAdapter(
+                      child: StreamBuilder<void>(
+                        stream: Stream<void>.periodic(
+                          const Duration(minutes: 1),
+                        ),
+                        builder: (context, _) => _HeroBanner(
+                          greeting: _greetingMessage(),
+                          region: currentRegion,
+                        ),
                       ),
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        final song = _feed!.quickPicks[index];
-                        return _QuickPickTile(
-                          song: song,
-                          queueSongs: _feed!.quickPicks,
-                        );
-                      }, childCount: _feed!.quickPicks.length.clamp(
-                        0,
-                        quickCols >= 3 ? 8 : 6,
-                      )),
                     ),
                   ),
-                ],
 
-                // Featured Shelves / Sections
-                for (final section in _feed!.sections)
-                  if (_shouldShowSection(section.title))
+                  // Quick Access Bento Grid (Liked Songs + Top 5 Picks - Spotify style)
+                  if (_feed != null &&
+                      _feed!.quickPicks.isNotEmpty &&
+                      (_selectedCategory == 'All' ||
+                          _selectedCategory == 'Music'))
                     SliverPadding(
-                      padding: const EdgeInsets.only(
-                        left: EuSpace.screenGutter,
-                        right: EuSpace.screenGutter,
-                        top: EuSpace.md,
-                        bottom: EuSpace.lg,
+                      padding: const EdgeInsets.fromLTRB(
+                        EuSpace.screenGutter,
+                        EuSpace.md,
+                        EuSpace.screenGutter,
+                        EuSpace.xs,
                       ),
                       sliver: SliverToBoxAdapter(
-                        child: _HomeSectionBlock(section: section),
+                        child: _QuickAccessBentoGrid(
+                          quickPicks: _feed!.quickPicks,
+                        ),
                       ),
                     ),
 
-                const SliverPadding(padding: EdgeInsets.only(bottom: 110.0)),
-              ],
+                  SliverToBoxAdapter(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 400),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      transitionBuilder: (child, anim) =>
+                          FadeTransition(opacity: anim, child: child),
+                      child: _loading
+                          ? const SizedBox(key: ValueKey('loading'))
+                          : _error != null
+                          ? Padding(
+                              key: const ValueKey('error'),
+                              padding: const EdgeInsets.all(EuSpace.xl),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const SizedBox(height: 40),
+                                  const Icon(
+                                    Icons.error_outline,
+                                    size: 48,
+                                    color: EuBrutal.alert,
+                                  ),
+                                  const SizedBox(height: EuSpace.md),
+                                  Text(
+                                    _error!,
+                                    style: theme.textTheme.titleMedium,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: EuSpace.md),
+                                  FilledButton.icon(
+                                    onPressed: _loadHomeFeed,
+                                    icon: const Icon(Icons.refresh),
+                                    label: const Text('Try Again'),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : const SizedBox(key: ValueKey('content')),
+                    ),
+                  ),
+
+                  if (_loading)
+                    const _HomeSkeletonFeed()
+                  else if (_error != null)
+                    const SliverToBoxAdapter(child: SizedBox.shrink())
+                  else if (_feed != null) ...[
+                    // Quick Picks Grid (Image 3)
+                    if (_feed!.quickPicks.isNotEmpty &&
+                        (_selectedCategory == 'All' ||
+                            _selectedCategory == 'Music')) ...[
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(
+                          EuSpace.screenGutter,
+                          EuSpace.lg,
+                          EuSpace.screenGutter,
+                          EuSpace.sm,
+                        ),
+                        sliver: SliverToBoxAdapter(
+                          child: Text(
+                            'Quick Picks',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SliverPadding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: EuSpace.screenGutter,
+                          vertical: EuSpace.xs,
+                        ),
+                        sliver: SliverGrid(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: quickCols,
+                                mainAxisSpacing: 10,
+                                crossAxisSpacing: 10,
+                                mainAxisExtent: 72,
+                              ),
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final song = _feed!.quickPicks[index];
+                              return _QuickPickTile(
+                                song: song,
+                                queueSongs: _feed!.quickPicks,
+                              );
+                            },
+                            childCount: _feed!.quickPicks.length.clamp(
+                              0,
+                              quickCols >= 3 ? 8 : 6,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+
+                    // Featured Shelves / Sections
+                    for (final section in _feed!.sections)
+                      if (_shouldShowSection(section.title))
+                        SliverPadding(
+                          padding: const EdgeInsets.only(
+                            left: EuSpace.screenGutter,
+                            right: EuSpace.screenGutter,
+                            top: EuSpace.md,
+                            bottom: EuSpace.lg,
+                          ),
+                          sliver: SliverToBoxAdapter(
+                            child: _HomeSectionBlock(section: section),
+                          ),
+                        ),
+
+                    const SliverPadding(
+                      padding: EdgeInsets.only(bottom: 110.0),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -690,7 +700,8 @@ class _HomeSectionBlock extends ConsumerWidget {
     if (l.contains('tollywood') || l.contains('telugu')) return 'Tollywood';
     if (l.contains('bollywood') || l.contains('hindi')) return 'Bollywood';
     if (l.contains('hollywood') || l.contains('global')) return 'Hollywood';
-    if (l.contains('pakistani') || l.contains('coke studio')) return 'Pakistani';
+    if (l.contains('pakistani') || l.contains('coke studio'))
+      return 'Pakistani';
     if (l.contains('indie india') || l.contains('indie')) return 'Indie';
     if (l.contains('billboard') || l.contains('hot 100')) return 'Billboard';
     if (l.contains('hip-hop') || l.contains('rap')) return 'Hip-Hop';
@@ -810,7 +821,9 @@ class _RegionalShowcaseCard extends ConsumerWidget {
                       .toList();
                   final idx = songs.indexWhere((s) => s.id == song.id);
                   if (idx >= 0) {
-                    ref.read(playerControllerProvider).playQueue(songs, startIndex: idx);
+                    ref
+                        .read(playerControllerProvider)
+                        .playQueue(songs, startIndex: idx);
                   } else {
                     ref.read(playerControllerProvider).playSong(song);
                   }
@@ -839,7 +852,9 @@ class _RegionalShowcaseCard extends ConsumerWidget {
               Stack(
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(14),
+                    ),
                     child: AspectRatio(
                       aspectRatio: 1.0,
                       child: artworkUrl != null
@@ -848,19 +863,27 @@ class _RegionalShowcaseCard extends ConsumerWidget {
                               fit: BoxFit.cover,
                               errorBuilder: (_, _, _) => Container(
                                 color: EuBrutal.accent.withValues(alpha: 0.2),
-                                child: const Icon(Icons.music_note, color: EuBrutal.accent),
+                                child: const Icon(
+                                  Icons.music_note,
+                                  color: EuBrutal.accent,
+                                ),
                               ),
                             )
                           : Container(
                               color: EuBrutal.accent.withValues(alpha: 0.2),
-                              child: const Icon(Icons.music_note, color: EuBrutal.accent),
+                              child: const Icon(
+                                Icons.music_note,
+                                color: EuBrutal.accent,
+                              ),
                             ),
                     ),
                   ),
                   Positioned.fill(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(14),
+                        ),
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
@@ -876,13 +899,19 @@ class _RegionalShowcaseCard extends ConsumerWidget {
                     top: 8,
                     left: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: EuBrutal.accent,
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(color: context.eu.ink, width: 1.2),
                         boxShadow: const [
-                          BoxShadow(color: Colors.black45, offset: Offset(1, 1)),
+                          BoxShadow(
+                            color: Colors.black45,
+                            offset: Offset(1, 1),
+                          ),
                         ],
                       ),
                       child: Text(
@@ -921,7 +950,9 @@ class _RegionalShowcaseCard extends ConsumerWidget {
                       style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         fontSize: 11,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                     ),
                   ],
@@ -963,11 +994,7 @@ class _QuickAccessBentoGrid extends ConsumerWidget {
           return _BentoLikedSongsCard(isDark: isDark);
         }
         final song = recentSongs[index - 1];
-        return _BentoSongCard(
-          song: song,
-          allSongs: quickPicks,
-          isDark: isDark,
-        );
+        return _BentoSongCard(song: song, allSongs: quickPicks, isDark: isDark);
       },
     );
   }
@@ -1011,10 +1038,16 @@ class _BentoLikedSongsCard extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.horizontal(left: Radius.circular(8)),
+                  borderRadius: BorderRadius.horizontal(
+                    left: Radius.circular(8),
+                  ),
                 ),
                 child: const Center(
-                  child: Icon(Icons.favorite_rounded, color: Colors.white, size: 24),
+                  child: Icon(
+                    Icons.favorite_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
@@ -1051,7 +1084,8 @@ class _BentoSongCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final artworkUrl = song.artwork?.low ?? song.artwork?.medium ?? song.artworkUrl;
+    final artworkUrl =
+        song.artwork?.low ?? song.artwork?.medium ?? song.artworkUrl;
 
     return Container(
       decoration: BoxDecoration(
@@ -1076,7 +1110,9 @@ class _BentoSongCard extends ConsumerWidget {
           onTap: () {
             final idx = allSongs.indexWhere((s) => s.id == song.id);
             if (idx >= 0) {
-              ref.read(playerControllerProvider).playQueue(allSongs, startIndex: idx);
+              ref
+                  .read(playerControllerProvider)
+                  .playQueue(allSongs, startIndex: idx);
             } else {
               ref.read(playerControllerProvider).playSong(song);
             }
@@ -1085,7 +1121,9 @@ class _BentoSongCard extends ConsumerWidget {
           child: Row(
             children: [
               ClipRRect(
-                borderRadius: const BorderRadius.horizontal(left: Radius.circular(8)),
+                borderRadius: const BorderRadius.horizontal(
+                  left: Radius.circular(8),
+                ),
                 child: SizedBox(
                   width: 56,
                   height: 58,
@@ -1095,12 +1133,20 @@ class _BentoSongCard extends ConsumerWidget {
                           fit: BoxFit.cover,
                           errorBuilder: (_, _, _) => Container(
                             color: EuBrutal.accent.withValues(alpha: 0.2),
-                            child: const Icon(Icons.music_note, size: 20, color: EuBrutal.accent),
+                            child: const Icon(
+                              Icons.music_note,
+                              size: 20,
+                              color: EuBrutal.accent,
+                            ),
                           ),
                         )
                       : Container(
                           color: EuBrutal.accent.withValues(alpha: 0.2),
-                          child: const Icon(Icons.music_note, size: 20, color: EuBrutal.accent),
+                          child: const Icon(
+                            Icons.music_note,
+                            size: 20,
+                            color: EuBrutal.accent,
+                          ),
                         ),
                 ),
               ),

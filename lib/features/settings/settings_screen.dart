@@ -596,14 +596,18 @@ class SettingsScreen extends ConsumerWidget {
     SettingsController controller,
   ) {
     final countries = [
-      'US - United States',
       'IN - India',
+      'PK - Pakistan',
+      'US - United States',
       'UK - United Kingdom',
-      'JP - Japan',
-      'BR - Brazil',
-      'DE - Germany',
       'CA - Canada',
       'AU - Australia',
+      'JP - Japan',
+      'KR - South Korea',
+      'DE - Germany',
+      'FR - France',
+      'BR - Brazil',
+      'NG - Nigeria',
     ];
 
     showDialog<void>(

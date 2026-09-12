@@ -77,6 +77,9 @@ class InnertubeClient {
   /// The `hl` code sent with every request.
   String get language => _language;
 
+  /// The `gl` region code sent with every request.
+  String get region => _region;
+
   Map<String, String> get _headers {
     final visitorId = _visitorId;
     if (kIsWeb) {

@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -39,9 +40,105 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
   @override
   void initState() {
     super.initState();
+    HardwareKeyboard.instance.addHandler(_handleGlobalKey);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) UpdatePrompt.maybeShowOnLaunch(context, ref);
     });
+  }
+
+  @override
+  void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handleGlobalKey);
+    super.dispose();
+  }
+
+  bool _handleGlobalKey(KeyEvent event) {
+    if (event is! KeyDownEvent) return false;
+
+    final key = event.logicalKey;
+    final controller = ref.read(playerControllerProvider);
+    final player = ref.read(audioPlayerProvider);
+
+    final isDedicatedMediaKey =
+        key == LogicalKeyboardKey.mediaPlayPause ||
+        key == LogicalKeyboardKey.mediaPlay ||
+        key == LogicalKeyboardKey.mediaPause ||
+        key == LogicalKeyboardKey.mediaTrackNext ||
+        key == LogicalKeyboardKey.mediaTrackPrevious ||
+        key == LogicalKeyboardKey.mediaFastForward ||
+        key == LogicalKeyboardKey.mediaRewind ||
+        key == LogicalKeyboardKey.mediaStop ||
+        key == LogicalKeyboardKey.mediaSkip;
+
+    // Do not intercept text editing keys if user is typing in a text field
+    if (!isDedicatedMediaKey) {
+      final primaryFocus = FocusManager.instance.primaryFocus;
+      if (primaryFocus != null && primaryFocus.context != null) {
+        final widget = primaryFocus.context!.widget;
+        if (widget is EditableText) {
+          return false;
+        }
+      }
+    }
+
+    final isShiftOrCtrl =
+        HardwareKeyboard.instance.isShiftPressed ||
+        HardwareKeyboard.instance.isControlPressed ||
+        HardwareKeyboard.instance.isMetaPressed;
+
+    // 1. Play / Pause / Resume
+    if (key == LogicalKeyboardKey.mediaPlayPause ||
+        key == LogicalKeyboardKey.mediaPlay ||
+        key == LogicalKeyboardKey.mediaPause ||
+        key == LogicalKeyboardKey.space ||
+        key == LogicalKeyboardKey.keyK) {
+      controller.togglePlayPause();
+      return true;
+    }
+
+    // 2. Stop
+    if (key == LogicalKeyboardKey.mediaStop) {
+      controller.stop();
+      return true;
+    }
+
+    // 3. Skip to Next track
+    if (key == LogicalKeyboardKey.mediaTrackNext ||
+        key == LogicalKeyboardKey.mediaSkip ||
+        (isShiftOrCtrl && (key == LogicalKeyboardKey.arrowRight || key == LogicalKeyboardKey.keyN))) {
+      controller.skipNext();
+      return true;
+    }
+
+    // 4. Skip to Previous track
+    if (key == LogicalKeyboardKey.mediaTrackPrevious ||
+        (isShiftOrCtrl && (key == LogicalKeyboardKey.arrowLeft || key == LogicalKeyboardKey.keyP))) {
+      controller.skipPrevious();
+      return true;
+    }
+
+    // 5. Fast-Forward (10s)
+    if (key == LogicalKeyboardKey.mediaFastForward ||
+        key == LogicalKeyboardKey.arrowRight ||
+        key == LogicalKeyboardKey.keyL) {
+      final pos = player.position;
+      final total = player.duration ?? Duration.zero;
+      final target = pos + const Duration(seconds: 10);
+      controller.seek(target > total ? total : target);
+      return true;
+    }
+
+    // 6. Rewind / Backward (10s)
+    if (key == LogicalKeyboardKey.mediaRewind ||
+        key == LogicalKeyboardKey.arrowLeft ||
+        key == LogicalKeyboardKey.keyJ) {
+      final pos = player.position;
+      final target = pos - const Duration(seconds: 10);
+      controller.seek(target < Duration.zero ? Duration.zero : target);
+      return true;
+    }
+
+    return false;
   }
 
   StatefulNavigationShell get navigationShell => widget.navigationShell;
@@ -76,11 +173,19 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
   // ── Mobile: glass nav bar floating over content ─────────────────────────
   Widget _buildMobile(BuildContext context) {
     return Scaffold(
-      extendBody: true,
-      body: navigationShell,
-      bottomNavigationBar: _GlassBrutalNavBar(
-        selectedIndex: navigationShell.currentIndex,
-        onSelected: _goBranch,
+      body: Stack(
+        children: [
+          Positioned.fill(child: navigationShell),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: _GlassBrutalNavBar(
+              selectedIndex: navigationShell.currentIndex,
+              onSelected: _goBranch,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -135,87 +240,148 @@ class _GlassBrutalNavBar extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Mini player sits above the nav bar
-        const MiniPlayer(),
+    return SafeArea(
+      top: false,
+      left: false,
+      right: false,
+      bottom: true,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Mini player sits above the nav bar
+          const MiniPlayer(),
 
-        // Glass nav bar with brutalist top border
-        ClipRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          // Floating rounded capsule navigation bar
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
             child: Container(
+              height: 62,
               decoration: BoxDecoration(
-                // Frosted glass fill with subtle tint
-                color: isDark
-                    ? const Color(0xFF12121C).withValues(alpha: 0.82)
-                    : Colors.white.withValues(alpha: 0.82),
-                // Brutalist top border — the visual "frame" of the nav slab
-                border: Border(
-                  top: BorderSide(color: context.eu.ink, width: 2),
-                ),
+                borderRadius: BorderRadius.circular(34),
                 boxShadow: [
                   BoxShadow(
-                    color: isDark
-                        ? Colors.black.withValues(alpha: 0.35)
-                        : Colors.black.withValues(alpha: 0.06),
-                    offset: const Offset(0, -3),
-                    blurRadius: 10,
+                    color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.14),
+                    offset: const Offset(0, 10),
+                    blurRadius: 28,
+                    spreadRadius: -2,
+                  ),
+                  BoxShadow(
+                    color: (isDark ? Colors.white : Colors.black).withValues(
+                      alpha: isDark ? 0.06 : 0.03,
+                    ),
+                    offset: const Offset(0, 2),
+                    blurRadius: 6,
                   ),
                 ],
               ),
-              child: Theme(
-                data: theme.copyWith(
-                  navigationBarTheme: NavigationBarThemeData(
-                    labelTextStyle: WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return TextStyle(
-                          color: context.eu.ink,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 12,
-                        );
-                      }
-                      return TextStyle(
-                        color: context.eu.ink.withValues(alpha: 0.7),
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                      );
-                    }),
-                  ),
-                ),
-                child: NavigationBar(
-                  selectedIndex: selectedIndex,
-                  onDestinationSelected: onSelected,
-                  backgroundColor: Colors.transparent,
-                  surfaceTintColor: Colors.transparent,
-                  elevation: 0,
-                  indicatorColor: EuBrutal.accent,
-                  labelBehavior:
-                      NavigationDestinationLabelBehavior.onlyShowSelected,
-                  destinations: [
-                    for (final d in _destinations)
-                      NavigationDestination(
-                        icon: Icon(
-                          d.icon,
-                          color: context.eu.ink.withValues(alpha: 0.7),
-                        ),
-                        selectedIcon: Icon(
-                          d.selectedIcon,
-                          color: EuBrutal.onAccent,
-                        ),
-                        label: d.label,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(34),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0x80141422)
+                          : Colors.white.withValues(alpha: 0.65),
+                      borderRadius: BorderRadius.circular(34),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.16)
+                            : Colors.white.withValues(alpha: 0.85),
+                        width: 1.2,
                       ),
-                  ],
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        for (int i = 0; i < _destinations.length; i++)
+                          _buildNavItem(
+                            context: context,
+                            index: i,
+                            dest: _destinations[i],
+                            isSelected: i == selectedIndex,
+                            isDark: isDark,
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required BuildContext context,
+    required int index,
+    required _Dest dest,
+    required bool isSelected,
+    required bool isDark,
+  }) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => onSelected(index),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOutCubic,
+        padding: EdgeInsets.symmetric(
+          horizontal: isSelected ? 12 : 8,
+          vertical: 7,
         ),
-      ],
+        decoration: BoxDecoration(
+          color: isSelected ? EuBrutal.accent : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? context.eu.ink.withValues(alpha: isDark ? 0.7 : 0.9)
+                : Colors.transparent,
+            width: 1.5,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: EuBrutal.accent.withValues(alpha: 0.4),
+                    blurRadius: 12,
+                    spreadRadius: 0,
+                    offset: Offset.zero,
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isSelected ? dest.selectedIcon : dest.icon,
+              size: 20,
+              color: isSelected
+                  ? EuBrutal.onAccent
+                  : context.eu.ink.withValues(alpha: 0.7),
+            ),
+            if (isSelected) ...[
+              const SizedBox(width: 5),
+              Text(
+                dest.label,
+                style: const TextStyle(
+                  color: EuBrutal.onAccent,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 12,
+                  letterSpacing: -0.3,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
+
+
 
 // ---------------------------------------------------------------------------
 // Desktop sidebar — glass panel + brutalist right border
