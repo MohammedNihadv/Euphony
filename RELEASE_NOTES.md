@@ -1,11 +1,17 @@
-## Euphony v0.3.0 — Downloads Fixed, Glassmorphic Nav & Light Mode Polish 🎨⚡
+## Euphony v0.3.0 — Premium Loading Animations, Artist Navigation & Player Polish 🎵✨
 
-### 🔧 Fixes & Enhancements
-- **Rock-Solid Downloads** — Fixed download stream resolution and eliminated 403 Forbidden / 1% stuck downloads using chunked Range streaming (`itag 18` muxed unthrottled streams + 512 KB chunk relays with Content-Length auto-detection).
-- **Glassmorphic Footer Navigation** — Enabled `extendBody` on mobile shells with frosted `BackdropFilter` glass blur, translucent brutalist surface tint, and sharp contrast borders.
-- **Light Theme Contrast** — Fixed hero banner text & equalizer bars, category filter chips, and item card borders for clean, high-contrast readability in light/white mode.
-- **Reordered Library Tabs** — Reorganized library navigation with **Liked Songs** 1st and **Downloads** 2nd for quick access.
-- **Concise Update Popups** — Automated in-app new release dialogs with clean, concise bullet highlights instead of wall-of-text changelogs.
+### ✨ What's New
+- **Animated Home Loading Screen** — Replaced the static loading card with a live frequency visualizer: 18 dancing sine-wave bars (purple→pink gradient), a shimmering "Euphony" title, and cycling status text that fades and slides between messages.
+- **Artist & Composer Navigation** — Tap any artist or composer credit in the song options sheet to go directly to their artist page or search for them. Multi-artist credits are now split into individual tappable "Go to [Artist]" actions.
+- **Go to Album** shortcut added to the song options sheet when album metadata is available.
+- **Player Action Bar** — Redesigned as a frosted glass capsule with a specular highlight border.
+- **Speed Badge** — The 1.0× speed indicator is now a floating accent pill with a soft glow.
+
+### 🔧 Fixes
+- **Search by composer** — Tapping a composer now correctly opens the search screen with their name pre-filled.
+- **Song options sheet** — Fixed route pop order so the sheet dismisses cleanly before navigating to artist/search routes.
+- **Home feed region** — Quick Picks and Featured sections now correctly reflect your account region instead of defaulting to US.
+- **Loading splash** — Removed duplicate widget class that caused build failures on fresh installs.
 
 ### 📥 Downloads
 | Platform | File | Install |
