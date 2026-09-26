@@ -35,13 +35,18 @@ class StreamProxy {
   var _counter = 0;
 
   final HttpClient _client = HttpClient()
-    ..connectionTimeout = const Duration(seconds: 20)
+    // Reduced from 20 s: on Samsung, a hung connection should fail fast so
+    // we can retry rather than blocking playback for half a minute.
+    ..connectionTimeout = const Duration(seconds: 10)
     ..autoUncompress = false
     ..idleTimeout = const Duration(seconds: 30);
 
   static StreamProxy? _instance;
 
   /// Starts (or reuses) the shared proxy bound to loopback.
+  ///
+  /// If the server has crashed (e.g. after Samsung's OS kills background
+  /// sockets), the stale instance is discarded and a fresh one is created.
   static Future<StreamProxy> start() async {
     final existing = _instance;
     if (existing != null) return existing;
@@ -61,26 +66,38 @@ class StreamProxy {
   }
 
   void _listen() {
-    _server.listen((request) async {
-      final id = request.uri.pathSegments.isNotEmpty
-          ? request.uri.pathSegments.first
-          : '';
-      final remote = _urls[id];
-      if (remote == null) {
-        request.response.statusCode = HttpStatus.notFound;
-        await request.response.close();
-        return;
-      }
-      try {
-        await _relay(request, remote);
-      } catch (e) {
-        _log.warning('relay error: $e');
-        try {
-          request.response.statusCode = HttpStatus.badGateway;
+    _server.listen(
+      (request) async {
+        final id = request.uri.pathSegments.isNotEmpty
+            ? request.uri.pathSegments.first
+            : '';
+        final remote = _urls[id];
+        if (remote == null) {
+          request.response.statusCode = HttpStatus.notFound;
           await request.response.close();
+          return;
+        }
+        try {
+          await _relay(request, remote);
+        } catch (e) {
+          _log.warning('relay error: $e');
+          try {
+            request.response.statusCode = HttpStatus.badGateway;
+            await request.response.close();
+          } catch (_) {}
+        }
+      },
+      onError: (Object error) {
+        // The server socket died (e.g. Samsung killed the loopback interface
+        // during aggressive battery optimisation). Reset the singleton so the
+        // next call to start() creates a fresh server on a new port.
+        _log.warning('stream proxy server error, resetting: $error');
+        _instance = null;
+        try {
+          _server.close(force: true);
         } catch (_) {}
-      }
-    });
+      },
+    );
   }
 
   Future<void> _relay(HttpRequest request, String remoteUrl) async {

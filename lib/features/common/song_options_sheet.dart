@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -12,16 +13,15 @@ import '../../playback/local_playlist_provider.dart';
 import '../../playback/player_provider.dart';
 
 void showSongOptionsSheet(BuildContext context, Song song) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
   showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
-    backgroundColor: Theme.of(context).colorScheme.surface,
-    shape: RoundedRectangleBorder(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      side: BorderSide(color: context.eu.ink, width: 2.5),
-    ),
-    builder: (context) =>
-        SingleChildScrollView(child: _SongOptionsSheetBody(song: song)),
+    showDragHandle: false,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: isDark ? 0.70 : 0.40),
+    builder: (context) => _SongOptionsSheetBody(song: song),
   );
 }
 
@@ -33,122 +33,198 @@ class _SongOptionsSheetBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dao = ref.watch(likedSongsDaoProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(EuSpace.lg),
-            child: Row(
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
+    return Container(
+      height: MediaQuery.sizeOf(context).height * 0.68,
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF10101A) : const Color(0xFFF8FAFD),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border(
+          top: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.14)
+                : Colors.black.withValues(alpha: 0.08),
+            width: 1.2,
+          ),
+        ),
+      ),
+      child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              // Drag handle
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 6),
+                  width: 36,
+                  height: 4,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: context.eu.ink, width: 2),
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainerHighest,
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: song.artworkUrl != null
-                      ? Image.network(
-                          song.artworkUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) =>
-                              const Icon(Icons.music_note),
-                        )
-                      : const Icon(Icons.music_note),
-                ),
-                const SizedBox(width: EuSpace.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        song.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        song.artistNames.isEmpty
-                            ? 'Unknown Artist'
-                            : song.artistNames,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.7),
-                        ),
-                      ),
-                    ],
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.25)
+                        : Colors.black.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-              ],
-            ),
-          ),
-          Divider(color: context.eu.ink, thickness: 2, height: 2),
-          ListTile(
-            leading: const Icon(Icons.playlist_add, color: EuBrutal.accent),
-            title: const Text(
-              'Add to Playlist',
-              style: TextStyle(fontWeight: FontWeight.w800),
-            ),
-            onTap: () {
-              Navigator.pop(context);
-              _showAddToPlaylistSheet(context, song);
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.playlist_play, color: context.eu.ink),
-            title: const Text(
-              'Play Next',
-              style: TextStyle(fontWeight: FontWeight.w800),
-            ),
-            onTap: () {
-              ref.read(playerControllerProvider).addNext(song);
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Added to play next')),
-              );
-            },
-          ),
-          ListTile(
-            leading: Icon(Icons.queue_music, color: context.eu.ink),
-            title: const Text(
-              'Add to Queue',
-              style: TextStyle(fontWeight: FontWeight.w800),
-            ),
-            onTap: () {
-              ref.read(playerControllerProvider).addToQueue(song);
-              Navigator.pop(context);
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('Added to queue')));
-            },
-          ),
+              ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      EuSpace.lg,
+                      EuSpace.xs,
+                      EuSpace.lg,
+                      EuSpace.md,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 54,
+                          height: 54,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.15)
+                                  : Colors.black.withValues(alpha: 0.08),
+                              width: 1,
+                            ),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.05)
+                                : Colors.black.withValues(alpha: 0.04),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: song.artworkUrl != null
+                              ? Image.network(
+                                  song.artworkUrl!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, _, _) => const Icon(
+                                    Icons.music_note_rounded,
+                                    color: EuBrutal.accent,
+                                  ),
+                                )
+                              : const Icon(
+                                  Icons.music_note_rounded,
+                                  color: EuBrutal.accent,
+                                ),
+                        ),
+                        const SizedBox(width: EuSpace.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                song.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 16,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                song.artistNames.isEmpty
+                                    ? 'Unknown Artist'
+                                    : song.artistNames,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 13,
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.65)
+                                      : Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Divider(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.black.withValues(alpha: 0.06),
+                    thickness: 1,
+                    height: 1,
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.playlist_add_rounded, color: EuBrutal.accent),
+                    title: Text(
+                      'Add to Playlist',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontSize: 14,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(context);
+                      _showAddToPlaylistSheet(context, song);
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      Icons.playlist_play_rounded,
+                      color: isDark ? Colors.white70 : Colors.black54,
+                    ),
+                    title: Text(
+                      'Play Next',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontSize: 14,
+                      ),
+                    ),
+                    onTap: () {
+                      ref.read(playerControllerProvider).addNext(song);
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Added to play next')),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(
+                      Icons.queue_music_rounded,
+                      color: isDark ? Colors.white70 : Colors.black54,
+                    ),
+                    title: Text(
+                      'Add to Queue',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontSize: 14,
+                      ),
+                    ),
+                    onTap: () {
+                      ref.read(playerControllerProvider).addToQueue(song);
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Added to queue')),
+                      );
+                    },
+                  ),
           StreamBuilder<bool>(
             stream: dao.watchIsLiked(song.id),
             builder: (context, snapshot) {
               final isLiked = snapshot.data ?? false;
               return ListTile(
                 leading: Icon(
-                  isLiked ? Icons.favorite : Icons.favorite_border,
-                  color: isLiked ? EuBrutal.alert : context.eu.ink,
+                  isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                  color: isLiked
+                      ? EuBrutal.alert
+                      : (isDark ? Colors.white70 : Colors.black54),
                 ),
                 title: Text(
                   isLiked ? 'Remove from Favorites' : 'Add to Favorites',
-                  style: const TextStyle(fontWeight: FontWeight.w800),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                  ),
                 ),
                 onTap: () {
                   if (isLiked) {
@@ -188,9 +264,11 @@ class _SongOptionsSheetBody extends ConsumerWidget {
                       )
                     : Icon(
                         isDownloaded
-                            ? Icons.check_circle
+                            ? Icons.check_circle_rounded
                             : Icons.download_for_offline_outlined,
-                        color: isDownloaded ? Colors.green : EuBrutal.accent,
+                        color: isDownloaded
+                            ? Colors.green
+                            : (isDark ? Colors.white70 : Colors.black54),
                       ),
                 title: Text(
                   isDownloaded
@@ -198,12 +276,20 @@ class _SongOptionsSheetBody extends ConsumerWidget {
                       : (progress != null
                             ? 'Downloading ${(progress * 100).toInt()}%...'
                             : 'Download Track'),
-                  style: const TextStyle(fontWeight: FontWeight.w800),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                  ),
                 ),
                 subtitle: Text(
                   isDownloaded
                       ? 'Remove from offline storage'
                       : 'Save track for offline listening',
+                  style: TextStyle(
+                    color: isDark ? Colors.white60 : Colors.black54,
+                    fontSize: 12,
+                  ),
                 ),
                 onTap: () {
                   if (progress != null) return;
@@ -226,10 +312,17 @@ class _SongOptionsSheetBody extends ConsumerWidget {
               song.albumTitle != null &&
               song.albumTitle!.isNotEmpty)
             ListTile(
-              leading: Icon(Icons.album_outlined, color: context.eu.ink),
+              leading: Icon(
+                Icons.album_outlined,
+                color: isDark ? Colors.white70 : Colors.black54,
+              ),
               title: Text(
                 'Go to Album "${song.albumTitle}"',
-                style: const TextStyle(fontWeight: FontWeight.w800),
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 14,
+                ),
               ),
               onTap: () {
                 Navigator.of(context).pop();
@@ -241,15 +334,19 @@ class _SongOptionsSheetBody extends ConsumerWidget {
               ListTile(
                 leading: Icon(
                   artist.isNavigable
-                      ? Icons.person_outline
+                      ? Icons.person_outline_rounded
                       : Icons.person_search_outlined,
-                  color: context.eu.ink,
+                  color: isDark ? Colors.white70 : Colors.black54,
                 ),
                 title: Text(
                   artist.isNavigable
                       ? 'Go to ${artist.name}'
                       : 'Search "${artist.name}"',
-                  style: const TextStyle(fontWeight: FontWeight.w800),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : Colors.black87,
+                    fontSize: 14,
+                  ),
                 ),
                 onTap: () {
                   Navigator.of(context).pop();
@@ -265,11 +362,15 @@ class _SongOptionsSheetBody extends ConsumerWidget {
             ListTile(
               leading: Icon(
                 Icons.person_search_outlined,
-                color: context.eu.ink,
+                color: isDark ? Colors.white70 : Colors.black54,
               ),
               title: Text(
                 'Search "${song.artistNames}"',
-                style: const TextStyle(fontWeight: FontWeight.w800),
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : Colors.black87,
+                  fontSize: 14,
+                ),
               ),
               onTap: () {
                 Navigator.of(context).pop();
@@ -286,16 +387,16 @@ class _SongOptionsSheetBody extends ConsumerWidget {
   }
 }
 
+
 void _showAddToPlaylistSheet(BuildContext context, Song song) {
-  final inkColor = context.eu.ink;
+  final isDark = Theme.of(context).brightness == Brightness.dark;
   showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
-    backgroundColor: Theme.of(context).colorScheme.surface,
-    shape: RoundedRectangleBorder(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      side: BorderSide(color: inkColor, width: 2.5),
-    ),
+    showDragHandle: false,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: isDark ? 0.70 : 0.40),
     builder: (context) {
       return Consumer(
         builder: (context, ref, child) {
@@ -304,113 +405,165 @@ void _showAddToPlaylistSheet(BuildContext context, Song song) {
             stream: dao.watchAll(),
             builder: (context, snapshot) {
               final playlists = snapshot.data ?? const [];
-              return SafeArea(
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.all(EuSpace.lg),
-                        child: Text(
-                          'ADD TO PLAYLIST',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.2,
-                            fontSize: 16,
-                          ),
+              return Container(
+                height: MediaQuery.sizeOf(context).height * 0.65,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF10101A) : const Color(0xFFF8FAFD),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                      border: Border(
+                        top: BorderSide(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.16)
+                              : Colors.white.withValues(alpha: 0.90),
+                          width: 1.2,
+                        ),
+                        left: BorderSide(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.10)
+                              : Colors.black.withValues(alpha: 0.06),
+                          width: 1.0,
+                        ),
+                        right: BorderSide(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.10)
+                              : Colors.black.withValues(alpha: 0.06),
+                          width: 1.0,
                         ),
                       ),
-                      Divider(
-                        color: context.eu.divider,
-                        thickness: 2,
-                        height: 1,
-                      ),
-                      ListTile(
-                        leading: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            color: EuBrutal.accent,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(
-                            Icons.add,
-                            color: EuBrutal.onAccent,
-                            size: 20,
-                          ),
-                        ),
-                        title: const Text(
-                          'Create New Playlist',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            color: EuBrutal.accent,
-                          ),
-                        ),
-                        onTap: () {
-                          Navigator.pop(context);
-                          _showNewPlaylistDialog(context, song);
-                        },
-                      ),
-                      if (playlists.isEmpty)
-                        const Padding(
-                          padding: EdgeInsets.all(EuSpace.xl),
-                          child: Text(
-                            'No playlists created yet',
-                            style: TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                        )
-                      else
-                        for (final playlist in playlists)
-                          ListTile(
-                            leading: Icon(
-                              Icons.playlist_play,
-                              color: context.eu.ink,
+                    ),
+                    child: ListView(
+                      padding: EdgeInsets.zero,
+                      children: [
+                        Center(
+                          child: Container(
+                            margin: const EdgeInsets.only(top: 12, bottom: 6),
+                            width: 36,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.25)
+                                  : Colors.black.withValues(alpha: 0.18),
+                              borderRadius: BorderRadius.circular(2),
                             ),
-                            title: Text(
-                              playlist.title,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: EuSpace.lg,
+                            vertical: EuSpace.sm,
+                          ),
+                          child: Text(
+                            'ADD TO PLAYLIST',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.2,
+                              fontSize: 16,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                        ),
+                        Divider(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : Colors.black.withValues(alpha: 0.06),
+                          thickness: 1,
+                          height: 1,
+                        ),
+                        ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: EuBrutal.accent,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(
+                              Icons.add_rounded,
+                              color: EuBrutal.onAccent,
+                              size: 20,
+                            ),
+                          ),
+                          title: const Text(
+                            'Create New Playlist',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              color: EuBrutal.accent,
+                              fontSize: 14,
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.pop(context);
+                            _showNewPlaylistDialog(context, song);
+                          },
+                        ),
+                        if (playlists.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.all(EuSpace.xl),
+                            child: Text(
+                              'No playlists created yet',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                color: isDark ? Colors.white60 : Colors.black54,
                               ),
                             ),
-                            subtitle: Text(
-                              '${playlist.trackCount ?? 0} tracks',
-                            ),
-                            onTap: () async {
-                              final notifier = ref.read(
-                                localPlaylistTracksProvider.notifier,
-                              );
-                              await notifier.addSongToPlaylist(
-                                playlist.id,
-                                song,
-                              );
-                              final currentTracks = notifier.getPlaylistTracks(
-                                playlist.id,
-                              );
-                              await dao.save(
-                                id: playlist.id,
-                                title: playlist.title,
-                                author: playlist.author ?? 'Custom Playlist',
-                                artworkUrl:
-                                    song.artworkUrl ?? playlist.artworkUrl,
-                                trackCount: currentTracks.length,
-                              );
-                              if (context.mounted) {
-                                Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Added "${song.title}" to ${playlist.title}',
-                                    ),
-                                  ),
+                          )
+                        else
+                          for (final playlist in playlists)
+                            ListTile(
+                              leading: Icon(
+                                Icons.playlist_play_rounded,
+                                color: isDark ? Colors.white70 : Colors.black54,
+                              ),
+                              title: Text(
+                                playlist.title,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              subtitle: Text(
+                                '${playlist.trackCount ?? 0} tracks',
+                                style: TextStyle(
+                                  color: isDark ? Colors.white60 : Colors.black54,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              onTap: () async {
+                                final notifier = ref.read(
+                                  localPlaylistTracksProvider.notifier,
                                 );
-                              }
-                            },
-                          ),
-                      const SizedBox(height: EuSpace.md),
-                    ],
-                  ),
-                ),
-              );
-            },
+                                await notifier.addSongToPlaylist(
+                                  playlist.id,
+                                  song,
+                                );
+                                final currentTracks = notifier.getPlaylistTracks(
+                                  playlist.id,
+                                );
+                                await dao.save(
+                                  id: playlist.id,
+                                  title: playlist.title,
+                                  author: playlist.author ?? 'Custom Playlist',
+                                  artworkUrl:
+                                      song.artworkUrl ?? playlist.artworkUrl,
+                                  trackCount: currentTracks.length,
+                                );
+                                if (context.mounted) {
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Added "${song.title}" to ${playlist.title}',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                        const SizedBox(height: EuSpace.md),
+                      ],
+                    ),
+                  );
+                },
           );
         },
       );
@@ -419,40 +572,75 @@ void _showAddToPlaylistSheet(BuildContext context, Song song) {
 }
 
 void _showNewPlaylistDialog(BuildContext context, Song song) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
   final controller = TextEditingController();
   showDialog<void>(
     context: context,
     builder: (context) => Consumer(
       builder: (context, ref, child) => AlertDialog(
+        backgroundColor: isDark ? const Color(0xFF161626) : Colors.white,
         scrollable: true,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: context.eu.ink, width: 2.5),
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.14)
+                : Colors.black.withValues(alpha: 0.10),
+            width: 1.0,
+          ),
         ),
-        title: const Text(
+        title: Text(
           'NEW PLAYLIST',
-          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1,
+            color: isDark ? Colors.white : Colors.black87,
+            fontSize: 16,
+          ),
         ),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(
+          style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+          decoration: InputDecoration(
             hintText: 'Playlist Title',
-            border: OutlineInputBorder(),
+            hintStyle: TextStyle(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.35)
+                  : Colors.black.withValues(alpha: 0.40),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : Colors.black.withValues(alpha: 0.15),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: EuBrutal.accent, width: 1.5),
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
+            child: Text(
               'Cancel',
-              style: TextStyle(fontWeight: FontWeight.w700),
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white70 : Colors.black54,
+              ),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: EuBrutal.accent,
               foregroundColor: EuBrutal.onAccent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
             onPressed: () async {
               final name = controller.text.trim();

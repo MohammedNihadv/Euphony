@@ -53,6 +53,7 @@ class SettingsRepository {
   static const _kAutoPlaySimilar = 'auto_play_similar';
   static const _kSkipSilence = 'skip_silence';
   static const _kContentRegion = 'content_region';
+  static const _kDynamicIsland = 'dynamic_island_enabled';
 
   String get audioQuality => _prefs.getString(_kAudioQuality) ?? 'HIGH';
   Future<void> setAudioQuality(String value) =>
@@ -70,4 +71,14 @@ class SettingsRepository {
       _prefs.getString(_kContentRegion) ?? 'US - United States';
   Future<void> setContentRegion(String value) =>
       _prefs.setString(_kContentRegion, value);
+
+  bool get dynamicIsland => _prefs.getBool(_kDynamicIsland) ?? true;
+  Future<void> setDynamicIsland(bool value) =>
+      _prefs.setBool(_kDynamicIsland, value);
+
+  static const _kHideMiniPlayerWithIsland = 'hide_mini_player_with_island';
+  bool get hideMiniPlayerWithIsland =>
+      _prefs.getBool(_kHideMiniPlayerWithIsland) ?? true;
+  Future<void> setHideMiniPlayerWithIsland(bool value) =>
+      _prefs.setBool(_kHideMiniPlayerWithIsland, value);
 }

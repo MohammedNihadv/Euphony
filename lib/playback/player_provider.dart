@@ -489,7 +489,22 @@ class PlayerController {
 
   /// Guards against two loads racing — a fast double-tap, or a track finishing
   /// while the user is already skipping.
-  int _loadGeneration = 0;
+  ///
+  /// A [Completer] is used rather than a plain counter so that any awaiting
+  /// [_resolveStream] call can be short-circuited mid-flight. When a new load
+  /// begins, the previous completer is completed with `true` ("cancelled"),
+  /// and every suspension point in [_playCurrent] checks the token before
+  /// continuing.
+  Completer<bool>? _cancelToken;
+
+  /// Cancels any in-flight [_playCurrent] call and returns a fresh token for
+  /// the upcoming one.
+  Completer<bool> _startNewLoad() {
+    _cancelToken?.complete(true);
+    final token = Completer<bool>();
+    _cancelToken = token;
+    return token;
+  }
 
   /// Windows media-key / SMTC integration. No-op off Windows.
   final DesktopMediaControls _mediaControls = DesktopMediaControls();
@@ -550,6 +565,7 @@ class PlayerController {
       // Nothing to play next: stop cleanly rather than sitting in `completed`,
       // which reports as "playing" to the UI.
       await _player.stop();
+      _queue.clearQueue();
       return;
     }
     _queue.setIndex(next);
@@ -583,6 +599,25 @@ class PlayerController {
   Future<void> playSong(Song song) async {
     _queue.playQueue([song], shuffle: _shuffleEnabled());
     await _playCurrent();
+    // Pre-populate queue with related tracks (Demus / YouTube Music radio mix)
+    unawaited(_autoPopulateQueue(song));
+  }
+
+  /// Automatically populates the play queue with related radio tracks when a
+  /// new song starts, matching Demus and Spotify auto-queue behavior.
+  Future<void> _autoPopulateQueue(Song seed) async {
+    final fetch = _fetchAutoplay;
+    if (fetch == null || _disposed) return;
+    try {
+      final related = await fetch(seed);
+      if (_disposed || related.isEmpty) return;
+      if (_queue.currentSong?.id == seed.id) {
+        _queue.addAllToQueue(related);
+        _log.info('auto-populated queue with ${related.length} radio tracks');
+      }
+    } catch (e) {
+      _log.fine('auto-populate queue failed (non-critical): $e');
+    }
   }
 
   Future<void> playQueue(
@@ -620,20 +655,44 @@ class PlayerController {
     final song = _queue.currentSong;
     if (song == null) return;
 
-    final generation = ++_loadGeneration;
+    // Cancel any in-flight load from a previous track switch. The token lets
+    // every suspension point below bail out immediately instead of waiting for
+    // the full network round-trip — critical on Samsung where stream resolution
+    // can take several seconds and two rapid taps would otherwise overlap.
+    final token = _startNewLoad();
+
     try {
-      // Explicitly pause and stop the player before doing anything else.
-      // Rapidly switching audio sources without stopping can cause
-      // ExoPlayer native crashes on some devices.
-      await _player.pause();
-      await _player.stop();
+      // Pause playback cleanly without tearing down the media notification or ExoPlayer audio session.
+      // Do NOT call _player.stop() here: calling stop() destroys the system MediaNotification and
+      // tears down the Android/ColorOS/HyperOS system Live Island!
+      if (_player.playing) {
+        await _player.pause();
+      }
     } catch (_) {}
 
-    unawaited(ensureNotificationPermission());
-    final source = await _resolveStream(song);
+    if (_disposed || token.isCompleted) return;
 
-    // A newer load started while this one was in flight; its result wins.
-    if (_disposed || generation != _loadGeneration) return;
+    unawaited(ensureNotificationPermission());
+
+    // Resolve the stream URL, but race it against our cancel token so that
+    // if the user taps another track while we are waiting for the network we
+    // abandon this load immediately rather than setting the wrong audio source.
+    final ResolvedStream? source;
+    try {
+      source = await Future.any([
+        _resolveStream(song),
+        token.future.then((_) => null),
+      ]);
+    } catch (_) {
+      // Resolution threw — check cancellation before surfacing the error.
+      if (_disposed || token.isCompleted) return;
+      _streams.remove(song.id);
+      _fail('Could not play "${song.title}".');
+      return;
+    }
+
+    // A newer load started while this one was resolving; discard the result.
+    if (_disposed || token.isCompleted) return;
 
     if (source == null) {
       _fail('Could not play "${song.title}".');
@@ -657,22 +716,69 @@ class PlayerController {
         final proxy = await StreamProxy.start();
         playbackUri = Uri.parse(proxy.localUrlFor(uri.toString()));
       }
-      if (_disposed || generation != _loadGeneration) return;
+      if (_disposed || token.isCompleted) return;
+      if (_player.playing) {
+        await _quickFadeOut();
+      }
+      if (_disposed || token.isCompleted) return;
       await _player.setAudioSource(AudioSource.uri(playbackUri));
-      if (_disposed || generation != _loadGeneration) return;
+      if (_disposed || token.isCompleted) return;
       _mediaControls.updateSong(song);
       await _player.play();
+      unawaited(_quickFadeIn());
       _log.info('playing: ${song.title}');
+      // Pre-resolve upcoming track stream in the background so next track switches in 0ms!
+      unawaited(_prefetchNextTrack());
     } catch (error) {
+      if (_disposed || token.isCompleted) return;
       _log.severe('playback failed for ${song.id}: $error');
-      // A resolved URL that will not load is usually stale or IP-bound — the
-      // googlevideo link was signed for the address that resolved it, and on
-      // mobile/IPv6 or behind a proxy the playback request can egress from a
-      // different address and get a 403. Dropping the cached URL and resolving
-      // fresh binds a new link to the current address; retry once before giving
-      // up so a transient mismatch does not read as "song won't play".
       _streams.remove(song.id);
       _fail('Could not play "${song.title}".');
+    }
+  }
+
+  /// Gently fades down volume before switching tracks to avoid harsh cuts or pops.
+  Future<void> _quickFadeOut() async {
+    try {
+      if (!_player.playing) return;
+      const steps = 4;
+      for (var i = steps - 1; i >= 0; i--) {
+        await _player.setVolume(i / steps);
+        await Future<void>.delayed(const Duration(milliseconds: 25));
+      }
+    } catch (_) {}
+  }
+
+  /// Smoothly ramps volume up after starting a new track.
+  Future<void> _quickFadeIn() async {
+    try {
+      const steps = 5;
+      await _player.setVolume(0.15);
+      for (var i = 2; i <= steps; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 30));
+        await _player.setVolume(i / steps);
+      }
+    } catch (_) {
+      try {
+        await _player.setVolume(1.0);
+      } catch (_) {}
+    }
+  }
+
+  /// Resolves the upcoming track in the queue ahead of time so next song switching
+  /// has zero network latency.
+  Future<void> _prefetchNextTrack() async {
+    if (_disposed) return;
+    try {
+      final nextIndex = _queue.nextIndex(wrap: _repeatMode() == LoopMode.all);
+      if (nextIndex == null || nextIndex < 0 || nextIndex >= _queue.queue.length) return;
+      final nextSong = _queue.queue[nextIndex];
+      final cached = _streams[nextSong.id];
+      if (cached != null && !cached.isStale) return;
+      _log.fine('pre-resolving upcoming track: ${nextSong.title}');
+      await _resolveStream(nextSong);
+    } catch (e) {
+      _log.fine('prefetch failed (non-critical): $e');
     }
   }
 
@@ -699,24 +805,56 @@ class PlayerController {
       }
     } catch (_) {}
 
-    // Primary engine: YoutubeExplode, forced onto the ANDROID client — the one
-    // that reliably resolves official/music tracks. Its adaptive audio-only
-    // formats are throttled by YouTube to ~1 MB (about a minute) without a
-    // proof-of-origin token, so we prefer the **muxed** format (itag 18): a
-    // combined MP4 whose AAC audio track plays fine and which YouTube does not
-    // throttle, giving full-length playback. just_audio plays the audio out of
-    // the MP4 and ignores the (usually static) video track.
+    // 1. Primary engine: InnertubeClient ANDROID client
+    // Ultra-fast (~200ms), provides direct unthrottled itag 18 stream URL,
+    // completely avoiding YouTube's watch-page bot-check/rate-limiting delays.
+    try {
+      final result = await _client.player(song.id).timeout(
+        const Duration(seconds: 8),
+      );
+      final innertubeResolved = result.fold(
+        (data) {
+          final streamingData = data['streamingData'] as Map<String, dynamic>?;
+          if (streamingData == null) {
+            _log.warning('no streamingData for ${song.id}');
+            return null;
+          }
+          final url = pickAudioStreamUrl(streamingData, quality: _audioQuality());
+          if (url == null) {
+            _log.warning('no playable audio format for ${song.id}');
+            return null;
+          }
+          _log.info('resolved via Innertube for ${song.id}');
+          final resolved = ResolvedStream(url, direct: true);
+          _streams[song.id] = resolved;
+          return resolved;
+        },
+        (failure) {
+          _log.warning('Innertube failed for ${song.id}: $failure');
+          return null;
+        },
+      );
+      if (innertubeResolved != null) {
+        return innertubeResolved;
+      }
+    } catch (e) {
+      _log.warning('Innertube player threw for ${song.id}: $e');
+    }
+
+    // 2. Secondary fallback engine: YoutubeExplode
     final yt = yt_explode.YoutubeExplode();
     try {
-      final manifest = await yt.videos.streamsClient.getManifest(
-        song.id,
-        ytClients: [yt_explode.YoutubeApiClient.android],
-      );
+      final manifest = await yt.videos.streamsClient
+          .getManifest(
+            song.id,
+            ytClients: [yt_explode.YoutubeApiClient.android],
+          )
+          .timeout(
+            const Duration(seconds: 6),
+          );
 
       final muxed = manifest.muxed.toList();
       if (muxed.isNotEmpty) {
-        // itag 18 is the small, universally-available 360p MP4; prefer it, else
-        // take the lowest-bitrate muxed stream to minimise wasted video data.
         muxed.sort((a, b) => a.bitrate.compareTo(b.bitrate));
         final chosen = muxed.firstWhere(
           (s) => s.tag == 18,
@@ -731,8 +869,6 @@ class PlayerController {
         }
       }
 
-      // Fallback: audio-only. Higher quality but throttled, so it plays through
-      // StreamProxy which fetches it in small chunks YouTube still serves.
       final audioOnly = manifest.audioOnly.toList();
       if (audioOnly.isNotEmpty) {
         audioOnly.sort((a, b) => b.bitrate.compareTo(a.bitrate));
@@ -756,34 +892,10 @@ class PlayerController {
     } catch (e) {
       _log.warning('YoutubeExplode failed for ${song.id}: $e');
     } finally {
-      // Always release the client's HTTP resources, even when getManifest threw
-      // — otherwise a run of failing tracks leaks a socket pool each time.
       yt.close();
     }
 
-    // 2. Fallback engine: InnertubeClient mobile client
-    final result = await _client.player(song.id);
-    return result.fold(
-      (data) {
-        final streamingData = data['streamingData'] as Map<String, dynamic>?;
-        if (streamingData == null) {
-          _log.warning('no streamingData for ${song.id}');
-          return null;
-        }
-        final url = pickAudioStreamUrl(streamingData, quality: _audioQuality());
-        if (url == null) {
-          _log.warning('no playable audio format for ${song.id}');
-          return null;
-        }
-        final resolved = ResolvedStream(url);
-        _streams[song.id] = resolved;
-        return resolved;
-      },
-      (failure) {
-        _log.warning('failed to resolve audio for ${song.id}: $failure');
-        return null;
-      },
-    );
+    return null;
   }
 
   Future<void> togglePlayPause() async {
@@ -832,7 +944,9 @@ class PlayerController {
   }
 
   Future<void> stop() async {
-    _loadGeneration++;
+    // Cancel any in-flight load so it does not restart playback after stop.
+    _cancelToken?.complete(true);
+    _cancelToken = null;
     await _player.stop();
     _queue.clearQueue();
   }

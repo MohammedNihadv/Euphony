@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -78,17 +77,14 @@ class GlassContainer extends StatelessWidget {
       child: ClipRRect(
         borderRadius: borderRadius,
         clipBehavior: clipBehavior,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-          child: Container(
-            padding: padding,
-            decoration: BoxDecoration(
-              color: effectiveTint,
-              borderRadius: borderRadius,
-              border: effectiveBorder,
-            ),
-            child: child,
+        child: Container(
+          padding: padding,
+          decoration: BoxDecoration(
+            color: effectiveTint,
+            borderRadius: borderRadius,
+            border: effectiveBorder,
           ),
+          child: child,
         ),
       ),
     );

@@ -55,12 +55,35 @@ class EuphonyAudioHandler extends BaseAudioHandler with SeekHandler {
   void _watchSong() {
     _songSub = _container.listen<Song?>(activeSongProvider, (previous, next) {
       mediaItem.add(next == null ? null : _toMediaItem(next));
+      _emit(force: true);
     }, fireImmediately: true);
   }
 
   void _emit({bool force = false}) {
     _lastEmit = DateTime.now();
     final playing = _player.playing;
+    final song = _container.read(activeSongProvider);
+    final rawState = _player.processingState;
+
+    // As long as there is an active song selected, the media session is NEVER
+    // reported as idle. Emitting AudioProcessingState.idle causes Android's
+    // AudioService to call stopForeground(true), which tears down the media
+    // notification from the status bar, only to recreate it a second later
+    // when ExoPlayer finishes preparing the next track.
+    final AudioProcessingState processingState;
+    if (song == null) {
+      processingState = AudioProcessingState.idle;
+    } else if (rawState == ProcessingState.idle ||
+        rawState == ProcessingState.loading) {
+      processingState = AudioProcessingState.loading;
+    } else if (rawState == ProcessingState.buffering) {
+      processingState = AudioProcessingState.buffering;
+    } else if (rawState == ProcessingState.completed) {
+      processingState = AudioProcessingState.completed;
+    } else {
+      processingState = AudioProcessingState.ready;
+    }
+
     playbackState.add(
       PlaybackState(
         controls: [
@@ -78,7 +101,7 @@ class EuphonyAudioHandler extends BaseAudioHandler with SeekHandler {
         },
         // Collapsed notification shows prev, play/pause, next
         androidCompactActionIndices: const [0, 1, 2],
-        processingState: _mapProcessingState(_player.processingState),
+        processingState: processingState,
         playing: playing,
         updatePosition: _player.position,
         bufferedPosition: _player.bufferedPosition,
@@ -87,15 +110,6 @@ class EuphonyAudioHandler extends BaseAudioHandler with SeekHandler {
       ),
     );
   }
-
-  static AudioProcessingState _mapProcessingState(ProcessingState state) =>
-      switch (state) {
-        ProcessingState.idle => AudioProcessingState.idle,
-        ProcessingState.loading => AudioProcessingState.loading,
-        ProcessingState.buffering => AudioProcessingState.buffering,
-        ProcessingState.ready => AudioProcessingState.ready,
-        ProcessingState.completed => AudioProcessingState.completed,
-      };
 
   Uri? _parseArtUri(String? url) {
     if (url == null || url.trim().isEmpty) return null;

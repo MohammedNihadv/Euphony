@@ -43,7 +43,8 @@ class MiniPlayer extends ConsumerWidget {
       direction: DismissDirection.horizontal,
       onDismissed: (_) => ref.read(playerControllerProvider).stop(),
       child: GestureDetector(
-        onTap: () => Navigator.of(context).push(_buildPlayerRoute()),
+        onTap: () => Navigator.of(context, rootNavigator: true)
+            .push(_buildPlayerRoute()),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
             EuSpace.md,
@@ -51,7 +52,7 @@ class MiniPlayer extends ConsumerWidget {
             EuSpace.md,
             EuSpace.md,
           ),
-          child: _BrutalGlassSlab(
+          child: _GlassPillSlab(
             isPlaying: isPlaying,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -151,13 +152,11 @@ class MiniPlayer extends ConsumerWidget {
 }
 
 // ---------------------------------------------------------------------------
-// _BrutalGlassSlab — the outer brutalist frame with glass fill
+// _GlassPillSlab — Glassmorphic Pill Capsule
 // ---------------------------------------------------------------------------
 
-/// The key hybrid widget: hard offset shadow + 2px border (Neo-Brutalism)
-/// wrapping a frosted-glass BackdropFilter fill (Glassmorphism).
-class _BrutalGlassSlab extends StatelessWidget {
-  const _BrutalGlassSlab({required this.child, required this.isPlaying});
+class _GlassPillSlab extends StatelessWidget {
+  const _GlassPillSlab({required this.child, required this.isPlaying});
 
   final Widget child;
   final bool isPlaying;
@@ -169,36 +168,52 @@ class _BrutalGlassSlab extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        // ── Brutalist hard offset shadow ──────────────────────────────────
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(22),
         boxShadow: [
-          // Classic Neo-Brutalist hard offset
-          const BoxShadow(color: EuBrutal.shadow, offset: Offset(4, 4)),
-          // Subtle accent glow when playing (glass layer bonus)
+          // Soft ambient drop shadow
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
+            blurRadius: 28,
+            spreadRadius: -2,
+            offset: const Offset(0, 8),
+          ),
+          // Ethereal accent glow when playing
           if (isPlaying)
             BoxShadow(
               color: EuBrutal.accent.withValues(alpha: 0.22),
               blurRadius: 20,
-              spreadRadius: -4,
+              spreadRadius: -3,
+              offset: const Offset(0, 2),
             ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(22),
         child: BackdropFilter(
-          // ── Glass layer: blur the content behind the slab ─────────────
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
             decoration: BoxDecoration(
-              // Semi-transparent fill — the "glass" inside the brutalist frame
-              color: isDark
-                  ? theme.colorScheme.surfaceContainerLow.withValues(alpha: 0.78)
-                  : Colors.white.withValues(alpha: 0.72),
-              borderRadius: BorderRadius.circular(16),
-              // ── Bold 2px Neo-Brutalist border ──────────────────────────
+              // Gradient glass fill
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isDark
+                    ? [
+                        const Color(0xF21C1C28),
+                        const Color(0xD912121A),
+                      ]
+                    : [
+                        Colors.white.withValues(alpha: 0.92),
+                        const Color(0xFFF1F5F9).withValues(alpha: 0.85),
+                      ],
+              ),
+              borderRadius: BorderRadius.circular(22),
+              // Ultra-refined translucent rim
               border: Border.all(
-                color: context.eu.ink,
-                width: 2,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.16)
+                    : Colors.white.withValues(alpha: 0.85),
+                width: 1.2,
               ),
             ),
             child: child,
@@ -222,6 +237,8 @@ class _MiniArtwork extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return AnimatedSwitcher(
       duration: EuMotion.standard,
       child: Container(
@@ -229,20 +246,27 @@ class _MiniArtwork extends StatelessWidget {
         width: 48,
         height: 48,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          // Brutalist border on the artwork thumbnail
-          border: Border.all(color: context.eu.ink, width: 2),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.14)
+                : Colors.black.withValues(alpha: 0.08),
+            width: 1,
+          ),
           color: theme.colorScheme.surfaceContainerHighest,
-          // Glass-accent glow when playing
-          boxShadow: isPlaying
-              ? [
-                  BoxShadow(
-                    color: EuBrutal.accent.withValues(alpha: 0.3),
-                    blurRadius: 10,
-                    spreadRadius: -2,
-                  ),
-                ]
-              : EuBrutal.smHardShadow,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+            if (isPlaying)
+              BoxShadow(
+                color: EuBrutal.accent.withValues(alpha: 0.35),
+                blurRadius: 10,
+                spreadRadius: -1,
+              ),
+          ],
         ),
         clipBehavior: Clip.antiAlias,
         child: song.artworkUrl != null
@@ -358,23 +382,19 @@ class _SpringPlayButtonState extends State<_SpringPlayButton>
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            // ── Brutalist accent fill + gradient glass shimmer ─────────
             gradient: const LinearGradient(
               colors: [EuBrutal.accent, EuBrutal.accentDeep],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             shape: BoxShape.circle,
-            // Hard shadow + soft glow — brutalist meets glass
+            // Soft glowing accent shadow
             boxShadow: [
-              const BoxShadow(
-                color: EuBrutal.shadow,
-                offset: Offset(2, 2),
-              ),
               BoxShadow(
-                color: EuBrutal.accent.withValues(alpha: 0.35),
-                blurRadius: 12,
-                spreadRadius: -2,
+                color: EuBrutal.accent.withValues(alpha: 0.40),
+                blurRadius: 14,
+                spreadRadius: -1,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
@@ -408,7 +428,7 @@ class _SpringPlayButtonState extends State<_SpringPlayButton>
 }
 
 // ---------------------------------------------------------------------------
-// _GradientProgressBar — Brutalist bottom rail with gradient fill
+// _GradientProgressBar — Smooth bottom rail with gradient fill
 // ---------------------------------------------------------------------------
 
 class _GradientProgressBar extends StatelessWidget {
@@ -426,8 +446,8 @@ class _GradientProgressBar extends StatelessWidget {
       builder: (context, constraints) {
         return ClipRRect(
           borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(14),
-            bottomRight: Radius.circular(14),
+            bottomLeft: Radius.circular(22),
+            bottomRight: Radius.circular(22),
           ),
           child: SizedBox(
             height: 4,

@@ -7,7 +7,9 @@ import 'package:go_router/go_router.dart';
 
 import '../design/tokens/brutal.dart';
 import '../design/widgets/brand_badge.dart';
+import '../features/player/dynamic_island.dart';
 import '../features/player/mini_player.dart';
+import '../features/settings/settings_provider.dart';
 import '../playback/player_provider.dart';
 import 'update_prompt.dart';
 
@@ -174,8 +176,9 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
   Widget _buildMobile(BuildContext context) {
     return Scaffold(
       body: Stack(
+        fit: StackFit.expand,
         children: [
-          Positioned.fill(child: navigationShell),
+          navigationShell,
           Positioned(
             left: 0,
             right: 0,
@@ -184,6 +187,9 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
               selectedIndex: navigationShell.currentIndex,
               onSelected: _goBranch,
             ),
+          ),
+          const Positioned.fill(
+            child: DynamicIsland(),
           ),
         ],
       ),
@@ -239,6 +245,8 @@ class _GlassBrutalNavBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final settings = ref.watch(settingsControllerProvider);
+    final showMiniPlayer = !settings.dynamicIsland;
 
     return SafeArea(
       top: false,
@@ -248,8 +256,8 @@ class _GlassBrutalNavBar extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Mini player sits above the nav bar
-          const MiniPlayer(),
+          // Mini player sits above the nav bar when Dynamic Island is disabled or not docked
+          if (showMiniPlayer) const MiniPlayer(),
 
           // Floating rounded capsule navigation bar
           Padding(

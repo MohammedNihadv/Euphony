@@ -64,14 +64,12 @@ class HomeRepository {
       releasesQuickPicks = value.quickPicks;
     }
 
-    // Curated regional shelves are the primary feed content (preventing IP-located other-country content):
+    // Combine curated regional shelves, new releases, and home shelves
+    // so category filters (Music, Playlists, New Releases) have rich content:
     final allSections = <HomeSection>[
-      if (regionalSections.isNotEmpty)
-        ...regionalSections
-      else ...[
-        ...releasesSections,
-        ...homeSections,
-      ],
+      ...regionalSections,
+      ...releasesSections,
+      ...homeSections,
     ];
 
     // Deduplicate sections by title (case-insensitive).

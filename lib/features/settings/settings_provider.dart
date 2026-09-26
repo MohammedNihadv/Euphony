@@ -10,23 +10,32 @@ class SettingsState {
     required this.autoPlaySimilar,
     required this.skipSilence,
     required this.contentRegion,
+    required this.dynamicIsland,
+    this.hideMiniPlayerWithIsland = true,
   });
 
   final String audioQuality;
   final bool autoPlaySimilar;
   final bool skipSilence;
   final String contentRegion;
+  final bool dynamicIsland;
+  final bool hideMiniPlayerWithIsland;
 
   SettingsState copyWith({
     String? audioQuality,
     bool? autoPlaySimilar,
     bool? skipSilence,
     String? contentRegion,
+    bool? dynamicIsland,
+    bool? hideMiniPlayerWithIsland,
   }) => SettingsState(
     audioQuality: audioQuality ?? this.audioQuality,
     autoPlaySimilar: autoPlaySimilar ?? this.autoPlaySimilar,
     skipSilence: skipSilence ?? this.skipSilence,
     contentRegion: contentRegion ?? this.contentRegion,
+    dynamicIsland: dynamicIsland ?? this.dynamicIsland,
+    hideMiniPlayerWithIsland:
+        hideMiniPlayerWithIsland ?? this.hideMiniPlayerWithIsland,
   );
 }
 
@@ -39,6 +48,8 @@ class SettingsController extends Notifier<SettingsState> {
       autoPlaySimilar: repo.autoPlaySimilar,
       skipSilence: repo.skipSilence,
       contentRegion: repo.contentRegion,
+      dynamicIsland: repo.dynamicIsland,
+      hideMiniPlayerWithIsland: repo.hideMiniPlayerWithIsland,
     );
   }
 
@@ -60,6 +71,16 @@ class SettingsController extends Notifier<SettingsState> {
   void setContentRegion(String region) {
     ref.read(settingsRepositoryProvider).setContentRegion(region);
     state = state.copyWith(contentRegion: region);
+  }
+
+  void setDynamicIsland(bool value) {
+    ref.read(settingsRepositoryProvider).setDynamicIsland(value);
+    state = state.copyWith(dynamicIsland: value);
+  }
+
+  void setHideMiniPlayerWithIsland(bool value) {
+    ref.read(settingsRepositoryProvider).setHideMiniPlayerWithIsland(value);
+    state = state.copyWith(hideMiniPlayerWithIsland: value);
   }
 }
 

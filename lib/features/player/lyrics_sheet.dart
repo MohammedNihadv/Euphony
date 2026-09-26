@@ -1,22 +1,22 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../design/tokens/brutal.dart';
 import '../../design/tokens/tokens.dart';
 import '../../domain/song.dart';
 
-/// Shows a Neo-Brutalist lyrics modal sheet for the given [song].
+/// Shows a Frosted Neo-Glassmorphic lyrics modal sheet for the given [song].
 void showLyricsSheet(BuildContext context, Song song) {
-  final inkColor = context.eu.ink;
+  final isDark = Theme.of(context).brightness == Brightness.dark;
   showModalBottomSheet<void>(
     context: context,
+    useRootNavigator: true,
     isScrollControlled: true,
-    backgroundColor: Theme.of(context).colorScheme.surface,
-    barrierColor: Colors.black54,
-    shape: RoundedRectangleBorder(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      side: BorderSide(color: inkColor, width: 2.5),
-    ),
+    showDragHandle: false,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: isDark ? 0.70 : 0.40),
     builder: (context) => _LyricsSheet(song: song),
   );
 }
@@ -41,158 +41,431 @@ class _LyricsSheetState extends State<_LyricsSheet> {
     _fetchLyrics();
   }
 
+  String? _extractLyricsText(dynamic data) {
+    if (data is! Map) return null;
+    final plain = data['plainLyrics']?.toString();
+    if (plain != null && plain.trim().isNotEmpty) {
+      return plain.trim();
+    }
+    final synced = data['syncedLyrics']?.toString();
+    if (synced != null && synced.trim().isNotEmpty) {
+      return synced.replaceAll(RegExp(r'\[\d+:\d+(?:\.\d+)?\]\s*'), '').trim();
+    }
+    return null;
+  }
+
   Future<void> _fetchLyrics() async {
     setState(() {
       _loading = true;
       _error = null;
     });
 
-    final artist = Uri.encodeComponent(widget.song.artistNames);
-    final title = Uri.encodeComponent(widget.song.title);
-    final dur = widget.song.duration?.inSeconds ?? 200;
-    final url =
-        'https://lrclib.net/api/get?artist_name=$artist&track_name=$title&duration=$dur';
+    final rawTitle = widget.song.title;
+    // Strip common YouTube/InnerTube noise from title
+    final cleanTitle = rawTitle
+        .replaceAll(
+          RegExp(
+            r'\s*[\(\[](official\s*(music)?\s*(video|audio)?|lyric\s*(video)?|audio|remastered|hd|4k|from\s+[^)\]]+)[\)\]]',
+            caseSensitive: false,
+          ),
+          '',
+        )
+        .replaceAll(RegExp(r'\s*\(feat\..*?\)', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\s*\[feat\..*?\]', caseSensitive: false), '')
+        .trim();
 
+    final dio = Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 6),
+        receiveTimeout: const Duration(seconds: 7),
+        validateStatus: (status) => status != null && status < 500,
+      ),
+    );
+
+    // 1. First attempt: exact match with duration
     try {
-      final response = await Dio().get<Map<String, dynamic>>(
-        url,
-        options: Options(responseType: ResponseType.json),
+      final artist = Uri.encodeComponent(widget.song.artistNames);
+      final title = Uri.encodeComponent(
+        cleanTitle.isNotEmpty ? cleanTitle : rawTitle,
       );
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data!;
-        final plain = data['plainLyrics'] as String?;
-        final synced = data['syncedLyrics'] as String?;
+      final dur = widget.song.duration?.inSeconds ?? 200;
+      final url =
+          'https://lrclib.net/api/get?artist_name=$artist&track_name=$title&duration=$dur';
 
-        if (synced != null && synced.isNotEmpty) {
-          final cleaned = synced.replaceAll(RegExp(r'\[\d+:\d+\.\d+\]\s*'), '');
-          setState(() {
-            _plainLyrics = cleaned;
-            _loading = false;
-          });
-        } else if (plain != null && plain.isNotEmpty) {
-          setState(() {
-            _plainLyrics = plain;
-            _loading = false;
-          });
-        } else {
-          setState(() {
-            _error = 'No lyrics found for this song';
-            _loading = false;
-          });
+      final response = await dio.get<dynamic>(url);
+      if (response.statusCode == 200 && response.data != null) {
+        final extracted = _extractLyricsText(response.data);
+        if (extracted != null && extracted.isNotEmpty) {
+          if (mounted) {
+            setState(() {
+              _plainLyrics = extracted;
+              _loading = false;
+            });
+            return;
+          }
         }
-      } else {
-        setState(() {
-          _error = 'Lyrics not available';
-          _loading = false;
-        });
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = 'Could not load lyrics right now';
-          _loading = false;
-        });
+    } catch (_) {}
+
+    // 2. Second attempt: search by query (track + artist)
+    try {
+      final queryTitle = cleanTitle.isNotEmpty ? cleanTitle : rawTitle;
+      final query = Uri.encodeComponent('$queryTitle ${widget.song.artistNames}'.trim());
+      final searchUrl = 'https://lrclib.net/api/search?q=$query';
+      final response = await dio.get<dynamic>(searchUrl);
+      if (response.statusCode == 200 && response.data is List) {
+        final list = response.data as List;
+        for (final item in list) {
+          final extracted = _extractLyricsText(item);
+          if (extracted != null && extracted.isNotEmpty) {
+            if (mounted) {
+              setState(() {
+                _plainLyrics = extracted;
+                _loading = false;
+              });
+              return;
+            }
+          }
+        }
       }
+    } catch (_) {}
+
+    // 3. Third attempt: search by clean title & primary artist
+    try {
+      final firstArtist = widget.song.artistNames.split(',').first.trim();
+      final track = Uri.encodeComponent(
+        cleanTitle.isNotEmpty ? cleanTitle : rawTitle,
+      );
+      final artistEnc = Uri.encodeComponent(firstArtist);
+      final searchUrl =
+          'https://lrclib.net/api/search?track_name=$track&artist_name=$artistEnc';
+      final response = await dio.get<dynamic>(searchUrl);
+      if (response.statusCode == 200 && response.data is List) {
+        final list = response.data as List;
+        for (final item in list) {
+          final extracted = _extractLyricsText(item);
+          if (extracted != null && extracted.isNotEmpty) {
+            if (mounted) {
+              setState(() {
+                _plainLyrics = extracted;
+                _loading = false;
+              });
+              return;
+            }
+          }
+        }
+      }
+    } catch (_) {}
+
+    // 4. Fourth attempt: search by track name only
+    try {
+      final track = Uri.encodeComponent(cleanTitle.isNotEmpty ? cleanTitle : rawTitle);
+      final searchUrl = 'https://lrclib.net/api/search?q=$track';
+      final response = await dio.get<dynamic>(searchUrl);
+      if (response.statusCode == 200 && response.data is List) {
+        final list = response.data as List;
+        for (final item in list) {
+          final extracted = _extractLyricsText(item);
+          if (extracted != null && extracted.isNotEmpty) {
+            if (mounted) {
+              setState(() {
+                _plainLyrics = extracted;
+                _loading = false;
+              });
+              return;
+            }
+          }
+        }
+      }
+    } catch (_) {}
+
+    if (mounted) {
+      setState(() {
+        _error = 'Lyrics not available for this track';
+        _loading = false;
+      });
+    }
+  }
+
+  void _searchLyricsOnline() async {
+    final query = Uri.encodeComponent(
+      '${widget.song.title} ${widget.song.artistNames} lyrics',
+    );
+    final url = Uri.parse('https://www.google.com/search?q=$query');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return FractionallySizedBox(
-      heightFactor: 0.85,
+    return Container(
+      height: MediaQuery.sizeOf(context).height * 0.85,
+      decoration: BoxDecoration(
+        color: isDark
+            ? const Color(0xFF10101A)
+            : const Color(0xFFF8FAFD),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border(
+          top: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.14)
+                : Colors.black.withValues(alpha: 0.08),
+            width: 1.2,
+          ),
+        ),
+      ),
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(EuSpace.lg),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
+              // Drag Handle
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 8),
+                  width: 36,
+                  height: 4,
                   decoration: BoxDecoration(
-                    color: EuBrutal.highlight,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: EuBrutal.onHighlight, width: 2),
-                  ),
-                  child: const Icon(Icons.lyrics, color: EuBrutal.onHighlight),
-                ),
-                const SizedBox(width: EuSpace.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.song.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      Text(
-                        widget.song.artistNames,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: context.eu.ink.withValues(alpha: 0.7),
-                        ),
-                      ),
-                    ],
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.25)
+                        : Colors.black.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-              ],
-            ),
-          ),
-          Divider(
-            height: 1,
-            color: context.eu.ink.withValues(alpha: 0.2),
-            thickness: 1.5,
-          ),
-          Expanded(
-            child: _loading
-                ? const Center(
-                    child: CircularProgressIndicator(color: EuBrutal.accent),
-                  )
-                : _error != null
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(EuSpace.xl),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.music_off,
-                            size: 48,
-                            color: EuBrutal.alert,
+              ),
+
+              // Header Bar
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  EuSpace.lg,
+                  EuSpace.xs,
+                  EuSpace.lg,
+                  EuSpace.md,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(9),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [EuBrutal.accent, Color(0xFF9060FA)],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: EuBrutal.accent.withValues(alpha: 0.35),
+                            blurRadius: 10,
+                            offset: const Offset(0, 3),
                           ),
-                          const SizedBox(height: EuSpace.md),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.lyrics_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: EuSpace.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            _error!,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
+                            widget.song.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            widget.song.artistNames,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.65)
+                                  : Colors.black54,
                             ),
                           ),
                         ],
                       ),
                     ),
-                  )
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.all(EuSpace.xl),
-                    child: SelectableText(
-                      _plainLyrics!,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontSize: 18,
-                        height: 1.6,
-                        fontWeight: FontWeight.w700,
+                    if (_plainLyrics != null)
+                      IconButton(
+                        tooltip: 'Copy Lyrics',
+                        icon: Icon(
+                          Icons.copy_rounded,
+                          color: isDark ? Colors.white70 : Colors.black54,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: _plainLyrics!));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Lyrics copied to clipboard'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
                       ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.close_rounded,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                      onPressed: () => Navigator.pop(context),
                     ),
-                  ),
+                  ],
+                ),
+              ),
+              Divider(
+                height: 1,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: 0.06),
+                thickness: 1.0,
+              ),
+
+              // Lyrics Content
+              Expanded(
+                child: _loading
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const CircularProgressIndicator(color: EuBrutal.accent),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Finding synchronized lyrics...',
+                              style: TextStyle(
+                                color: isDark ? Colors.white70 : Colors.black54,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : _error != null
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(18),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.05)
+                                      : Colors.black.withValues(alpha: 0.04),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: isDark
+                                        ? Colors.white.withValues(alpha: 0.12)
+                                        : Colors.black.withValues(alpha: 0.08),
+                                    width: 1.2,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.lyrics_outlined,
+                                  size: 42,
+                                  color: EuBrutal.accent,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Lyrics Unavailable',
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : Colors.black87,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.3,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'No synced lyrics found in database for\n"${widget.song.title}"',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.65)
+                                      : Colors.black54,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.4,
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  OutlinedButton.icon(
+                                    onPressed: _fetchLyrics,
+                                    icon: const Icon(Icons.refresh_rounded, size: 16),
+                                    label: const Text('Try Again'),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: isDark ? Colors.white : Colors.black87,
+                                      side: BorderSide(
+                                        color: isDark
+                                            ? Colors.white.withValues(alpha: 0.2)
+                                            : Colors.black.withValues(alpha: 0.15),
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  ElevatedButton.icon(
+                                    onPressed: _searchLyricsOnline,
+                                    icon: const Icon(Icons.travel_explore_rounded, size: 16),
+                                    label: const Text('Search Online'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: EuBrutal.accent,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      elevation: 0,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: EuSpace.xl,
+                          vertical: EuSpace.lg,
+                        ),
+                        child: SelectableText(
+                          _plainLyrics!,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 18,
+                            height: 1.8,
+                            fontWeight: FontWeight.w700,
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.92)
+                                : Colors.black87,
+                            letterSpacing: 0.2,
+                          ),
+                        ),
+                      ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        );
   }
 }

@@ -305,42 +305,155 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                       Builder(
                         builder: (context) {
                           final song = _tracks[i];
+                          final activeSong = ref.watch(activeSongProvider);
+                          final isPlaying = ref.watch(isPlayingProvider);
+                          final isCurrentSong = activeSong?.id == song.id;
+
                           return Container(
                             margin: const EdgeInsets.only(bottom: EuSpace.sm),
-                            decoration: EuBrutal.boxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(12),
-                              shadows: EuBrutal.smHardShadow,
+                            decoration: BoxDecoration(
+                              color: isCurrentSong
+                                  ? EuBrutal.accent.withValues(alpha: 0.12)
+                                  : theme.colorScheme.surfaceContainerLow,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: isCurrentSong
+                                    ? EuBrutal.accent.withValues(alpha: 0.5)
+                                    : theme.colorScheme.outlineVariant.withValues(alpha: 0.15),
+                                width: isCurrentSong ? 1.4 : 1.0,
+                              ),
+                              boxShadow: isCurrentSong
+                                  ? [
+                                      BoxShadow(
+                                        color: EuBrutal.accent.withValues(alpha: 0.22),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ]
+                                  : [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.08),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
                             ),
                             child: Material(
-                              type: MaterialType.canvas,
-                              color: theme.colorScheme.surfaceContainerLow,
-                              borderRadius: BorderRadius.circular(12),
+                              type: MaterialType.transparency,
+                              borderRadius: BorderRadius.circular(14),
                               child: ListTile(
-                                onTap: () => ref
-                                    .read(playerControllerProvider)
-                                    .playQueue(_tracks, startIndex: i),
+                                onTap: () {
+                                  if (isCurrentSong) {
+                                    if (isPlaying) {
+                                      ref.read(playerControllerProvider).pause();
+                                    } else {
+                                      ref.read(playerControllerProvider).play();
+                                    }
+                                  } else {
+                                    ref.read(playerControllerProvider).playQueue(_tracks, startIndex: i);
+                                  }
+                                },
                                 onLongPress: () =>
                                     showSongOptionsSheet(context, song),
-                                title: Text(
-                                  song.title,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w800,
+                                leading: Container(
+                                  width: 38,
+                                  height: 38,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: isCurrentSong
+                                        ? EuBrutal.accent.withValues(alpha: 0.18)
+                                        : Colors.white.withValues(alpha: 0.05),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: isCurrentSong
+                                      ? (isPlaying
+                                          ? const _AlbumEqualizerBars()
+                                          : const Icon(
+                                              Icons.volume_up_rounded,
+                                              color: EuBrutal.accent,
+                                              size: 18,
+                                            ))
+                                      : Text(
+                                          '${i + 1}',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 13,
+                                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                          ),
+                                        ),
+                                ),
+                                title: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        song.title,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 14.5,
+                                          color: isCurrentSong
+                                              ? EuBrutal.accent
+                                              : theme.colorScheme.onSurface,
+                                        ),
+                                      ),
+                                    ),
+                                    if (isCurrentSong) ...[
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: EuBrutal.accent.withValues(alpha: 0.2),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          isPlaying ? 'PLAYING' : 'PAUSED',
+                                          style: const TextStyle(
+                                            color: EuBrutal.accent,
+                                            fontSize: 9.5,
+                                            fontWeight: FontWeight.w900,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                subtitle: Text(
+                                  song.artistNames,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                                   ),
                                 ),
-                                subtitle: Text(song.artistNames),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
-                                      icon: const Icon(
-                                        Icons.play_circle_fill,
-                                        color: EuBrutal.accent,
-                                        size: 32,
+                                      icon: Icon(
+                                        isCurrentSong
+                                            ? (isPlaying
+                                                ? Icons.pause_circle_filled_rounded
+                                                : Icons.play_circle_fill_rounded)
+                                            : Icons.play_circle_outline_rounded,
+                                        color: isCurrentSong
+                                            ? EuBrutal.accent
+                                            : theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                                        size: isCurrentSong ? 34 : 28,
                                       ),
-                                      onPressed: () => ref
-                                          .read(playerControllerProvider)
-                                          .playQueue(_tracks, startIndex: i),
+                                      onPressed: () {
+                                        if (isCurrentSong) {
+                                          if (isPlaying) {
+                                            ref.read(playerControllerProvider).pause();
+                                          } else {
+                                            ref.read(playerControllerProvider).play();
+                                          }
+                                        } else {
+                                          ref.read(playerControllerProvider).playQueue(_tracks, startIndex: i);
+                                        }
+                                      },
                                     ),
                                     if (isLocal)
                                       IconButton(
@@ -388,6 +501,72 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
               ),
                 ),
               ),
+      ),
+    );
+  }
+}
+
+class _AlbumEqualizerBars extends StatefulWidget {
+  const _AlbumEqualizerBars();
+
+  @override
+  State<_AlbumEqualizerBars> createState() => _AlbumEqualizerBarsState();
+}
+
+class _AlbumEqualizerBarsState extends State<_AlbumEqualizerBars>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, _) {
+        final t = _controller.value;
+        final h1 = 5.0 + 9.0 * (0.3 + 0.7 * (t - 0.2).abs());
+        final h2 = 5.0 + 11.0 * t;
+        final h3 = 5.0 + 9.0 * (1.0 - t);
+        return SizedBox(
+          width: 16,
+          height: 18,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _bar(h1),
+              const SizedBox(width: 2),
+              _bar(h2),
+              const SizedBox(width: 2),
+              _bar(h3),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _bar(double height) {
+    return Container(
+      width: 3.0,
+      height: height.clamp(4.0, 16.0),
+      decoration: BoxDecoration(
+        color: EuBrutal.accent,
+        borderRadius: BorderRadius.circular(1.5),
       ),
     );
   }

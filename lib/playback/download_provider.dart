@@ -112,40 +112,12 @@ class DownloadedSongsNotifier extends Notifier<List<Song>> {
       // ── 1. Resolve stream URL ───────────────────────────────────────────
       String? streamUrl;
 
-      // Primary: YoutubeExplode (forced onto ANDROID client, preferring itag 18)
-      final yt = yt_explode.YoutubeExplode();
+      // Primary: InnerTube player endpoint (ultra-fast, direct unthrottled itag 18 stream)
       try {
-        final manifest = await yt.videos.streamsClient.getManifest(
-          song.id,
-          ytClients: [yt_explode.YoutubeApiClient.android],
-        );
-
-        final muxed = manifest.muxed.toList();
-        if (muxed.isNotEmpty) {
-          final chosen = muxed.firstWhere(
-            (s) => s.tag == 18,
-            orElse: () => muxed.first,
-          );
-          streamUrl = chosen.url.toString();
-        }
-
-        if (streamUrl == null || streamUrl.isEmpty) {
-          final audioOnly = manifest.audioOnly.toList();
-          if (audioOnly.isNotEmpty) {
-            audioOnly.sort((a, b) => b.bitrate.compareTo(a.bitrate));
-            streamUrl = audioOnly.first.url.toString();
-          }
-        }
-      } catch (e) {
-        _log.warning('YoutubeExplode download resolve failed for ${song.id}: $e');
-      } finally {
-        yt.close();
-      }
-
-      // Secondary fallback: InnerTube player endpoint
-      if (streamUrl == null || streamUrl.isEmpty) {
         final client = ref.read(innertubeClientProvider);
-        final result = await client.player(song.id);
+        final result = await client.player(song.id).timeout(
+          const Duration(seconds: 8),
+        );
         result.fold(
           (data) {
             final streamingData = data['streamingData'] as Map<String, dynamic>?;
@@ -157,6 +129,42 @@ class DownloadedSongsNotifier extends Notifier<List<Song>> {
             _log.warning('InnerTube player failed for ${song.id}: $failure');
           },
         );
+      } catch (e) {
+        _log.warning('InnerTube download resolve threw for ${song.id}: $e');
+      }
+
+      // Secondary fallback: YoutubeExplode
+      if (streamUrl?.isEmpty ?? true) {
+        final yt = yt_explode.YoutubeExplode();
+        try {
+          final manifest = await yt.videos.streamsClient
+              .getManifest(
+                song.id,
+                ytClients: [yt_explode.YoutubeApiClient.android],
+              )
+              .timeout(const Duration(seconds: 6));
+
+          final muxed = manifest.muxed.toList();
+          if (muxed.isNotEmpty) {
+            final chosen = muxed.firstWhere(
+              (s) => s.tag == 18,
+              orElse: () => muxed.first,
+            );
+            streamUrl = chosen.url.toString();
+          }
+
+          if (streamUrl?.isEmpty ?? true) {
+            final audioOnly = manifest.audioOnly.toList();
+            if (audioOnly.isNotEmpty) {
+              audioOnly.sort((a, b) => b.bitrate.compareTo(a.bitrate));
+              streamUrl = audioOnly.first.url.toString();
+            }
+          }
+        } catch (e) {
+          _log.warning('YoutubeExplode download resolve failed for ${song.id}: $e');
+        } finally {
+          yt.close();
+        }
       }
 
       final resolvedUrl = streamUrl;

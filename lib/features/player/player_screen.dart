@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
@@ -293,6 +294,7 @@ class _Artwork extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final url = song.artwork?.max ?? song.artworkUrl;
 
     return Center(
@@ -305,50 +307,95 @@ class _Artwork extends ConsumerWidget {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // ── Pulsing glow ring (glass layer) ──────────────────────
+              // ── Pulsing ambient aura behind artwork ───────────────────
               _PulsingGlowRing(
-                artSize: artSize,
+                artSize: artSize - 16,
                 isPlaying: isPlaying,
                 color: EuBrutal.accent,
               ),
 
-              // ── Artwork slab (brutalist hard shadow + border) ──────────
+              // ── Glassmorphic Artwork Slab ────────────────────────────
               AnimatedScale(
-                scale: isPlaying ? 1.0 : 0.96,
-                duration: const Duration(milliseconds: 400),
-                curve: Curves.easeInOut,
+                scale: isPlaying ? 1.0 : 0.94,
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeOutBack,
                 child: Container(
-                  width: artSize - 12,
-                  height: artSize - 12,
+                  width: artSize - 16,
+                  height: artSize - 16,
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: context.eu.ink, width: 2),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.18)
+                          : Colors.white.withValues(alpha: 0.80),
+                      width: 1.2,
+                    ),
                     boxShadow: [
-                      // Brutalist hard offset
-                      const BoxShadow(
-                        color: EuBrutal.shadow,
-                        offset: Offset(6, 6),
+                      // Smooth deep diffusion shadow
+                      BoxShadow(
+                        color: Colors.black.withValues(
+                          alpha: isDark ? 0.50 : 0.16,
+                        ),
+                        blurRadius: 32,
+                        spreadRadius: -4,
+                        offset: const Offset(0, 16),
                       ),
-                      // Glass accent glow
+                      // Ambient accent illumination
                       BoxShadow(
                         color: EuBrutal.accent.withValues(
-                          alpha: isPlaying ? 0.25 : 0.0,
+                          alpha: isPlaying ? 0.35 : 0.10,
                         ),
-                        blurRadius: 28,
+                        blurRadius: 40,
                         spreadRadius: -6,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
                   clipBehavior: Clip.antiAlias,
-                  child: url == null
-                      ? const Icon(Icons.music_note_rounded, size: 80)
-                      : Image.network(
-                          url,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) =>
-                              const Icon(Icons.music_note_rounded, size: 80),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      url == null
+                          ? Center(
+                              child: Icon(
+                                Icons.music_note_rounded,
+                                size: 80,
+                                color: EuBrutal.accent.withValues(alpha: 0.6),
+                              ),
+                            )
+                          : Image.network(
+                              url,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, _, _) => Center(
+                                child: Icon(
+                                  Icons.music_note_rounded,
+                                  size: 80,
+                                  color: EuBrutal.accent.withValues(alpha: 0.6),
+                                ),
+                              ),
+                            ),
+                      // Diagonal glass gloss sheen overlay
+                      Positioned.fill(
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              stops: const [0.0, 0.35, 1.0],
+                              colors: [
+                                Colors.white.withValues(
+                                  alpha: isDark ? 0.15 : 0.25,
+                                ),
+                                Colors.white.withValues(alpha: 0.02),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
                         ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -384,11 +431,11 @@ class _PulsingGlowRingState extends State<_PulsingGlowRing>
     super.initState();
     _ctrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2200),
+      duration: const Duration(milliseconds: 2600),
     );
     _glow = Tween<double>(
-      begin: 0.08,
-      end: 0.28,
+      begin: 0.10,
+      end: 0.38,
     ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
     if (widget.isPlaying) _ctrl.repeat(reverse: true);
   }
@@ -402,7 +449,7 @@ class _PulsingGlowRingState extends State<_PulsingGlowRing>
       } else {
         _ctrl.animateTo(
           0.0,
-          duration: const Duration(milliseconds: 500),
+          duration: const Duration(milliseconds: 600),
           curve: Curves.easeOut,
         );
       }
@@ -423,13 +470,15 @@ class _PulsingGlowRingState extends State<_PulsingGlowRing>
         width: widget.artSize,
         height: widget.artSize,
         decoration: BoxDecoration(
-          shape: BoxShape.rectangle,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(36),
           boxShadow: [
             BoxShadow(
-              color: widget.color.withValues(alpha: _glow.value),
-              blurRadius: 36,
-              spreadRadius: 4,
+              color: widget.color.withValues(
+                alpha: widget.isPlaying ? _glow.value : 0.08,
+              ),
+              blurRadius: 52,
+              spreadRadius: 8,
+              offset: const Offset(0, 10),
             ),
           ],
         ),
@@ -450,6 +499,7 @@ class _TrackHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -470,6 +520,7 @@ class _TrackHeader extends ConsumerWidget {
             child: Column(
               key: ValueKey(song.id),
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   song.title,
@@ -477,26 +528,61 @@ class _TrackHeader extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.w900,
-                    letterSpacing: -0.5,
+                    letterSpacing: -0.6,
+                    height: 1.2,
                   ),
                 ),
-                const SizedBox(height: EuSpace.xs),
-                Text(
-                  song.artistNames.isEmpty
-                      ? 'Unknown Artist'
-                      : song.artistNames,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: context.eu.ink.withValues(alpha: 0.65),
+                const SizedBox(height: 6),
+                // Authors / Artists Chip with avatar
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.06)
+                        : Colors.black.withValues(alpha: 0.04),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.10)
+                          : Colors.black.withValues(alpha: 0.06),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.person_outline_rounded,
+                        size: 14,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
+                      const SizedBox(width: 5),
+                      Flexible(
+                        child: Text(
+                          song.artistNames.isEmpty
+                              ? 'Unknown Artist'
+                              : song.artistNames,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.90)
+                                : Colors.black87,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
         ),
+        const SizedBox(width: 12),
         _DownloadButton(song: song),
+        const SizedBox(width: 4),
         _LikeButton(song: song),
       ],
     );
@@ -658,7 +744,9 @@ class _AnimatedIconButtonState extends State<_AnimatedIconButton>
       child: ScaleTransition(
         scale: _ctrl,
         child: IconButton(
-          iconSize: 30,
+          iconSize: 24,
+          padding: const EdgeInsets.all(8),
+          constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
           icon: Icon(widget.icon, color: widget.color),
           onPressed: _tap,
         ),
@@ -712,12 +800,13 @@ class _GlassScrubberState extends ConsumerState<_GlassScrubber> {
             children: [
               SliderTheme(
                 data: SliderTheme.of(context).copyWith(
-                  trackHeight: 6,
+                  trackHeight: 4,
                   activeTrackColor: EuBrutal.accent,
-                  inactiveTrackColor: theme.colorScheme.surfaceContainerHighest,
-                  thumbColor: EuBrutal.accent,
+                  inactiveTrackColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  thumbColor: Colors.white,
                   thumbShape: const RoundSliderThumbShape(
-                    enabledThumbRadius: 7,
+                    enabledThumbRadius: 6,
+                    elevation: 3,
                   ),
                   overlayShape: SliderComponentShape.noOverlay,
                 ),
@@ -780,46 +869,55 @@ class _TransportControls extends ConsumerWidget {
     final shuffle = ref.watch(shuffleModeProvider);
     final repeat = ref.watch(repeatModeProvider);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _ToggleButton(
-          icon: Icons.shuffle_rounded,
-          active: shuffle,
-          tooltip: shuffle ? 'Shuffle on' : 'Shuffle off',
-          onPressed: () => ref.read(shuffleModeProvider.notifier).toggle(),
-        ),
-        IconButton(
-          iconSize: 36,
-          icon: const Icon(Icons.skip_previous_rounded),
-          tooltip: 'Previous',
-          onPressed: controller.skipPrevious,
-        ),
-        _LargePlayButton(isPlaying: isPlaying, isBuffering: isBuffering),
-        IconButton(
-          iconSize: 36,
-          icon: const Icon(Icons.skip_next_rounded),
-          tooltip: 'Next',
-          onPressed: controller.skipNext,
-        ),
-        _ToggleButton(
-          icon: repeat == LoopMode.one
-              ? Icons.repeat_one_rounded
-              : Icons.repeat_rounded,
-          active: repeat != LoopMode.off,
-          tooltip: switch (repeat) {
-            LoopMode.off => 'Repeat off',
-            LoopMode.all => 'Repeat queue',
-            LoopMode.one => 'Repeat track',
-          },
-          onPressed: () => ref.read(repeatModeProvider.notifier).cycle(),
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _ToggleButton(
+            icon: Icons.shuffle_rounded,
+            active: shuffle,
+            tooltip: shuffle ? 'Shuffle on' : 'Shuffle off',
+            onPressed: () => ref.read(shuffleModeProvider.notifier).toggle(),
+          ),
+          IconButton(
+            iconSize: 30,
+            icon: const Icon(Icons.skip_previous_rounded),
+            tooltip: 'Previous',
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              controller.skipPrevious();
+            },
+          ),
+          _LargePlayButton(isPlaying: isPlaying, isBuffering: isBuffering),
+          IconButton(
+            iconSize: 30,
+            icon: const Icon(Icons.skip_next_rounded),
+            tooltip: 'Next',
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              controller.skipNext();
+            },
+          ),
+          _ToggleButton(
+            icon: repeat == LoopMode.one
+                ? Icons.repeat_one_rounded
+                : Icons.repeat_rounded,
+            active: repeat != LoopMode.off,
+            tooltip: switch (repeat) {
+              LoopMode.off => 'Repeat off',
+              LoopMode.all => 'Repeat queue',
+              LoopMode.one => 'Repeat track',
+            },
+            onPressed: () => ref.read(repeatModeProvider.notifier).cycle(),
+          ),
+        ],
+      ),
     );
   }
 }
 
-/// The big central play/pause — brutalist circle with glass-accent glow.
+/// The big central play/pause — glowing glassmorphic button with ambient aura.
 class _LargePlayButton extends ConsumerWidget {
   const _LargePlayButton({required this.isPlaying, required this.isBuffering});
 
@@ -832,38 +930,48 @@ class _LargePlayButton extends ConsumerWidget {
       button: true,
       label: isPlaying ? 'Pause' : 'Play',
       child: GestureDetector(
-        onTap: ref.read(playerControllerProvider).togglePlayPause,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          ref.read(playerControllerProvider).togglePlayPause();
+        },
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 220),
           curve: Curves.easeInOut,
-          width: 72,
-          height: 72,
+          width: 64,
+          height: 64,
           decoration: BoxDecoration(
-            // Brutalist: gradient accent fill
             gradient: const LinearGradient(
-              colors: [EuBrutal.accent, EuBrutal.accentDeep],
+              colors: [Color(0xFF8B5CF6), Color(0xFF6D28D9)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             shape: BoxShape.circle,
-            // Hard shadow (brutalist) + soft glow (glass)
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.35),
+              width: 1.2,
+            ),
             boxShadow: [
-              const BoxShadow(color: EuBrutal.shadow, offset: Offset(4, 4)),
               BoxShadow(
                 color: EuBrutal.accent.withValues(
-                  alpha: isPlaying ? 0.45 : 0.15,
+                  alpha: isPlaying ? 0.45 : 0.18,
                 ),
-                blurRadius: 24,
-                spreadRadius: -4,
+                blurRadius: 22,
+                spreadRadius: 0,
+                offset: const Offset(0, 6),
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: isBuffering
               ? const Padding(
-                  padding: EdgeInsets.all(EuSpace.lg),
+                  padding: EdgeInsets.all(EuSpace.md),
                   child: CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: EuBrutal.onAccent,
+                    strokeWidth: 2.4,
+                    color: Colors.white,
                   ),
                 )
               : AnimatedSwitcher(
@@ -875,8 +983,8 @@ class _LargePlayButton extends ConsumerWidget {
                   child: Icon(
                     key: ValueKey(isPlaying),
                     isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                    size: 40,
-                    color: EuBrutal.onAccent,
+                    size: 34,
+                    color: Colors.white,
                   ),
                 ),
         ),
@@ -900,23 +1008,53 @@ class _ToggleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      tooltip: tooltip,
-      onPressed: onPressed,
-      style: IconButton.styleFrom(
-        backgroundColor: active ? EuBrutal.accent : Colors.transparent,
-        foregroundColor: active
-            ? EuBrutal.onAccent
-            : context.eu.ink.withValues(alpha: 0.7),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: active ? context.eu.thinSide : BorderSide.none,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Tooltip(
+      message: tooltip,
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onPressed();
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          width: 38,
+          height: 38,
+          decoration: BoxDecoration(
+            color: active
+                ? EuBrutal.accent.withValues(alpha: 0.22)
+                : (isDark
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.black.withValues(alpha: 0.04)),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: active
+                  ? EuBrutal.accent.withValues(alpha: 0.8)
+                  : (isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : Colors.black.withValues(alpha: 0.06)),
+              width: 1.0,
+            ),
+            boxShadow: active
+                ? [
+                    BoxShadow(
+                      color: EuBrutal.accent.withValues(alpha: 0.28),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Icon(
+            icon,
+            size: 20,
+            color: active
+                ? EuBrutal.accent
+                : (isDark ? Colors.white60 : Colors.black54),
+          ),
         ),
-        // Brutalist hard shadow when active
-        shadowColor: active ? EuBrutal.shadow : Colors.transparent,
-        elevation: active ? 0 : 0,
       ),
-      icon: Icon(icon),
     );
   }
 }
@@ -924,6 +1062,7 @@ class _ToggleButton extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // Glass Bottom Action Bar — glass panel + brutalist border
 // ---------------------------------------------------------------------------
+
 
 class _GlassBottomActionBar extends ConsumerWidget {
   const _GlassBottomActionBar({required this.song});
@@ -1005,6 +1144,7 @@ class _GlassBottomActionBar extends ConsumerWidget {
                 // Live waveform badge or queue button
                 isPlaying
                     ? GestureDetector(
+                        behavior: HitTestBehavior.opaque,
                         onTap: () => showQueueSheet(context),
                         child: const Tooltip(
                           message: 'Queue',
@@ -1054,11 +1194,14 @@ class _BarButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Tooltip(
       message: tooltip,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: onPressed,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onPressed();
+        },
         child: Padding(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1104,9 +1247,12 @@ class _SpeedBadge extends StatelessWidget {
     final isCustom = speed != 1.0;
     return Tooltip(
       message: 'Playback Speed',
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onPressed,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onPressed();
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -1147,48 +1293,92 @@ class _SpeedBadge extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 void _showSpeedSheet(BuildContext context, WidgetRef ref) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
   final currentSpeed = ref.read(playbackSpeedProvider);
   final speeds = [0.75, 1.0, 1.25, 1.5, 2.0];
-  final inkColor = context.eu.ink;
   showModalBottomSheet<void>(
     context: context,
-    backgroundColor: Theme.of(context).colorScheme.surface,
-    shape: RoundedRectangleBorder(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      side: BorderSide(color: inkColor, width: 2.5),
-    ),
-    builder: (context) => SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(EuSpace.lg),
-              child: Text(
-                'PLAYBACK SPEED',
-                style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
-              ),
-            ),
-            for (final speed in speeds)
-              ListTile(
-                title: Text(
-                  '${speed}x',
-                  style: TextStyle(
-                    fontWeight: speed == currentSpeed
-                        ? FontWeight.w900
-                        : FontWeight.w700,
+    useRootNavigator: true,
+    showDragHandle: false,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: isDark ? 0.70 : 0.40),
+    builder: (context) => Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF10101A) : const Color(0xFFF8FAFD),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border(
+          top: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.16)
+                : Colors.black.withValues(alpha: 0.08),
+            width: 1.2,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 6),
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.25)
+                        : Colors.black.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                trailing: speed == currentSpeed
-                    ? const Icon(Icons.check_rounded, color: EuBrutal.accent)
-                    : null,
-                onTap: () {
-                  ref.read(playbackSpeedProvider.notifier).setSpeed(speed);
-                  Navigator.pop(context);
-                },
               ),
-            const SizedBox(height: EuSpace.md),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: EuSpace.lg,
+                  vertical: EuSpace.sm,
+                ),
+                child: Text(
+                  'PLAYBACK SPEED',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                    fontSize: 16,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ),
+              Divider(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: 0.06),
+                thickness: 1,
+                height: 1,
+              ),
+              for (final speed in speeds)
+                ListTile(
+                  title: Text(
+                    '${speed}x',
+                    style: TextStyle(
+                      fontWeight: speed == currentSpeed
+                          ? FontWeight.w900
+                          : FontWeight.w700,
+                      color: speed == currentSpeed
+                          ? EuBrutal.accent
+                          : (isDark ? Colors.white : Colors.black87),
+                    ),
+                  ),
+                  trailing: speed == currentSpeed
+                      ? const Icon(Icons.check_rounded, color: EuBrutal.accent)
+                      : null,
+                  onTap: () {
+                    ref.read(playbackSpeedProvider.notifier).setSpeed(speed);
+                    Navigator.pop(context);
+                  },
+                ),
+              const SizedBox(height: EuSpace.md),
+            ],
+          ),
         ),
       ),
     ),
@@ -1196,47 +1386,91 @@ void _showSpeedSheet(BuildContext context, WidgetRef ref) {
 }
 
 void _showSleepTimerSheet(BuildContext context, WidgetRef ref) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
   final currentPreset = ref.read(sleepTimerProvider).preset;
-  final inkColor = context.eu.ink;
   showModalBottomSheet<void>(
     context: context,
-    backgroundColor: Theme.of(context).colorScheme.surface,
-    shape: RoundedRectangleBorder(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      side: BorderSide(color: inkColor, width: 2.5),
-    ),
-    builder: (context) => SafeArea(
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Padding(
-              padding: EdgeInsets.all(EuSpace.lg),
-              child: Text(
-                'SLEEP TIMER',
-                style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
-              ),
-            ),
-            for (final preset in SleepTimerPreset.values)
-              ListTile(
-                title: Text(
-                  preset.label,
-                  style: TextStyle(
-                    fontWeight: preset == currentPreset
-                        ? FontWeight.w900
-                        : FontWeight.w700,
+    useRootNavigator: true,
+    showDragHandle: false,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: isDark ? 0.70 : 0.40),
+    builder: (context) => Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF10101A) : const Color(0xFFF8FAFD),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border(
+          top: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.16)
+                : Colors.black.withValues(alpha: 0.08),
+            width: 1.2,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 12, bottom: 6),
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.25)
+                        : Colors.black.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                trailing: preset == currentPreset
-                    ? const Icon(Icons.check_rounded, color: EuBrutal.accent)
-                    : null,
-                onTap: () {
-                  ref.read(sleepTimerProvider.notifier).setPreset(preset);
-                  Navigator.pop(context);
-                },
               ),
-            const SizedBox(height: EuSpace.md),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: EuSpace.lg,
+                  vertical: EuSpace.sm,
+                ),
+                child: Text(
+                  'SLEEP TIMER',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                    fontSize: 16,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ),
+              Divider(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: 0.06),
+                thickness: 1,
+                height: 1,
+              ),
+              for (final preset in SleepTimerPreset.values)
+                ListTile(
+                  title: Text(
+                    preset.label,
+                    style: TextStyle(
+                      fontWeight: preset == currentPreset
+                          ? FontWeight.w900
+                          : FontWeight.w700,
+                      color: preset == currentPreset
+                          ? EuBrutal.accent
+                          : (isDark ? Colors.white : Colors.black87),
+                    ),
+                  ),
+                  trailing: preset == currentPreset
+                      ? const Icon(Icons.check_rounded, color: EuBrutal.accent)
+                      : null,
+                  onTap: () {
+                    ref.read(sleepTimerProvider.notifier).setPreset(preset);
+                    Navigator.pop(context);
+                  },
+                ),
+              const SizedBox(height: EuSpace.md),
+            ],
+          ),
         ),
       ),
     ),

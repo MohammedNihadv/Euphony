@@ -274,60 +274,55 @@ class InnertubeClient {
 
   /// Fetches player metadata and streaming formats for [videoId].
   ///
-  /// Uses the `ANDROID_MUSIC` client context instead of `WEB_REMIX`, because
-  /// YouTube returns direct (non-ciphered) stream URLs only for mobile clients.
-  /// The `WEB_REMIX` client gets ciphered-only formats which require signature
-  /// deciphering that Euphony does not implement.
+  /// Prefers the `ANDROID` client context because YouTube returns direct
+  /// (non-ciphered, unthrottled) stream URLs (such as itag 18) for mobile clients.
   Future<Result<Map<String, dynamic>>> player(String videoId) async {
     await initialise();
 
-    // 1. Try TVHTML5_SIMPLY_EMBEDDED_PLAYER (never signature-ciphered, 100% reliable)
-    final tvRes = await _fetchPlayerWithClient(
+    // 1. Try modern ANDROID Client (returns direct itag 18 without PO Token / watch page rate limiting)
+    final androidRes = await _fetchPlayerWithClient(
       videoId,
-      clientName: 'TVHTML5_SIMPLY_EMBEDDED_PLAYER',
-      clientVersion: '2.0',
-      apiKey: Innertube.apiKey,
-      userAgent: Innertube.userAgent,
-    );
-
-    if (_hasPlayableFormat(tvRes)) {
-      return tvRes;
-    }
-
-    // 2. Try ANDROID_VR Client (never signature-ciphered by YouTube)
-    final vrRes = await _fetchPlayerWithClient(
-      videoId,
-      clientName: 'ANDROID_VR',
-      clientVersion: '1.56.20',
+      clientName: 'ANDROID',
+      clientVersion: '21.26.364',
       apiKey: Innertube.apiKey,
       userAgent:
-          'com.google.android.apps.youtube.vr/1.56.20 (Linux; U; Android 11)',
+          'com.google.android.youtube/21.26.364 (Linux; U; Android 11) gzip',
       androidSdkVersion: 30,
+      osName: 'Android',
+      osVersion: '11',
     );
 
-    if (_hasPlayableFormat(vrRes)) {
-      return vrRes;
+    if (_hasPlayableFormat(androidRes)) {
+      return androidRes;
     }
 
-    // 3. Try IOS Client (never signature-ciphered by YouTube)
+    // 2. Try modern IOS Client
     final iosRes = await _fetchPlayerWithClient(
       videoId,
       clientName: 'IOS',
-      clientVersion: '19.45.4',
+      clientVersion: '21.26.4',
       apiKey: Innertube.apiKey,
       userAgent:
-          'com.google.ios.youtube/19.45.4 (iPhone; CPU iPhone OS 17_5 like Mac OS X)',
+          'com.google.ios.youtube/21.26.4 (iPhone16,2; U; CPU iOS 18_3_2 like Mac OS X;)',
+      deviceMake: 'Apple',
+      deviceModel: 'iPhone16,2',
+      osName: 'iPhone',
+      osVersion: '18.3.2.22D82',
     );
 
     if (_hasPlayableFormat(iosRes)) {
       return iosRes;
     }
 
-    // 4. Fallback to Web Remix Client
+    // 3. Fallback to Web Remix Client
+    final now = _now();
+    final webVersion =
+        '1.${now.year}${now.month.toString().padLeft(2, '0')}'
+        '${now.day.toString().padLeft(2, '0')}.01.00';
     return _fetchPlayerWithClient(
       videoId,
       clientName: Innertube.clientName,
-      clientVersion: '1.20231219.01.00',
+      clientVersion: webVersion,
       apiKey: Innertube.apiKey,
       userAgent: Innertube.userAgent,
     );
@@ -356,6 +351,10 @@ class InnertubeClient {
     required String apiKey,
     required String userAgent,
     int? androidSdkVersion,
+    String? deviceMake,
+    String? deviceModel,
+    String? osName,
+    String? osVersion,
   }) async {
     final now = _now();
     final daysSinceEpoch = now
@@ -367,8 +366,14 @@ class InnertubeClient {
       'context': {
         'client': {
           'clientName': clientName,
+          'clientVersion': clientVersion,
           'androidSdkVersion': ?androidSdkVersion,
+          'deviceMake': ?deviceMake,
+          'deviceModel': ?deviceModel,
+          'osName': ?osName,
+          'osVersion': ?osVersion,
           'hl': _language,
+          'gl': _region,
           'userAgent': userAgent,
         },
         'user': <String, dynamic>{},

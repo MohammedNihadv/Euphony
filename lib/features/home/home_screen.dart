@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -10,7 +11,6 @@ import '../../design/tokens/brutal.dart';
 import '../../design/tokens/tokens.dart';
 import '../../design/widgets/brand_badge.dart';
 import '../../domain/music_item.dart';
-import '../../domain/song.dart';
 import '../../playback/player_provider.dart';
 import '../common/song_options_sheet.dart';
 import '../settings/settings_provider.dart';
@@ -90,24 +90,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       }
     });
 
-    // Quick Picks are horizontal tiles. On a wide desktop window a 2-column
-    // grid stretched each cell tall and left it mostly empty, so scale the
-    // column count with width and pin the tile height instead.
-    final width = MediaQuery.sizeOf(context).width;
-    final quickCols = width >= 1500
-        ? 4
-        : width >= 1100
-        ? 3
-        : 2;
 
     return Scaffold(
       appBar: AppBar(
-        title: const EuphonyBrandBadge(animate: true),
+        title: const EuphonyPageCapsule(
+          label: 'Home',
+          icon: Icons.home_rounded,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: 'Settings',
-            onPressed: () => context.push('/settings'),
+            onPressed: () => context.go('/settings'),
           ),
         ],
       ),
@@ -165,24 +159,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ),
                   ),
 
-                  // Quick Access Bento Grid (Liked Songs + Top 5 Picks - Spotify style)
-                  if (_feed != null &&
-                      _feed!.quickPicks.isNotEmpty &&
-                      (_selectedCategory == 'All' ||
-                          _selectedCategory == 'Music'))
-                    SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(
-                        EuSpace.screenGutter,
-                        EuSpace.md,
-                        EuSpace.screenGutter,
-                        EuSpace.xs,
-                      ),
-                      sliver: SliverToBoxAdapter(
-                        child: _QuickAccessBentoGrid(
-                          quickPicks: _feed!.quickPicks,
-                        ),
-                      ),
-                    ),
 
                   SliverToBoxAdapter(
                     child: AnimatedSwitcher(
@@ -230,70 +206,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                   else if (_error != null)
                     const SliverToBoxAdapter(child: SizedBox.shrink())
                   else if (_feed != null) ...[
-                    // Quick Picks Grid (Image 3)
-                    if (_feed!.quickPicks.isNotEmpty &&
-                        (_selectedCategory == 'All' ||
-                            _selectedCategory == 'Music')) ...[
-                      SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(
-                          EuSpace.screenGutter,
-                          EuSpace.lg,
-                          EuSpace.screenGutter,
-                          EuSpace.sm,
-                        ),
-                        sliver: SliverToBoxAdapter(
-                          child: Text(
-                            'Quick Picks',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                        ),
+                    // Featured & Top Charts Carousel (Demus / Billboard style)
+                    if (_selectedCategory == 'All' ||
+                        _selectedCategory == 'Music' ||
+                        _selectedCategory == 'New Releases')
+                      const SliverToBoxAdapter(
+                        child: _FeaturedChartsCarousel(),
                       ),
-                      SliverPadding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: EuSpace.screenGutter,
-                          vertical: EuSpace.xs,
-                        ),
-                        sliver: SliverGrid(
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: quickCols,
-                                mainAxisSpacing: 10,
-                                crossAxisSpacing: 10,
-                                mainAxisExtent: 72,
-                              ),
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              final song = _feed!.quickPicks[index];
-                              return _QuickPickTile(
-                                song: song,
-                                queueSongs: _feed!.quickPicks,
-                              );
-                            },
-                            childCount: _feed!.quickPicks.length.clamp(
-                              0,
-                              quickCols >= 3 ? 8 : 6,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+
+
 
                     // Featured Shelves / Sections
-                    for (final section in _feed!.sections)
-                      if (_shouldShowSection(section.title))
-                        SliverPadding(
-                          padding: const EdgeInsets.only(
-                            left: EuSpace.screenGutter,
-                            right: EuSpace.screenGutter,
-                            top: EuSpace.md,
-                            bottom: EuSpace.lg,
-                          ),
-                          sliver: SliverToBoxAdapter(
-                            child: _HomeSectionBlock(section: section),
-                          ),
+                    for (final section in (_feed!.sections.where(_shouldShowSection).isNotEmpty
+                        ? _feed!.sections.where(_shouldShowSection)
+                        : _feed!.sections))
+                      SliverPadding(
+                        padding: const EdgeInsets.only(
+                          left: EuSpace.screenGutter,
+                          right: EuSpace.screenGutter,
+                          top: EuSpace.md,
+                          bottom: EuSpace.lg,
                         ),
+                        sliver: SliverToBoxAdapter(
+                          child: _HomeSectionBlock(section: section),
+                        ),
+                      ),
 
                     const SliverPadding(
                       padding: EdgeInsets.only(bottom: 110.0),
@@ -311,48 +248,70 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Widget _buildCategoryChip(String label) {
     final isSelected = _selectedCategory == label;
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final bg = isSelected
-        ? EuBrutal.highlight
-        : (isDark ? scheme.surfaceContainerHigh : Colors.white);
-    final fg = isSelected ? EuBrutal.onHighlight : context.eu.ink;
 
     return GestureDetector(
-      onTap: () => setState(() => _selectedCategory = label),
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        HapticFeedback.selectionClick();
+        setState(() => _selectedCategory = label);
+      },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(20),
+          color: isSelected
+              ? EuBrutal.accent
+              : (isDark
+                  ? Colors.white.withValues(alpha: 0.06)
+                  : Colors.black.withValues(alpha: 0.05)),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
-                ? context.eu.ink
-                : context.eu.ink.withValues(alpha: 0.35),
-            width: isSelected ? 2 : 1.5,
+                ? EuBrutal.accent
+                : (isDark
+                    ? Colors.white.withValues(alpha: 0.10)
+                    : Colors.black.withValues(alpha: 0.08)),
+            width: 1.0,
           ),
-          boxShadow: isSelected ? EuBrutal.smHardShadow : null,
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: EuBrutal.accent.withValues(alpha: 0.35),
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: fg,
-            fontWeight: FontWeight.w800,
-            fontSize: 13,
+            color: isSelected
+                ? Colors.white
+                : (isDark ? Colors.white70 : Colors.black87),
+            fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+            fontSize: 12.5,
           ),
         ),
       ),
     );
   }
 
-  bool _shouldShowSection(String title) {
+  bool _shouldShowSection(HomeSection section) {
     if (_selectedCategory == 'All') return true;
-    final lower = title.toLowerCase();
+    final lower = section.title.toLowerCase();
+    final items = section.items;
+    final hasSongs = items.any((i) => i is SongItem);
+    final hasAlbums = items.any((i) => i is AlbumItem);
+    final hasPlaylists = items.any((i) => i is PlaylistItem || i is StationItem);
+
     if (_selectedCategory == 'Music') {
+      if (hasSongs || hasAlbums) return true;
       return !lower.contains('playlist') && !lower.contains('mix');
     }
     if (_selectedCategory == 'Playlists') {
+      if (hasPlaylists) return true;
       return lower.contains('playlist') ||
           lower.contains('mix') ||
           lower.contains('waves') ||
@@ -360,16 +319,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           lower.contains('mass') ||
           lower.contains('hits') ||
           lower.contains('coke studio') ||
-          lower.contains('radio');
+          lower.contains('radio') ||
+          lower.contains('top') ||
+          lower.contains('chart');
     }
     if (_selectedCategory == 'New Releases') {
-      return lower.contains('new release') ||
+      return lower.contains('new') ||
+          lower.contains('release') ||
           lower.contains('album') ||
           lower.contains('single') ||
           lower.contains('fresh') ||
           lower.contains('drop') ||
           lower.contains('latest') ||
-          lower.contains('music video');
+          lower.contains('music video') ||
+          lower.contains('video') ||
+          hasAlbums;
     }
     return true;
   }
@@ -421,11 +385,25 @@ class _HeroBannerState extends State<_HeroBanner>
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
           decoration: BoxDecoration(
-            color: EuBrutal.accent,
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
+            ),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: context.eu.ink, width: 2.2),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.22),
+              width: 1.2,
+            ),
             boxShadow: [
-              BoxShadow(color: context.eu.ink, offset: const Offset(4, 4)),
+              BoxShadow(
+                color: const Color(0xFF4F46E5).withValues(
+                  alpha: theme.brightness == Brightness.dark ? 0.35 : 0.22,
+                ),
+                blurRadius: 20,
+                spreadRadius: -2,
+                offset: const Offset(0, 8),
+              ),
             ],
           ),
           child: Row(
@@ -489,117 +467,6 @@ class _HeroBannerState extends State<_HeroBanner>
   }
 }
 
-/// Horizontal Quick Pick tile matching Image 3 (Neo-Brutalist card layout with black border and offset shadow).
-class _QuickPickTile extends ConsumerWidget {
-  const _QuickPickTile({required this.song, this.queueSongs});
-  final Song song;
-  final List<Song>? queueSongs;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final artworkUrl = song.artwork?.medium ?? song.artworkUrl;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.eu.ink, width: 2),
-        boxShadow: [
-          BoxShadow(color: context.eu.ink, offset: const Offset(2, 2)),
-        ],
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            if (queueSongs != null) {
-              final idx = queueSongs!.indexWhere((s) => s.id == song.id);
-              if (idx >= 0) {
-                ref
-                    .read(playerControllerProvider)
-                    .playQueue(queueSongs!, startIndex: idx);
-              } else {
-                ref.read(playerControllerProvider).playSong(song);
-              }
-            } else {
-              ref.read(playerControllerProvider).playSong(song);
-            }
-          },
-          onLongPress: () => showSongOptionsSheet(context, song),
-          child: Row(
-            children: [
-              // Full-height artwork — fills the card edge-to-edge on the left
-              ClipRRect(
-                borderRadius: const BorderRadius.horizontal(
-                  left: Radius.circular(10),
-                ),
-                child: SizedBox(
-                  width: 72,
-                  height: double.infinity,
-                  child: artworkUrl != null
-                      ? Image.network(
-                          artworkUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => Container(
-                            color: EuBrutal.highlight,
-                            child: const Icon(
-                              Icons.music_note,
-                              color: EuBrutal.onHighlight,
-                            ),
-                          ),
-                        )
-                      : Container(
-                          color: EuBrutal.highlight,
-                          child: const Icon(
-                            Icons.music_note,
-                            color: EuBrutal.onHighlight,
-                          ),
-                        ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        song.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: context.eu.ink,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 12,
-                          height: 1.3,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        song.artistNames,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: context.eu.ink.withValues(alpha: 0.65),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// Five bars that independently bounce up and down like a music equaliser.
 class _AnimatedMusicBars extends StatefulWidget {
@@ -797,14 +664,19 @@ class _RegionalShowcaseCard extends ConsumerWidget {
     return Container(
       width: 156,
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF161622) : Colors.white,
+        color: isDark ? const Color(0xFF161626) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.eu.ink, width: 1.8),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.10)
+              : Colors.black.withValues(alpha: 0.08),
+          width: 1.0,
+        ),
         boxShadow: [
           BoxShadow(
-            color: context.eu.ink,
-            offset: const Offset(3, 3),
-            blurRadius: 0,
+            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+            offset: const Offset(0, 4),
+            blurRadius: 12,
           ),
         ],
       ),
@@ -967,213 +839,6 @@ class _RegionalShowcaseCard extends ConsumerWidget {
   }
 }
 
-/// 2x3 Quick Access Bento Grid (Spotify-style shortcuts).
-class _QuickAccessBentoGrid extends ConsumerWidget {
-  const _QuickAccessBentoGrid({required this.quickPicks});
-
-  final List<Song> quickPicks;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final width = MediaQuery.sizeOf(context).width;
-    final cols = width >= 1100 ? 3 : 2;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final recentSongs = quickPicks.take(5).toList();
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: 1 + recentSongs.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: cols,
-        mainAxisSpacing: 8,
-        crossAxisSpacing: 8,
-        mainAxisExtent: 58,
-      ),
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          return _BentoLikedSongsCard(isDark: isDark);
-        }
-        final song = recentSongs[index - 1];
-        return _BentoSongCard(song: song, allSongs: quickPicks, isDark: isDark);
-      },
-    );
-  }
-}
-
-class _BentoLikedSongsCard extends StatelessWidget {
-  const _BentoLikedSongsCard({required this.isDark});
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E2C) : Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: context.eu.ink.withValues(alpha: isDark ? 0.35 : 0.2),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: context.eu.ink.withValues(alpha: 0.12),
-            offset: const Offset(2, 2),
-            blurRadius: 0,
-          ),
-        ],
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(10),
-          onTap: () => context.push('/library'),
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 58,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF450AF5), Color(0xFF8E2DE2)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.horizontal(
-                    left: Radius.circular(8),
-                  ),
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.favorite_rounded,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'Liked Songs',
-                  style: TextStyle(
-                    color: context.eu.ink,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 13,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BentoSongCard extends ConsumerWidget {
-  const _BentoSongCard({
-    required this.song,
-    required this.allSongs,
-    required this.isDark,
-  });
-
-  final Song song;
-  final List<Song> allSongs;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final artworkUrl =
-        song.artwork?.low ?? song.artwork?.medium ?? song.artworkUrl;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E2C) : Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: context.eu.ink.withValues(alpha: isDark ? 0.35 : 0.2),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: context.eu.ink.withValues(alpha: 0.12),
-            offset: const Offset(2, 2),
-            blurRadius: 0,
-          ),
-        ],
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(10),
-          onTap: () {
-            final idx = allSongs.indexWhere((s) => s.id == song.id);
-            if (idx >= 0) {
-              ref
-                  .read(playerControllerProvider)
-                  .playQueue(allSongs, startIndex: idx);
-            } else {
-              ref.read(playerControllerProvider).playSong(song);
-            }
-          },
-          onLongPress: () => showSongOptionsSheet(context, song),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.horizontal(
-                  left: Radius.circular(8),
-                ),
-                child: SizedBox(
-                  width: 56,
-                  height: 58,
-                  child: artworkUrl != null
-                      ? Image.network(
-                          artworkUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => Container(
-                            color: EuBrutal.accent.withValues(alpha: 0.2),
-                            child: const Icon(
-                              Icons.music_note,
-                              size: 20,
-                              color: EuBrutal.accent,
-                            ),
-                          ),
-                        )
-                      : Container(
-                          color: EuBrutal.accent.withValues(alpha: 0.2),
-                          child: const Icon(
-                            Icons.music_note,
-                            size: 20,
-                            color: EuBrutal.accent,
-                          ),
-                        ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: Text(
-                    song.title,
-                    style: TextStyle(
-                      color: context.eu.ink,
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// Small pill badge rendered next to a section title.
 class _SectionBadge extends StatelessWidget {
@@ -1223,14 +888,26 @@ class _HomeItemCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       width: 145,
-      decoration: EuBrutal.boxDecoration(
-        color: theme.colorScheme.surfaceContainerLow,
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF161626) : Colors.white,
         borderRadius: BorderRadius.circular(14),
-        shadows: EuBrutal.smHardShadow,
-        border: context.eu.border,
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.10)
+              : Colors.black.withValues(alpha: 0.08),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.05),
+            offset: const Offset(0, 4),
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Material(
         type: MaterialType.transparency,
@@ -1528,4 +1205,266 @@ class _HomeSkeletonFeedState extends State<_HomeSkeletonFeed>
       ),
     );
   }
+}
+
+class _FeaturedChartsCarousel extends StatefulWidget {
+  const _FeaturedChartsCarousel();
+
+  @override
+  State<_FeaturedChartsCarousel> createState() => _FeaturedChartsCarouselState();
+}
+
+class _FeaturedChartsCarouselState extends State<_FeaturedChartsCarousel> {
+  late final PageController _pageController;
+  int _currentPage = 0;
+
+  final List<_ChartCardData> _cards = const [
+    _ChartCardData(
+      badge: 'TOP CHART',
+      title: 'Global Billboard Hits',
+      subtitle: 'The 50 most-streamed tracks worldwide right now',
+      tagline: 'Tap to explore charts',
+      gradient: [Color(0xFF6366F1), Color(0xFF4338CA)],
+      icon: Icons.trending_up_rounded,
+      query: 'Billboard Hot 100',
+    ),
+    _ChartCardData(
+      badge: 'COMMUNITY & LIVE',
+      title: 'Acoustic & Unplugged',
+      subtitle: 'Pure studio acoustic, live sessions & warm vocals',
+      tagline: 'Tap to listen live',
+      gradient: [Color(0xFFF59E0B), Color(0xFFD97706)],
+      icon: Icons.graphic_eq_rounded,
+      query: 'Acoustic live songs',
+    ),
+    _ChartCardData(
+      badge: 'DISCOVERY',
+      title: 'Indie Breakthroughs',
+      subtitle: 'Fresh releases, underground gems & rising talent',
+      tagline: 'Tap to discover',
+      gradient: [Color(0xFF10B981), Color(0xFF047857)],
+      icon: Icons.local_fire_department_rounded,
+      query: 'Indie pop hits',
+    ),
+    _ChartCardData(
+      badge: 'IMMERSIVE AUDIO',
+      title: 'Midnight 8D Lo-Fi',
+      subtitle: '360° spatial audio, chill lo-fi beats & ambient drift',
+      tagline: 'Tap to immerse',
+      gradient: [Color(0xFFEC4899), Color(0xFF9D174D)],
+      icon: Icons.headphones_rounded,
+      query: '8D audio songs',
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(viewportFraction: 0.90);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            EuSpace.screenGutter,
+            EuSpace.lg,
+            EuSpace.screenGutter,
+            EuSpace.xs,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Featured & Charts',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              Row(
+                children: List.generate(
+                  _cards.length,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                    width: _currentPage == index ? 16 : 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: _currentPage == index
+                          ? EuBrutal.accent
+                          : (isDark ? Colors.white24 : Colors.black12),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 148,
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: _cards.length,
+            onPageChanged: (page) => setState(() => _currentPage = page),
+            itemBuilder: (context, index) {
+              final card = _cards[index];
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 6),
+                child: GestureDetector(
+                  onTap: () {
+                    context.push('/search?q=${Uri.encodeComponent(card.query)}');
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: card.gradient,
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: isDark ? Colors.white24 : context.eu.ink,
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: card.gradient.first.withValues(alpha: 0.35),
+                          offset: const Offset(0, 6),
+                          blurRadius: 16,
+                          spreadRadius: -2,
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.22),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  card.badge,
+                                  style: const TextStyle(
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.8,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    card.title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white,
+                                      letterSpacing: -0.3,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    card.subtitle,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.white.withValues(alpha: 0.82),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.play_circle_fill_rounded,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    card.tagline,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.18),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            card.icon,
+                            size: 26,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ChartCardData {
+  const _ChartCardData({
+    required this.badge,
+    required this.title,
+    required this.subtitle,
+    required this.tagline,
+    required this.gradient,
+    required this.icon,
+    required this.query,
+  });
+
+  final String badge;
+  final String title;
+  final String subtitle;
+  final String tagline;
+  final List<Color> gradient;
+  final IconData icon;
+  final String query;
 }
