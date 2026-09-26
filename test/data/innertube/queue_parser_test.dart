@@ -1,5 +1,5 @@
 import 'package:euphony/data/remote/innertube/parsers/queue_parser.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../../fixtures.dart';
 

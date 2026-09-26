@@ -1,6 +1,6 @@
 import 'package:euphony/core/failure.dart';
 import 'package:euphony/data/remote/innertube/json_nav.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   const response = <String, dynamic>{

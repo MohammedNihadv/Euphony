@@ -1,7 +1,7 @@
 import 'package:euphony/data/remote/innertube/innertube_utils.dart';
 import 'package:euphony/data/remote/innertube/parsers/search_parser.dart';
 import 'package:euphony/domain/music_item.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 import '../../fixtures.dart';
 

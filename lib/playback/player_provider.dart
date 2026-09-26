@@ -773,8 +773,9 @@ class PlayerController {
       final nextIndex = _queue.nextIndex(wrap: _repeatMode() == LoopMode.all);
       if (nextIndex == null ||
           nextIndex < 0 ||
-          nextIndex >= _queue.queue.length)
+          nextIndex >= _queue.queue.length) {
         return;
+      }
       final nextSong = _queue.queue[nextIndex];
       final cached = _streams[nextSong.id];
       if (cached != null && !cached.isStale) return;
