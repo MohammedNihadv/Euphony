@@ -1,0 +1,12 @@
+Euphony is a premium, beautifully designed music streaming application built for speed and aesthetics. 
+
+Features:
+* Ad-free music streaming
+* Background playback & media controls
+* Offline downloads and local library support
+* Synchronized lyrics
+* Customizable UI themes and dynamic island
+* Curated regional home feeds
+* Battery and bandwidth efficient
+
+Built using Flutter.
