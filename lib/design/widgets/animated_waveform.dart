@@ -57,9 +57,10 @@ class _AnimatedWaveformState extends State<AnimatedWaveform>
     });
     _animations = _controllers
         .map(
-          (c) => Tween<double>(begin: 0.15, end: 1.0).animate(
-            CurvedAnimation(parent: c, curve: Curves.easeInOut),
-          ),
+          (c) => Tween<double>(
+            begin: 0.15,
+            end: 1.0,
+          ).animate(CurvedAnimation(parent: c, curve: Curves.easeInOut)),
         )
         .toList();
 
@@ -104,8 +105,7 @@ class _AnimatedWaveformState extends State<AnimatedWaveform>
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        widget.color ?? Theme.of(context).colorScheme.primary;
+    final color = widget.color ?? Theme.of(context).colorScheme.primary;
     return SizedBox(
       width: widget.width,
       height: widget.height,

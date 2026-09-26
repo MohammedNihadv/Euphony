@@ -94,7 +94,9 @@ class EuphonyBrandBadge extends StatelessWidget {
               style: TextStyle(
                 fontSize: 10.5,
                 fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.8,
+                ),
                 letterSpacing: 0.2,
               ),
             ),
@@ -153,11 +155,7 @@ class EuphonyPageCapsule extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 8),
             color: isDark ? Colors.white24 : Colors.black12,
           ),
-          Icon(
-            icon,
-            size: 14,
-            color: EuBrutal.accent,
-          ),
+          Icon(icon, size: 14, color: EuBrutal.accent),
           const SizedBox(width: 4),
           Text(
             label,

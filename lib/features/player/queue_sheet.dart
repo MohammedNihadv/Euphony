@@ -1,4 +1,3 @@
-﻿
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,9 +38,7 @@ class QueueSheet extends ConsumerWidget {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         child: Container(
           decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xF210101A)
-                : const Color(0xF5F6F6FC),
+            color: isDark ? const Color(0xF210101A) : const Color(0xF5F6F6FC),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
             border: Border(
               top: BorderSide(
@@ -60,152 +57,158 @@ class QueueSheet extends ConsumerWidget {
             ],
           ),
           child: Column(
-              children: [
-                // Drag handle
-                Center(
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 10, bottom: 4),
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.25)
-                          : Colors.black.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
+            children: [
+              // Drag handle
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 10, bottom: 4),
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.25)
+                        : Colors.black.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
+              ),
 
-                // Header bar
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 14, 12),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: EuBrutal.accent.withValues(alpha: 0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.queue_music_rounded,
-                          size: 18,
-                          color: EuBrutal.accent,
-                        ),
+              // Header bar
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 14, 12),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 32,
+                      height: 32,
+                      decoration: BoxDecoration(
+                        color: EuBrutal.accent.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Up Next Queue',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.3,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
+                      child: const Icon(
+                        Icons.queue_music_rounded,
+                        size: 18,
+                        color: EuBrutal.accent,
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
+                    ),
+                    const SizedBox(width: 10),
+                    Text(
+                      'Up Next Queue',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.3,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : Colors.black.withValues(alpha: 0.06),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
                           color: isDark
                               ? Colors.white.withValues(alpha: 0.08)
                               : Colors.black.withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.08)
-                                : Colors.black.withValues(alpha: 0.06),
-                          ),
-                        ),
-                        child: Text(
-                          '${entries.length}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: isDark ? Colors.white70 : Colors.black54,
-                          ),
                         ),
                       ),
-                      const Spacer(),
-                      if (entries.isNotEmpty)
-                        IconButton(
-                          icon: const Icon(Icons.delete_sweep_outlined, size: 20),
-                          tooltip: 'Clear queue',
-                          color: isDark ? Colors.white60 : Colors.black54,
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            ref.read(playerControllerProvider).stop();
-                            Navigator.of(context).maybePop();
-                          },
+                      child: Text(
+                        '${entries.length}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white70 : Colors.black54,
                         ),
+                      ),
+                    ),
+                    const Spacer(),
+                    if (entries.isNotEmpty)
                       IconButton(
-                        icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 26),
-                        tooltip: 'Close',
+                        icon: const Icon(Icons.delete_sweep_outlined, size: 20),
+                        tooltip: 'Clear queue',
                         color: isDark ? Colors.white60 : Colors.black54,
-                        onPressed: () => Navigator.of(context).maybePop(),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          ref.read(playerControllerProvider).stop();
+                          Navigator.of(context).maybePop();
+                        },
                       ),
-                    ],
-                  ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 26,
+                      ),
+                      tooltip: 'Close',
+                      color: isDark ? Colors.white60 : Colors.black54,
+                      onPressed: () => Navigator.of(context).maybePop(),
+                    ),
+                  ],
                 ),
+              ),
 
-                const Divider(height: 1, thickness: 0.8),
+              const Divider(height: 1, thickness: 0.8),
 
-                // Queue list
-                Expanded(
-                  child: entries.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.queue_music_rounded,
-                                size: 48,
-                                color: isDark ? Colors.white24 : Colors.black26,
+              // Queue list
+              Expanded(
+                child: entries.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.queue_music_rounded,
+                              size: 48,
+                              color: isDark ? Colors.white24 : Colors.black26,
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'The queue is empty',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: isDark ? Colors.white54 : Colors.black45,
                               ),
-                              const SizedBox(height: 12),
-                              Text(
-                                'The queue is empty',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: isDark ? Colors.white54 : Colors.black45,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : ReorderableListView.builder(
-                          scrollController: scrollController,
-                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-                          itemCount: entries.length,
-                          onReorderItem: (oldIndex, newIndex) {
-                            HapticFeedback.selectionClick();
-                            ref
-                                .read(queueProvider.notifier)
-                                .reorder(oldIndex, newIndex);
-                          },
-                          itemBuilder: (context, position) {
-                            final (queueIndex, song) = entries[position];
-                            final isCurrent = queueIndex == queue.currentIndex;
-                            return Padding(
-                              key: ValueKey('${song.id}-$queueIndex'),
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: _QueueRow(
-                                position: position,
-                                queueIndex: queueIndex,
-                                title: song.title,
-                                subtitle: song.artistNames,
-                                artworkUrl: song.artwork?.low ?? song.artworkUrl,
-                                duration: song.duration,
-                                isCurrent: isCurrent,
-                              ),
-                            );
-                          },
+                            ),
+                          ],
                         ),
-                ),
-              ],
-            ),
+                      )
+                    : ReorderableListView.builder(
+                        scrollController: scrollController,
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
+                        itemCount: entries.length,
+                        onReorderItem: (oldIndex, newIndex) {
+                          HapticFeedback.selectionClick();
+                          ref
+                              .read(queueProvider.notifier)
+                              .reorder(oldIndex, newIndex);
+                        },
+                        itemBuilder: (context, position) {
+                          final (queueIndex, song) = entries[position];
+                          final isCurrent = queueIndex == queue.currentIndex;
+                          return Padding(
+                            key: ValueKey('${song.id}-$queueIndex'),
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: _QueueRow(
+                              position: position,
+                              queueIndex: queueIndex,
+                              title: song.title,
+                              subtitle: song.artistNames,
+                              artworkUrl: song.artwork?.low ?? song.artworkUrl,
+                              duration: song.duration,
+                              isCurrent: isCurrent,
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
           ),
+        ),
       ),
     );
   }
@@ -251,15 +254,15 @@ class _QueueRow extends ConsumerWidget {
         color: isCurrent
             ? null
             : (isDark
-                ? Colors.white.withValues(alpha: 0.04)
-                : Colors.black.withValues(alpha: 0.03)),
+                  ? Colors.white.withValues(alpha: 0.04)
+                  : Colors.black.withValues(alpha: 0.03)),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isCurrent
               ? EuBrutal.accent.withValues(alpha: isDark ? 0.65 : 0.45)
               : (isDark
-                  ? Colors.white.withValues(alpha: 0.07)
-                  : Colors.black.withValues(alpha: 0.06)),
+                    ? Colors.white.withValues(alpha: 0.07)
+                    : Colors.black.withValues(alpha: 0.06)),
           width: isCurrent ? 1.4 : 1.0,
         ),
         boxShadow: isCurrent
@@ -325,10 +328,14 @@ class _QueueRow extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 13,
-                          fontWeight: isCurrent ? FontWeight.w900 : FontWeight.w700,
+                          fontWeight: isCurrent
+                              ? FontWeight.w900
+                              : FontWeight.w700,
                           color: isCurrent
                               ? (isDark ? Colors.white : Colors.black87)
-                              : (isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87),
+                              : (isDark
+                                    ? Colors.white.withValues(alpha: 0.9)
+                                    : Colors.black87),
                           letterSpacing: -0.2,
                         ),
                       ),

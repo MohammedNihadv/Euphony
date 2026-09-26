@@ -125,10 +125,14 @@ class _UpdateDialogState extends State<_UpdateDialog> {
         child: Container(
           padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xF5141424) : Colors.white.withValues(alpha: 0.96),
+            color: isDark
+                ? const Color(0xF5141424)
+                : Colors.white.withValues(alpha: 0.96),
             borderRadius: BorderRadius.circular(24),
             border: Border.all(
-              color: isDark ? Colors.white.withValues(alpha: 0.14) : Colors.black.withValues(alpha: 0.08),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.14)
+                  : Colors.black.withValues(alpha: 0.08),
               width: 1.2,
             ),
             boxShadow: [
@@ -187,7 +191,10 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                             ),
                             const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 2,
+                              ),
                               decoration: BoxDecoration(
                                 color: EuBrutal.accent.withValues(alpha: 0.18),
                                 borderRadius: BorderRadius.circular(6),
@@ -235,9 +242,14 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                 const SizedBox(height: 12),
                 Container(
                   constraints: const BoxConstraints(maxHeight: 90),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.black.withValues(alpha: 0.03),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.04)
+                        : Colors.black.withValues(alpha: 0.03),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
                       color: isDark ? Colors.white10 : Colors.black12,
@@ -276,7 +288,9 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          _progress > 0 ? 'Downloading update…' : 'Connecting to server…',
+                          _progress > 0
+                              ? 'Downloading update…'
+                              : 'Connecting to server…',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -286,7 +300,10 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
                       decoration: BoxDecoration(
                         color: EuBrutal.accent.withValues(alpha: 0.18),
                         borderRadius: BorderRadius.circular(8),
@@ -319,7 +336,10 @@ class _UpdateDialogState extends State<_UpdateDialog> {
               if (_error != null) ...[
                 const SizedBox(height: 14),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: EuBrutal.alert.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
@@ -358,8 +378,13 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                         TextButton(
                           onPressed: () => Navigator.pop(context),
                           style: TextButton.styleFrom(
-                            foregroundColor: isDark ? Colors.white60 : Colors.black54,
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                            foregroundColor: isDark
+                                ? Colors.white60
+                                : Colors.black54,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 10,
+                            ),
                           ),
                           child: const Text(
                             'Later',
@@ -372,7 +397,10 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                             onPressed: _openInBrowser,
                             style: TextButton.styleFrom(
                               foregroundColor: EuBrutal.accent,
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 10,
+                              ),
                             ),
                             child: const Text(
                               'In browser',
@@ -385,7 +413,10 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: EuBrutal.accent,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 11,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -414,8 +445,9 @@ String _cleanNotes(String? raw) {
       .map((l) => l.trim())
       .where((l) => l.isNotEmpty && !l.startsWith('##') && !l.startsWith('#'))
       .toList();
-  final bullets =
-      lines.where((l) => l.startsWith('-') || l.startsWith('*')).toList();
+  final bullets = lines
+      .where((l) => l.startsWith('-') || l.startsWith('*'))
+      .toList();
   final listToUse = bullets.isNotEmpty ? bullets : lines;
   return listToUse.take(3).join('\n');
 }

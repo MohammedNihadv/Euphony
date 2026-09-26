@@ -71,15 +71,87 @@ Result<PlaylistDetails> parsePlaylistDetails(
   Map<String, dynamic> root,
   String playlistId,
 ) {
-  final title = navOrNull<String>(root, P.titleText) ??
-      navOrNull<String>(root, const JsonPath(['header', 'musicDetailHeaderRenderer', 'title', 'runs', 0, 'text'])) ??
-      navOrNull<String>(root, const JsonPath(['header', 'musicResponsiveHeaderRenderer', 'title', 'runs', 0, 'text'])) ??
-      navOrNull<String>(root, const JsonPath(['header', 'musicEditablePlaylistDetailHeaderRenderer', 'header', 'musicResponsiveHeaderRenderer', 'title', 'runs', 0, 'text'])) ??
+  final title =
+      navOrNull<String>(root, P.titleText) ??
+      navOrNull<String>(
+        root,
+        const JsonPath([
+          'header',
+          'musicDetailHeaderRenderer',
+          'title',
+          'runs',
+          0,
+          'text',
+        ]),
+      ) ??
+      navOrNull<String>(
+        root,
+        const JsonPath([
+          'header',
+          'musicResponsiveHeaderRenderer',
+          'title',
+          'runs',
+          0,
+          'text',
+        ]),
+      ) ??
+      navOrNull<String>(
+        root,
+        const JsonPath([
+          'header',
+          'musicEditablePlaylistDetailHeaderRenderer',
+          'header',
+          'musicResponsiveHeaderRenderer',
+          'title',
+          'runs',
+          0,
+          'text',
+        ]),
+      ) ??
       'Playlist';
-  final artworkUrl = navOrNull<String>(root, P.thumbnails + [0, 'url']) ??
-      navOrNull<String>(root, const JsonPath(['header', 'musicDetailHeaderRenderer', 'thumbnail', 'croppedSquareThumbnailRenderer', 'thumbnail', 'thumbnails', 0, 'url'])) ??
-      navOrNull<String>(root, const JsonPath(['header', 'musicResponsiveHeaderRenderer', 'thumbnail', 'musicThumbnailRenderer', 'thumbnail', 'thumbnails', 0, 'url'])) ??
-      navOrNull<String>(root, const JsonPath(['header', 'musicEditablePlaylistDetailHeaderRenderer', 'header', 'musicResponsiveHeaderRenderer', 'thumbnail', 'musicThumbnailRenderer', 'thumbnail', 'thumbnails', 0, 'url']));
+  final artworkUrl =
+      navOrNull<String>(root, P.thumbnails + [0, 'url']) ??
+      navOrNull<String>(
+        root,
+        const JsonPath([
+          'header',
+          'musicDetailHeaderRenderer',
+          'thumbnail',
+          'croppedSquareThumbnailRenderer',
+          'thumbnail',
+          'thumbnails',
+          0,
+          'url',
+        ]),
+      ) ??
+      navOrNull<String>(
+        root,
+        const JsonPath([
+          'header',
+          'musicResponsiveHeaderRenderer',
+          'thumbnail',
+          'musicThumbnailRenderer',
+          'thumbnail',
+          'thumbnails',
+          0,
+          'url',
+        ]),
+      ) ??
+      navOrNull<String>(
+        root,
+        const JsonPath([
+          'header',
+          'musicEditablePlaylistDetailHeaderRenderer',
+          'header',
+          'musicResponsiveHeaderRenderer',
+          'thumbnail',
+          'musicThumbnailRenderer',
+          'thumbnail',
+          'thumbnails',
+          0,
+          'url',
+        ]),
+      );
 
   final secondary = navOrNull<List<dynamic>>(root, P.twoColumnSecondary);
   final singleColumn = navOrNull<List<dynamic>>(

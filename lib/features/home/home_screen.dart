@@ -90,7 +90,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       }
     });
 
-
     return Scaffold(
       appBar: AppBar(
         title: const EuphonyPageCapsule(
@@ -159,7 +158,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ),
                   ),
 
-
                   SliverToBoxAdapter(
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 400),
@@ -214,12 +212,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         child: _FeaturedChartsCarousel(),
                       ),
 
-
-
                     // Featured Shelves / Sections
-                    for (final section in (_feed!.sections.where(_shouldShowSection).isNotEmpty
-                        ? _feed!.sections.where(_shouldShowSection)
-                        : _feed!.sections))
+                    for (final section
+                        in (_feed!.sections.where(_shouldShowSection).isNotEmpty
+                            ? _feed!.sections.where(_shouldShowSection)
+                            : _feed!.sections))
                       SliverPadding(
                         padding: const EdgeInsets.only(
                           left: EuSpace.screenGutter,
@@ -263,15 +260,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           color: isSelected
               ? EuBrutal.accent
               : (isDark
-                  ? Colors.white.withValues(alpha: 0.06)
-                  : Colors.black.withValues(alpha: 0.05)),
+                    ? Colors.white.withValues(alpha: 0.06)
+                    : Colors.black.withValues(alpha: 0.05)),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? EuBrutal.accent
                 : (isDark
-                    ? Colors.white.withValues(alpha: 0.10)
-                    : Colors.black.withValues(alpha: 0.08)),
+                      ? Colors.white.withValues(alpha: 0.10)
+                      : Colors.black.withValues(alpha: 0.08)),
             width: 1.0,
           ),
           boxShadow: isSelected
@@ -304,7 +301,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final items = section.items;
     final hasSongs = items.any((i) => i is SongItem);
     final hasAlbums = items.any((i) => i is AlbumItem);
-    final hasPlaylists = items.any((i) => i is PlaylistItem || i is StationItem);
+    final hasPlaylists = items.any(
+      (i) => i is PlaylistItem || i is StationItem,
+    );
 
     if (_selectedCategory == 'Music') {
       if (hasSongs || hasAlbums) return true;
@@ -466,7 +465,6 @@ class _HeroBannerState extends State<_HeroBanner>
     );
   }
 }
-
 
 /// Five bars that independently bounce up and down like a music equaliser.
 class _AnimatedMusicBars extends StatefulWidget {
@@ -839,7 +837,6 @@ class _RegionalShowcaseCard extends ConsumerWidget {
   }
 }
 
-
 /// Small pill badge rendered next to a section title.
 class _SectionBadge extends StatelessWidget {
   const _SectionBadge({required this.label, required this.color});
@@ -1211,7 +1208,8 @@ class _FeaturedChartsCarousel extends StatefulWidget {
   const _FeaturedChartsCarousel();
 
   @override
-  State<_FeaturedChartsCarousel> createState() => _FeaturedChartsCarouselState();
+  State<_FeaturedChartsCarousel> createState() =>
+      _FeaturedChartsCarouselState();
 }
 
 class _FeaturedChartsCarouselState extends State<_FeaturedChartsCarousel> {
@@ -1325,7 +1323,9 @@ class _FeaturedChartsCarouselState extends State<_FeaturedChartsCarousel> {
                 padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 6),
                 child: GestureDetector(
                   onTap: () {
-                    context.push('/search?q=${Uri.encodeComponent(card.query)}');
+                    context.push(
+                      '/search?q=${Uri.encodeComponent(card.query)}',
+                    );
                   },
                   child: Container(
                     decoration: BoxDecoration(
@@ -1397,7 +1397,9 @@ class _FeaturedChartsCarouselState extends State<_FeaturedChartsCarousel> {
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.white.withValues(alpha: 0.82),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.82,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -1430,11 +1432,7 @@ class _FeaturedChartsCarouselState extends State<_FeaturedChartsCarousel> {
                             color: Colors.white.withValues(alpha: 0.18),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
-                            card.icon,
-                            size: 26,
-                            color: Colors.white,
-                          ),
+                          child: Icon(card.icon, size: 26, color: Colors.white),
                         ),
                       ],
                     ),

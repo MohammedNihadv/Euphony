@@ -771,7 +771,10 @@ class PlayerController {
     if (_disposed) return;
     try {
       final nextIndex = _queue.nextIndex(wrap: _repeatMode() == LoopMode.all);
-      if (nextIndex == null || nextIndex < 0 || nextIndex >= _queue.queue.length) return;
+      if (nextIndex == null ||
+          nextIndex < 0 ||
+          nextIndex >= _queue.queue.length)
+        return;
       final nextSong = _queue.queue[nextIndex];
       final cached = _streams[nextSong.id];
       if (cached != null && !cached.isStale) return;
@@ -809,9 +812,9 @@ class PlayerController {
     // Ultra-fast (~200ms), provides direct unthrottled itag 18 stream URL,
     // completely avoiding YouTube's watch-page bot-check/rate-limiting delays.
     try {
-      final result = await _client.player(song.id).timeout(
-        const Duration(seconds: 8),
-      );
+      final result = await _client
+          .player(song.id)
+          .timeout(const Duration(seconds: 8));
       final innertubeResolved = result.fold(
         (data) {
           final streamingData = data['streamingData'] as Map<String, dynamic>?;
@@ -819,7 +822,10 @@ class PlayerController {
             _log.warning('no streamingData for ${song.id}');
             return null;
           }
-          final url = pickAudioStreamUrl(streamingData, quality: _audioQuality());
+          final url = pickAudioStreamUrl(
+            streamingData,
+            quality: _audioQuality(),
+          );
           if (url == null) {
             _log.warning('no playable audio format for ${song.id}');
             return null;
@@ -849,9 +855,7 @@ class PlayerController {
             song.id,
             ytClients: [yt_explode.YoutubeApiClient.android],
           )
-          .timeout(
-            const Duration(seconds: 6),
-          );
+          .timeout(const Duration(seconds: 6));
 
       final muxed = manifest.muxed.toList();
       if (muxed.isNotEmpty) {

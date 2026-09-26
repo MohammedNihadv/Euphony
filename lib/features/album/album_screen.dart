@@ -179,326 +179,381 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 1100),
                   child: ListView(
-                padding: const EdgeInsets.all(EuSpace.screenGutter),
-                children: [
-                  // Cover & Actions Card
-                  Container(
-                    padding: const EdgeInsets.all(EuSpace.lg),
-                    decoration: EuBrutal.boxDecoration(
-                      color: theme.colorScheme.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(16),
-                      shadows: EuBrutal.hardShadow,
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 140,
-                          height: 140,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: context.eu.ink,
-                              width: 2.5,
-                            ),
-                            color: EuBrutal.highlight,
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          child: _artworkUrl != null
-                              ? Image.network(_artworkUrl!, fit: BoxFit.cover)
-                              : const Icon(
-                                  Icons.queue_music,
-                                  size: 60,
-                                  color: EuBrutal.onHighlight,
-                                ),
+                    padding: const EdgeInsets.all(EuSpace.screenGutter),
+                    children: [
+                      // Cover & Actions Card
+                      Container(
+                        padding: const EdgeInsets.all(EuSpace.lg),
+                        decoration: EuBrutal.boxDecoration(
+                          color: theme.colorScheme.surfaceContainerLow,
+                          borderRadius: BorderRadius.circular(16),
+                          shadows: EuBrutal.hardShadow,
                         ),
-                        const SizedBox(height: EuSpace.md),
-                        Text(
-                          _title ?? '',
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        const SizedBox(height: EuSpace.md),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        child: Column(
                           children: [
-                            FilledButton.icon(
-                              onPressed: _tracks.isEmpty
-                                  ? null
-                                  : () {
-                                      ref
-                                          .read(playerControllerProvider)
-                                          .playQueue(_tracks);
-                                    },
-                              icon: const Icon(Icons.play_arrow),
-                              label: const Text('Play All'),
-                            ),
-                            const SizedBox(width: EuSpace.md),
-                            OutlinedButton.icon(
-                              style: OutlinedButton.styleFrom(
-                                side: BorderSide(
+                            Container(
+                              width: 140,
+                              height: 140,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
                                   color: context.eu.ink,
-                                  width: 2,
+                                  width: 2.5,
                                 ),
+                                color: EuBrutal.highlight,
                               ),
-                              onPressed: _tracks.isEmpty
-                                  ? null
-                                  : () {
-                                      final shuffled = List<Song>.from(_tracks)
-                                        ..shuffle();
-                                      ref
-                                          .read(playerControllerProvider)
-                                          .playQueue(shuffled);
-                                    },
-                              icon: const Icon(Icons.shuffle),
-                              label: const Text('Shuffle'),
+                              clipBehavior: Clip.antiAlias,
+                              child: _artworkUrl != null
+                                  ? Image.network(
+                                      _artworkUrl!,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : const Icon(
+                                      Icons.queue_music,
+                                      size: 60,
+                                      color: EuBrutal.onHighlight,
+                                    ),
+                            ),
+                            const SizedBox(height: EuSpace.md),
+                            Text(
+                              _title ?? '',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            const SizedBox(height: EuSpace.md),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                FilledButton.icon(
+                                  onPressed: _tracks.isEmpty
+                                      ? null
+                                      : () {
+                                          ref
+                                              .read(playerControllerProvider)
+                                              .playQueue(_tracks);
+                                        },
+                                  icon: const Icon(Icons.play_arrow),
+                                  label: const Text('Play All'),
+                                ),
+                                const SizedBox(width: EuSpace.md),
+                                OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    side: BorderSide(
+                                      color: context.eu.ink,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  onPressed: _tracks.isEmpty
+                                      ? null
+                                      : () {
+                                          final shuffled = List<Song>.from(
+                                            _tracks,
+                                          )..shuffle();
+                                          ref
+                                              .read(playerControllerProvider)
+                                              .playQueue(shuffled);
+                                        },
+                                  icon: const Icon(Icons.shuffle),
+                                  label: const Text('Shuffle'),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: EuSpace.xl),
-
-                  // Tracks Header
-                  Text(
-                    'Tracks (${_tracks.length})',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: EuSpace.md),
-
-                  if (_tracks.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: EuSpace.xl),
-                      child: Column(
-                        children: [
-                          const Icon(
-                            Icons.music_off_outlined,
-                            size: 48,
-                            color: EuBrutal.accent,
-                          ),
-                          const SizedBox(height: EuSpace.md),
-                          Text(
-                            'No songs in this playlist yet',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          const SizedBox(height: EuSpace.xs),
-                          Text(
-                            'Tap "Add to Playlist" on any song to add tracks here.',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(
-                                alpha: 0.7,
-                              ),
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
                       ),
-                    )
-                  else
-                    for (int i = 0; i < _tracks.length; i++)
-                      Builder(
-                        builder: (context) {
-                          final song = _tracks[i];
-                          final activeSong = ref.watch(activeSongProvider);
-                          final isPlaying = ref.watch(isPlayingProvider);
-                          final isCurrentSong = activeSong?.id == song.id;
+                      const SizedBox(height: EuSpace.xl),
 
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: EuSpace.sm),
-                            decoration: BoxDecoration(
-                              color: isCurrentSong
-                                  ? EuBrutal.accent.withValues(alpha: 0.12)
-                                  : theme.colorScheme.surfaceContainerLow,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(
-                                color: isCurrentSong
-                                    ? EuBrutal.accent.withValues(alpha: 0.5)
-                                    : theme.colorScheme.outlineVariant.withValues(alpha: 0.15),
-                                width: isCurrentSong ? 1.4 : 1.0,
+                      // Tracks Header
+                      Text(
+                        'Tracks (${_tracks.length})',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      const SizedBox(height: EuSpace.md),
+
+                      if (_tracks.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: EuSpace.xl,
+                          ),
+                          child: Column(
+                            children: [
+                              const Icon(
+                                Icons.music_off_outlined,
+                                size: 48,
+                                color: EuBrutal.accent,
                               ),
-                              boxShadow: isCurrentSong
-                                  ? [
-                                      BoxShadow(
-                                        color: EuBrutal.accent.withValues(alpha: 0.22),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 3),
-                                      ),
-                                    ]
-                                  : [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.08),
-                                        blurRadius: 6,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                            ),
-                            child: Material(
-                              type: MaterialType.transparency,
-                              borderRadius: BorderRadius.circular(14),
-                              child: ListTile(
-                                onTap: () {
-                                  if (isCurrentSong) {
-                                    if (isPlaying) {
-                                      ref.read(playerControllerProvider).pause();
-                                    } else {
-                                      ref.read(playerControllerProvider).play();
-                                    }
-                                  } else {
-                                    ref.read(playerControllerProvider).playQueue(_tracks, startIndex: i);
-                                  }
-                                },
-                                onLongPress: () =>
-                                    showSongOptionsSheet(context, song),
-                                leading: Container(
-                                  width: 38,
-                                  height: 38,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
+                              const SizedBox(height: EuSpace.md),
+                              Text(
+                                'No songs in this playlist yet',
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              const SizedBox(height: EuSpace.xs),
+                              Text(
+                                'Tap "Add to Playlist" on any song to add tracks here.',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.colorScheme.onSurface.withValues(
+                                    alpha: 0.7,
+                                  ),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        for (int i = 0; i < _tracks.length; i++)
+                          Builder(
+                            builder: (context) {
+                              final song = _tracks[i];
+                              final activeSong = ref.watch(activeSongProvider);
+                              final isPlaying = ref.watch(isPlayingProvider);
+                              final isCurrentSong = activeSong?.id == song.id;
+
+                              return Container(
+                                margin: const EdgeInsets.only(
+                                  bottom: EuSpace.sm,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isCurrentSong
+                                      ? EuBrutal.accent.withValues(alpha: 0.12)
+                                      : theme.colorScheme.surfaceContainerLow,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
                                     color: isCurrentSong
-                                        ? EuBrutal.accent.withValues(alpha: 0.18)
-                                        : Colors.white.withValues(alpha: 0.05),
-                                    borderRadius: BorderRadius.circular(10),
+                                        ? EuBrutal.accent.withValues(alpha: 0.5)
+                                        : theme.colorScheme.outlineVariant
+                                              .withValues(alpha: 0.15),
+                                    width: isCurrentSong ? 1.4 : 1.0,
                                   ),
-                                  child: isCurrentSong
-                                      ? (isPlaying
-                                          ? const _AlbumEqualizerBars()
-                                          : const Icon(
-                                              Icons.volume_up_rounded,
-                                              color: EuBrutal.accent,
-                                              size: 18,
-                                            ))
-                                      : Text(
-                                          '${i + 1}',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 13,
-                                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                                  boxShadow: isCurrentSong
+                                      ? [
+                                          BoxShadow(
+                                            color: EuBrutal.accent.withValues(
+                                              alpha: 0.22,
+                                            ),
+                                            blurRadius: 12,
+                                            offset: const Offset(0, 3),
                                           ),
-                                        ),
-                                ),
-                                title: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        song.title,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 14.5,
-                                          color: isCurrentSong
-                                              ? EuBrutal.accent
-                                              : theme.colorScheme.onSurface,
-                                        ),
-                                      ),
-                                    ),
-                                    if (isCurrentSong) ...[
-                                      const SizedBox(width: 6),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                        decoration: BoxDecoration(
-                                          color: EuBrutal.accent.withValues(alpha: 0.2),
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Text(
-                                          isPlaying ? 'PLAYING' : 'PAUSED',
-                                          style: const TextStyle(
-                                            color: EuBrutal.accent,
-                                            fontSize: 9.5,
-                                            fontWeight: FontWeight.w900,
-                                            letterSpacing: 0.5,
+                                        ]
+                                      : [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(
+                                              alpha: 0.08,
+                                            ),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
                                           ),
-                                        ),
-                                      ),
-                                    ],
-                                  ],
+                                        ],
                                 ),
-                                subtitle: Text(
-                                  song.artistNames,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 12.5,
-                                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                                  ),
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(
-                                        isCurrentSong
-                                            ? (isPlaying
-                                                ? Icons.pause_circle_filled_rounded
-                                                : Icons.play_circle_fill_rounded)
-                                            : Icons.play_circle_outline_rounded,
-                                        color: isCurrentSong
-                                            ? EuBrutal.accent
-                                            : theme.colorScheme.onSurface.withValues(alpha: 0.55),
-                                        size: isCurrentSong ? 34 : 28,
-                                      ),
-                                      onPressed: () {
-                                        if (isCurrentSong) {
-                                          if (isPlaying) {
-                                            ref.read(playerControllerProvider).pause();
-                                          } else {
-                                            ref.read(playerControllerProvider).play();
-                                          }
+                                child: Material(
+                                  type: MaterialType.transparency,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: ListTile(
+                                    onTap: () {
+                                      if (isCurrentSong) {
+                                        if (isPlaying) {
+                                          ref
+                                              .read(playerControllerProvider)
+                                              .pause();
                                         } else {
-                                          ref.read(playerControllerProvider).playQueue(_tracks, startIndex: i);
+                                          ref
+                                              .read(playerControllerProvider)
+                                              .play();
                                         }
-                                      },
-                                    ),
-                                    if (isLocal)
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.remove_circle_outline,
-                                          size: 22,
-                                          color: EuBrutal.alert,
-                                        ),
-                                        tooltip: 'Remove from playlist',
-                                        onPressed: () async {
-                                          await ref
-                                              .read(
-                                                localPlaylistTracksProvider
-                                                    .notifier,
+                                      } else {
+                                        ref
+                                            .read(playerControllerProvider)
+                                            .playQueue(_tracks, startIndex: i);
+                                      }
+                                    },
+                                    onLongPress: () =>
+                                        showSongOptionsSheet(context, song),
+                                    leading: Container(
+                                      width: 38,
+                                      height: 38,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: isCurrentSong
+                                            ? EuBrutal.accent.withValues(
+                                                alpha: 0.18,
                                               )
-                                              .removeSongFromPlaylist(
-                                                widget.id,
-                                                song.id,
-                                              );
-                                          final updated = ref
-                                              .read(
-                                                localPlaylistTracksProvider
-                                                    .notifier,
-                                              )
-                                              .getPlaylistTracks(widget.id);
-                                          await ref
-                                              .read(savedPlaylistsDaoProvider)
-                                              .save(
-                                                id: widget.id,
-                                                title:
-                                                    _title ?? 'Custom Playlist',
-                                                artworkUrl: _artworkUrl,
-                                                trackCount: updated.length,
-                                              );
-                                        },
+                                            : Colors.white.withValues(
+                                                alpha: 0.05,
+                                              ),
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
-                                  ],
+                                      child: isCurrentSong
+                                          ? (isPlaying
+                                                ? const _AlbumEqualizerBars()
+                                                : const Icon(
+                                                    Icons.volume_up_rounded,
+                                                    color: EuBrutal.accent,
+                                                    size: 18,
+                                                  ))
+                                          : Text(
+                                              '${i + 1}',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 13,
+                                                color: theme
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withValues(alpha: 0.5),
+                                              ),
+                                            ),
+                                    ),
+                                    title: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            song.title,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 14.5,
+                                              color: isCurrentSong
+                                                  ? EuBrutal.accent
+                                                  : theme.colorScheme.onSurface,
+                                            ),
+                                          ),
+                                        ),
+                                        if (isCurrentSong) ...[
+                                          const SizedBox(width: 6),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: EuBrutal.accent.withValues(
+                                                alpha: 0.2,
+                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              isPlaying ? 'PLAYING' : 'PAUSED',
+                                              style: const TextStyle(
+                                                color: EuBrutal.accent,
+                                                fontSize: 9.5,
+                                                fontWeight: FontWeight.w900,
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                    subtitle: Text(
+                                      song.artistNames,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 12.5,
+                                        color: theme.colorScheme.onSurface
+                                            .withValues(alpha: 0.7),
+                                      ),
+                                    ),
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        IconButton(
+                                          icon: Icon(
+                                            isCurrentSong
+                                                ? (isPlaying
+                                                      ? Icons
+                                                            .pause_circle_filled_rounded
+                                                      : Icons
+                                                            .play_circle_fill_rounded)
+                                                : Icons
+                                                      .play_circle_outline_rounded,
+                                            color: isCurrentSong
+                                                ? EuBrutal.accent
+                                                : theme.colorScheme.onSurface
+                                                      .withValues(alpha: 0.55),
+                                            size: isCurrentSong ? 34 : 28,
+                                          ),
+                                          onPressed: () {
+                                            if (isCurrentSong) {
+                                              if (isPlaying) {
+                                                ref
+                                                    .read(
+                                                      playerControllerProvider,
+                                                    )
+                                                    .pause();
+                                              } else {
+                                                ref
+                                                    .read(
+                                                      playerControllerProvider,
+                                                    )
+                                                    .play();
+                                              }
+                                            } else {
+                                              ref
+                                                  .read(
+                                                    playerControllerProvider,
+                                                  )
+                                                  .playQueue(
+                                                    _tracks,
+                                                    startIndex: i,
+                                                  );
+                                            }
+                                          },
+                                        ),
+                                        if (isLocal)
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.remove_circle_outline,
+                                              size: 22,
+                                              color: EuBrutal.alert,
+                                            ),
+                                            tooltip: 'Remove from playlist',
+                                            onPressed: () async {
+                                              await ref
+                                                  .read(
+                                                    localPlaylistTracksProvider
+                                                        .notifier,
+                                                  )
+                                                  .removeSongFromPlaylist(
+                                                    widget.id,
+                                                    song.id,
+                                                  );
+                                              final updated = ref
+                                                  .read(
+                                                    localPlaylistTracksProvider
+                                                        .notifier,
+                                                  )
+                                                  .getPlaylistTracks(widget.id);
+                                              await ref
+                                                  .read(
+                                                    savedPlaylistsDaoProvider,
+                                                  )
+                                                  .save(
+                                                    id: widget.id,
+                                                    title:
+                                                        _title ??
+                                                        'Custom Playlist',
+                                                    artworkUrl: _artworkUrl,
+                                                    trackCount: updated.length,
+                                                  );
+                                            },
+                                          ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                ],
-              ),
+                              );
+                            },
+                          ),
+                    ],
+                  ),
                 ),
               ),
       ),

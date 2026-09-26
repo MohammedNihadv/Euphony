@@ -161,7 +161,9 @@ class EuphonyAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> skipToPrevious() => _controller.skipPrevious();
 
   @override
-  Future<void> fastForward([Duration interval = const Duration(seconds: 10)]) async {
+  Future<void> fastForward([
+    Duration interval = const Duration(seconds: 10),
+  ]) async {
     final current = _player.position;
     final total = _player.duration ?? Duration.zero;
     final target = current + interval;

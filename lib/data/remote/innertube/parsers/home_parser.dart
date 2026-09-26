@@ -1,4 +1,4 @@
-﻿import '../../../../core/failure.dart';
+import '../../../../core/failure.dart';
 import '../../../../core/result.dart';
 import '../../../../domain/music_item.dart';
 import '../../../../domain/song.dart';

@@ -43,8 +43,10 @@ class MiniPlayer extends ConsumerWidget {
       direction: DismissDirection.horizontal,
       onDismissed: (_) => ref.read(playerControllerProvider).stop(),
       child: GestureDetector(
-        onTap: () => Navigator.of(context, rootNavigator: true)
-            .push(_buildPlayerRoute()),
+        onTap: () => Navigator.of(
+          context,
+          rootNavigator: true,
+        ).push(_buildPlayerRoute()),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
             EuSpace.md,
@@ -72,15 +74,16 @@ class MiniPlayer extends ConsumerWidget {
                           transitionBuilder: (child, anim) => FadeTransition(
                             opacity: anim,
                             child: SlideTransition(
-                              position: Tween<Offset>(
-                                begin: const Offset(0.06, 0),
-                                end: Offset.zero,
-                              ).animate(
-                                CurvedAnimation(
-                                  parent: anim,
-                                  curve: Curves.easeOut,
-                                ),
-                              ),
+                              position:
+                                  Tween<Offset>(
+                                    begin: const Offset(0.06, 0),
+                                    end: Offset.zero,
+                                  ).animate(
+                                    CurvedAnimation(
+                                      parent: anim,
+                                      curve: Curves.easeOut,
+                                    ),
+                                  ),
                               child: child,
                             ),
                           ),
@@ -93,8 +96,7 @@ class MiniPlayer extends ConsumerWidget {
                         duration: EuMotion.quick,
                         child: isPlaying && !isBuffering
                             ? const Padding(
-                                padding:
-                                    EdgeInsets.symmetric(horizontal: 6),
+                                padding: EdgeInsets.symmetric(horizontal: 6),
                                 child: AnimatedWaveform(
                                   playing: true,
                                   color: EuBrutal.accent,
@@ -111,8 +113,9 @@ class MiniPlayer extends ConsumerWidget {
                       _SpringPlayButton(
                         isPlaying: isPlaying,
                         isBuffering: isBuffering,
-                        onTap: () =>
-                            ref.read(playerControllerProvider).togglePlayPause(),
+                        onTap: () => ref
+                            .read(playerControllerProvider)
+                            .togglePlayPause(),
                       ),
 
                       // ── Skip next ───────────────────────────────────────
@@ -198,10 +201,7 @@ class _GlassPillSlab extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: isDark
-                    ? [
-                        const Color(0xF21C1C28),
-                        const Color(0xD912121A),
-                      ]
+                    ? [const Color(0xF21C1C28), const Color(0xD912121A)]
                     : [
                         Colors.white.withValues(alpha: 0.92),
                         const Color(0xFFF1F5F9).withValues(alpha: 0.85),
@@ -273,8 +273,7 @@ class _MiniArtwork extends StatelessWidget {
             ? Image.network(
                 song.artworkUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) =>
-                    const Icon(Icons.music_note_rounded),
+                errorBuilder: (_, _, _) => const Icon(Icons.music_note_rounded),
               )
             : const Icon(Icons.music_note_rounded),
       ),
@@ -300,9 +299,9 @@ class _TrackInfo extends StatelessWidget {
           song.title,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 2),
         Text(
@@ -363,13 +362,17 @@ class _SpringPlayButtonState extends State<_SpringPlayButton>
   }
 
   Future<void> _onTap() async {
-    await _ctrl.animateTo(0.82,
-        curve: Curves.easeIn,
-        duration: const Duration(milliseconds: 80));
+    await _ctrl.animateTo(
+      0.82,
+      curve: Curves.easeIn,
+      duration: const Duration(milliseconds: 80),
+    );
     widget.onTap();
-    await _ctrl.animateTo(1.0,
-        curve: Curves.elasticOut,
-        duration: const Duration(milliseconds: 400));
+    await _ctrl.animateTo(
+      1.0,
+      curve: Curves.elasticOut,
+      duration: const Duration(milliseconds: 400),
+    );
   }
 
   @override
@@ -455,10 +458,9 @@ class _GradientProgressBar extends StatelessWidget {
               children: [
                 // Track background
                 Container(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .surfaceContainerHighest
-                      .withValues(alpha: 0.5),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 ),
                 // Gradient fill
                 AnimatedContainer(
@@ -466,7 +468,10 @@ class _GradientProgressBar extends StatelessWidget {
                   width: constraints.maxWidth * progress,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [EuBrutal.accent, primaryColor.withValues(alpha: 0.7)],
+                      colors: [
+                        EuBrutal.accent,
+                        primaryColor.withValues(alpha: 0.7),
+                      ],
                     ),
                   ),
                 ),

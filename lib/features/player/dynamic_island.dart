@@ -204,18 +204,13 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(_isExpanded ? 26 : 24),
         child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: 20,
-            sigmaY: 20,
-          ),
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
             decoration: BoxDecoration(
               color: isDark
                   ? const Color(0xF60F0F18)
                   : Colors.white.withValues(alpha: 0.94),
-              borderRadius: BorderRadius.circular(
-                _isExpanded ? 26 : 24,
-              ),
+              borderRadius: BorderRadius.circular(_isExpanded ? 26 : 24),
               border: Border.all(
                 color: isDark
                     ? Colors.white.withValues(alpha: 0.22)
@@ -239,12 +234,12 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                       ? null
                       : () {
                           HapticFeedback.lightImpact();
-                          Navigator.of(context, rootNavigator: true)
-                              .push(_buildPlayerRoute());
+                          Navigator.of(
+                            context,
+                            rootNavigator: true,
+                          ).push(_buildPlayerRoute());
                         },
-                  borderRadius: BorderRadius.circular(
-                    _isExpanded ? 26 : 24,
-                  ),
+                  borderRadius: BorderRadius.circular(_isExpanded ? 26 : 24),
                   child: AnimatedSwitcher(
                     duration: const Duration(milliseconds: 220),
                     child: _isExpanded
@@ -420,7 +415,10 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
     final AsyncValue<Duration> positionAsync = ref.watch(trackPositionProvider);
     final Duration position = positionAsync.asData?.value ?? Duration.zero;
     final Duration? totalDuration = ref.watch(totalDurationProvider);
-    final total = totalDuration ?? song.duration ?? const Duration(minutes: 3, seconds: 30);
+    final total =
+        totalDuration ??
+        song.duration ??
+        const Duration(minutes: 3, seconds: 30);
     final progress = total.inMilliseconds > 0
         ? (position.inMilliseconds / total.inMilliseconds).clamp(0.0, 1.0)
         : 0.0;
@@ -439,7 +437,10 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
             children: [
               Flexible(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: isPlaying
                         ? const Color(0xFF22C55E).withValues(alpha: 0.16)
@@ -468,7 +469,9 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                       const SizedBox(width: 6),
                       Flexible(
                         child: Text(
-                          isPlaying ? 'DYNAMIC ISLAND · PLAYING' : 'DYNAMIC ISLAND · PAUSED',
+                          isPlaying
+                              ? 'DYNAMIC ISLAND · PLAYING'
+                              : 'DYNAMIC ISLAND · PAUSED',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -476,7 +479,9 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                             fontWeight: FontWeight.w900,
                             letterSpacing: 0.6,
                             color: isPlaying
-                                ? (isDark ? const Color(0xFF4ADE80) : const Color(0xFF16A34A))
+                                ? (isDark
+                                      ? const Color(0xFF4ADE80)
+                                      : const Color(0xFF16A34A))
                                 : Colors.orange,
                           ),
                         ),
@@ -493,14 +498,18 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                     behavior: HitTestBehavior.opaque,
                     onTap: () {
                       _collapse();
-                      Navigator.of(context, rootNavigator: true)
-                          .push(_buildPlayerRoute());
+                      Navigator.of(
+                        context,
+                        rootNavigator: true,
+                      ).push(_buildPlayerRoute());
                     },
                     child: Container(
                       width: 28,
                       height: 28,
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.06),
+                        color: isDark
+                            ? Colors.white12
+                            : Colors.black.withValues(alpha: 0.06),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -519,7 +528,9 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                       width: 28,
                       height: 28,
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.06),
+                        color: isDark
+                            ? Colors.white12
+                            : Colors.black.withValues(alpha: 0.06),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
@@ -542,8 +553,10 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
               GestureDetector(
                 onTap: () {
                   _collapse();
-                  Navigator.of(context, rootNavigator: true)
-                      .push(_buildPlayerRoute());
+                  Navigator.of(
+                    context,
+                    rootNavigator: true,
+                  ).push(_buildPlayerRoute());
                 },
                 child: Container(
                   width: 50,
@@ -564,7 +577,8 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(11),
-                    child: song.artworkUrl != null && song.artworkUrl!.isNotEmpty
+                    child:
+                        song.artworkUrl != null && song.artworkUrl!.isNotEmpty
                         ? Image.network(
                             song.artworkUrl!,
                             fit: BoxFit.cover,
@@ -588,8 +602,10 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                   behavior: HitTestBehavior.opaque,
                   onTap: () {
                     _collapse();
-                    Navigator.of(context, rootNavigator: true)
-                        .push(_buildPlayerRoute());
+                    Navigator.of(
+                      context,
+                      rootNavigator: true,
+                    ).push(_buildPlayerRoute());
                   },
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -642,9 +658,7 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                             style: TextStyle(
                               fontSize: 9.5,
                               fontWeight: FontWeight.w700,
-                              color: isDark
-                                  ? Colors.white38
-                                  : Colors.black38,
+                              color: isDark ? Colors.white38 : Colors.black38,
                             ),
                           ),
                           Text(
@@ -652,9 +666,7 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                             style: TextStyle(
                               fontSize: 9.5,
                               fontWeight: FontWeight.w700,
-                              color: isDark
-                                  ? Colors.white38
-                                  : Colors.black38,
+                              color: isDark ? Colors.white38 : Colors.black38,
                             ),
                           ),
                         ],
@@ -706,9 +718,7 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                     ],
                   ),
                   child: Icon(
-                    isPlaying
-                        ? Icons.pause_rounded
-                        : Icons.play_arrow_rounded,
+                    isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
                     size: 22,
                     color: EuBrutal.onAccent,
                   ),
@@ -732,8 +742,10 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   _collapse();
-                  Navigator.of(context, rootNavigator: true)
-                      .push(_buildPlayerRoute());
+                  Navigator.of(
+                    context,
+                    rootNavigator: true,
+                  ).push(_buildPlayerRoute());
                 },
               ),
             ],

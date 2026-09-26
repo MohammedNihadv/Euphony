@@ -23,7 +23,11 @@ class _Dest {
 const _destinations = <_Dest>[
   _Dest(Icons.home_outlined, Icons.home_rounded, 'Home'),
   _Dest(Icons.search_outlined, Icons.search_rounded, 'Search'),
-  _Dest(Icons.my_library_music_outlined, Icons.my_library_music_rounded, 'Library'),
+  _Dest(
+    Icons.my_library_music_outlined,
+    Icons.my_library_music_rounded,
+    'Library',
+  ),
   _Dest(Icons.settings_outlined, Icons.settings_rounded, 'Settings'),
 ];
 
@@ -107,14 +111,18 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
     // 3. Skip to Next track
     if (key == LogicalKeyboardKey.mediaTrackNext ||
         key == LogicalKeyboardKey.mediaSkip ||
-        (isShiftOrCtrl && (key == LogicalKeyboardKey.arrowRight || key == LogicalKeyboardKey.keyN))) {
+        (isShiftOrCtrl &&
+            (key == LogicalKeyboardKey.arrowRight ||
+                key == LogicalKeyboardKey.keyN))) {
       controller.skipNext();
       return true;
     }
 
     // 4. Skip to Previous track
     if (key == LogicalKeyboardKey.mediaTrackPrevious ||
-        (isShiftOrCtrl && (key == LogicalKeyboardKey.arrowLeft || key == LogicalKeyboardKey.keyP))) {
+        (isShiftOrCtrl &&
+            (key == LogicalKeyboardKey.arrowLeft ||
+                key == LogicalKeyboardKey.keyP))) {
       controller.skipPrevious();
       return true;
     }
@@ -188,9 +196,7 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
               onSelected: _goBranch,
             ),
           ),
-          const Positioned.fill(
-            child: DynamicIsland(),
-          ),
+          const Positioned.fill(child: DynamicIsland()),
         ],
       ),
     );
@@ -299,7 +305,10 @@ class _GlassBrutalNavBar extends ConsumerWidget {
                         width: 1.2,
                       ),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
@@ -388,8 +397,6 @@ class _GlassBrutalNavBar extends ConsumerWidget {
     );
   }
 }
-
-
 
 // ---------------------------------------------------------------------------
 // Desktop sidebar — glass panel + brutalist right border
@@ -505,8 +512,7 @@ class _SidebarItem extends StatelessWidget {
                   dest.label,
                   style: TextStyle(
                     fontSize: 15,
-                    fontWeight:
-                        selected ? FontWeight.w900 : FontWeight.w700,
+                    fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
                     color: fg,
                   ),
                 ),

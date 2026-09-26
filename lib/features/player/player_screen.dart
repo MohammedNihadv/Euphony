@@ -535,7 +535,10 @@ class _TrackHeader extends ConsumerWidget {
                 const SizedBox(height: 6),
                 // Authors / Artists Chip with avatar
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: isDark
                         ? Colors.white.withValues(alpha: 0.06)
@@ -802,7 +805,8 @@ class _GlassScrubberState extends ConsumerState<_GlassScrubber> {
                 data: SliderTheme.of(context).copyWith(
                   trackHeight: 4,
                   activeTrackColor: EuBrutal.accent,
-                  inactiveTrackColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                  inactiveTrackColor: theme.colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.5),
                   thumbColor: Colors.white,
                   thumbShape: const RoundSliderThumbShape(
                     enabledThumbRadius: 6,
@@ -1025,15 +1029,15 @@ class _ToggleButton extends StatelessWidget {
             color: active
                 ? EuBrutal.accent.withValues(alpha: 0.22)
                 : (isDark
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : Colors.black.withValues(alpha: 0.04)),
+                      ? Colors.white.withValues(alpha: 0.05)
+                      : Colors.black.withValues(alpha: 0.04)),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: active
                   ? EuBrutal.accent.withValues(alpha: 0.8)
                   : (isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : Colors.black.withValues(alpha: 0.06)),
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.black.withValues(alpha: 0.06)),
               width: 1.0,
             ),
             boxShadow: active
@@ -1062,7 +1066,6 @@ class _ToggleButton extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // Glass Bottom Action Bar — glass panel + brutalist border
 // ---------------------------------------------------------------------------
-
 
 class _GlassBottomActionBar extends ConsumerWidget {
   const _GlassBottomActionBar({required this.song});

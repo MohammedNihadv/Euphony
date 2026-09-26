@@ -64,7 +64,10 @@ class DownloadedSongsNotifier extends Notifier<List<Song>> {
   Future<void> _saveToPrefs(List<Song> songs) async {
     try {
       final prefs = ref.read(sharedPreferencesProvider);
-      await prefs.setString(_downloadedSongsKey, json.encode(songs.map(_songToJson).toList()));
+      await prefs.setString(
+        _downloadedSongsKey,
+        json.encode(songs.map(_songToJson).toList()),
+      );
     } catch (e) {
       _log.warning('Failed to save downloaded songs: $e');
     }
@@ -115,12 +118,13 @@ class DownloadedSongsNotifier extends Notifier<List<Song>> {
       // Primary: InnerTube player endpoint (ultra-fast, direct unthrottled itag 18 stream)
       try {
         final client = ref.read(innertubeClientProvider);
-        final result = await client.player(song.id).timeout(
-          const Duration(seconds: 8),
-        );
+        final result = await client
+            .player(song.id)
+            .timeout(const Duration(seconds: 8));
         result.fold(
           (data) {
-            final streamingData = data['streamingData'] as Map<String, dynamic>?;
+            final streamingData =
+                data['streamingData'] as Map<String, dynamic>?;
             if (streamingData != null) {
               streamUrl = pickAudioStreamUrl(streamingData, quality: 'HIGH');
             }
@@ -161,7 +165,9 @@ class DownloadedSongsNotifier extends Notifier<List<Song>> {
             }
           }
         } catch (e) {
-          _log.warning('YoutubeExplode download resolve failed for ${song.id}: $e');
+          _log.warning(
+            'YoutubeExplode download resolve failed for ${song.id}: $e',
+          );
         } finally {
           yt.close();
         }
@@ -301,7 +307,9 @@ class DownloadedSongsNotifier extends Notifier<List<Song>> {
   Map<String, dynamic> _songToJson(Song s) => {
     'id': s.id,
     'title': s.title,
-    'artists': s.artists.map((a) => {'id': a.browseId, 'name': a.name}).toList(),
+    'artists': s.artists
+        .map((a) => {'id': a.browseId, 'name': a.name})
+        .toList(),
     'albumId': s.albumId,
     'albumTitle': s.albumTitle,
     'artworkUrl': s.artworkUrl,
@@ -311,7 +319,8 @@ class DownloadedSongsNotifier extends Notifier<List<Song>> {
 
   Song? _songFromJson(Map<String, dynamic> json) {
     try {
-      final artistsList = (json['artists'] as List<dynamic>?)?.map((item) {
+      final artistsList =
+          (json['artists'] as List<dynamic>?)?.map((item) {
             final m = item as Map<String, dynamic>;
             return ArtistRef(
               browseId: m['id'] as String?,

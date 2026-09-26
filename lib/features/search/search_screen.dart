@@ -109,7 +109,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final repository = ref.read(searchRepositoryProvider);
 
     await searchDao.record(query);
-    final effectiveFilter = _filterForLabel(filterLabel) ??
+    final effectiveFilter =
+        _filterForLabel(filterLabel) ??
         (_catalogSource == CatalogSource.community
             ? SearchFilter.videos
             : null);
@@ -244,7 +245,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                               ),
                               if (_focusNode.hasFocus)
                                 BoxShadow(
-                                  color: EuBrutal.accent.withValues(alpha: 0.22),
+                                  color: EuBrutal.accent.withValues(
+                                    alpha: 0.22,
+                                  ),
                                   blurRadius: 14,
                                   spreadRadius: -2,
                                 ),
@@ -265,8 +268,12 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                     color: _focusNode.hasFocus
                                         ? EuBrutal.accent
                                         : (isDark
-                                            ? Colors.white.withValues(alpha: 0.12)
-                                            : Colors.black.withValues(alpha: 0.08)),
+                                              ? Colors.white.withValues(
+                                                  alpha: 0.12,
+                                                )
+                                              : Colors.black.withValues(
+                                                  alpha: 0.08,
+                                                )),
                                     width: _focusNode.hasFocus ? 1.4 : 1.0,
                                   ),
                                 ),
@@ -279,15 +286,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                     EdgeInsets.symmetric(horizontal: 14.0),
                                   ),
                                   elevation: const WidgetStatePropertyAll(0),
-                                  backgroundColor:
-                                      const WidgetStatePropertyAll(Colors.transparent),
+                                  backgroundColor: const WidgetStatePropertyAll(
+                                    Colors.transparent,
+                                  ),
                                   controller: _controller,
                                   focusNode: _focusNode,
                                   hintText: 'Songs, albums, artists...',
                                   hintStyle: WidgetStatePropertyAll(
                                     TextStyle(
                                       fontSize: 13.5,
-                                      color: isDark ? Colors.white38 : Colors.black38,
+                                      color: isDark
+                                          ? Colors.white38
+                                          : Colors.black38,
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -295,7 +305,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                     TextStyle(
                                       fontSize: 14.0,
                                       fontWeight: FontWeight.w600,
-                                      color: isDark ? Colors.white : Colors.black,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.black,
                                     ),
                                   ),
                                   leading: const Icon(
@@ -491,12 +503,14 @@ class _CatalogSourcePill extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? (isDark
-                  ? accentColor.withValues(alpha: 0.18)
-                  : accentColor.withValues(alpha: 0.12))
+                    ? accentColor.withValues(alpha: 0.18)
+                    : accentColor.withValues(alpha: 0.12))
               : Colors.transparent,
           borderRadius: BorderRadius.circular(9),
           border: Border.all(
-            color: isSelected ? accentColor.withValues(alpha: 0.8) : Colors.transparent,
+            color: isSelected
+                ? accentColor.withValues(alpha: 0.8)
+                : Colors.transparent,
             width: isSelected ? 1.2 : 1.0,
           ),
           boxShadow: isSelected
@@ -889,21 +903,23 @@ class _ResultSlivers extends StatelessWidget {
                             color: isSelected
                                 ? EuBrutal.accent
                                 : (isDark
-                                    ? Colors.white.withValues(alpha: 0.06)
-                                    : Colors.black.withValues(alpha: 0.05)),
+                                      ? Colors.white.withValues(alpha: 0.06)
+                                      : Colors.black.withValues(alpha: 0.05)),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
                               color: isSelected
                                   ? EuBrutal.accent
                                   : (isDark
-                                      ? Colors.white.withValues(alpha: 0.10)
-                                      : Colors.black.withValues(alpha: 0.08)),
+                                        ? Colors.white.withValues(alpha: 0.10)
+                                        : Colors.black.withValues(alpha: 0.08)),
                               width: 1.0,
                             ),
                             boxShadow: isSelected
                                 ? [
                                     BoxShadow(
-                                      color: EuBrutal.accent.withValues(alpha: 0.32),
+                                      color: EuBrutal.accent.withValues(
+                                        alpha: 0.32,
+                                      ),
                                       blurRadius: 10,
                                       offset: const Offset(0, 2),
                                     ),
@@ -916,7 +932,9 @@ class _ResultSlivers extends StatelessWidget {
                               color: isSelected
                                   ? Colors.white
                                   : (isDark ? Colors.white70 : Colors.black87),
-                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                              fontWeight: isSelected
+                                  ? FontWeight.w800
+                                  : FontWeight.w600,
                               fontSize: 12,
                             ),
                           ),
@@ -1064,7 +1082,9 @@ class _TopResultCard extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(8),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: EuBrutal.accent.withValues(alpha: 0.35),
+                                    color: EuBrutal.accent.withValues(
+                                      alpha: 0.35,
+                                    ),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -1421,146 +1441,163 @@ class _SettingsSheet extends ConsumerWidget {
           ),
         ),
         child: SafeArea(
-            child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.fromLTRB(
-                EuSpace.screenGutter,
-                EuSpace.sm,
-                EuSpace.screenGutter,
-                EuSpace.xl,
-              ),
-              children: [
-                Center(
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 4, bottom: 12),
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.25)
-                          : Colors.black.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: EuSpace.md),
-                  child: Text(
-                    'QUICK SETTINGS',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.2,
-                      fontSize: 16,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
-                  ),
-                ),
-                SegmentedButton<ThemeMode>(
-                  segments: const [
-                    ButtonSegment(
-                      value: ThemeMode.system,
-                      icon: Icon(Icons.brightness_auto),
-                      label: Text('System'),
-                    ),
-                    ButtonSegment(
-                      value: ThemeMode.light,
-                      icon: Icon(Icons.light_mode),
-                      label: Text('Light'),
-                    ),
-                    ButtonSegment(
-                      value: ThemeMode.dark,
-                      icon: Icon(Icons.dark_mode),
-                      label: Text('Dark'),
-                    ),
-                  ],
-                  selected: {theme.mode},
-                  onSelectionChanged: (selection) =>
-                      controller.setMode(selection.first),
-                ),
-                Material(
-                  type: MaterialType.transparency,
-                  child: SwitchListTile(
-                    title: Text('AMOLED dark', style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600)),
-                    value: theme.amoled,
-                    onChanged: (value) => controller.setAmoled(value: value),
-                  ),
-                ),
-                Material(
-                  type: MaterialType.transparency,
-                  child: SwitchListTile(
-                    title: Text('Colour from artwork', style: TextStyle(color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600)),
-                    value: theme.source == ColourSource.artwork,
-                    onChanged: (value) => controller.setColourSource(
-                      value ? ColourSource.artwork : ColourSource.fixed,
-                    ),
-                  ),
-                ),
-                Divider(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.08)
-                      : Colors.black.withValues(alpha: 0.06),
-                  height: 16,
-                ),
-                Material(
-                  type: MaterialType.transparency,
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.bug_report_outlined,
-                      color: isDark ? Colors.white70 : Colors.black54,
-                    ),
-                    title: Text(
-                      'Export Error Logs',
-                      style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black87,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    subtitle: Text(
-                      'Download log file to report issues',
-                      style: TextStyle(
-                        color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.black54,
-                      ),
-                    ),
-                    onTap: () async {
-                      Navigator.of(context).pop();
-                      final success = await LogExporter.exportLogs();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              success
-                                  ? 'Logs saved successfully! Share with developers.'
-                                  : 'Log export failed or cancelled.',
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                  ),
-                ),
-                Material(
-                  type: MaterialType.transparency,
-                  child: ListTile(
-                    leading: const Icon(Icons.settings_outlined, color: EuBrutal.accent),
-                    title: Text(
-                      'All Settings',
-                      style: TextStyle(
-                        color: isDark ? Colors.white : Colors.black87,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    trailing: Icon(
-                      Icons.chevron_right,
-                      color: isDark ? Colors.white54 : Colors.black38,
-                    ),
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      context.push('/settings');
-                    },
-                  ),
-                ),
-              ],
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(
+              EuSpace.screenGutter,
+              EuSpace.sm,
+              EuSpace.screenGutter,
+              EuSpace.xl,
             ),
+            children: [
+              Center(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 4, bottom: 12),
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.25)
+                        : Colors.black.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: EuSpace.md),
+                child: Text(
+                  'QUICK SETTINGS',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                    fontSize: 16,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ),
+              SegmentedButton<ThemeMode>(
+                segments: const [
+                  ButtonSegment(
+                    value: ThemeMode.system,
+                    icon: Icon(Icons.brightness_auto),
+                    label: Text('System'),
+                  ),
+                  ButtonSegment(
+                    value: ThemeMode.light,
+                    icon: Icon(Icons.light_mode),
+                    label: Text('Light'),
+                  ),
+                  ButtonSegment(
+                    value: ThemeMode.dark,
+                    icon: Icon(Icons.dark_mode),
+                    label: Text('Dark'),
+                  ),
+                ],
+                selected: {theme.mode},
+                onSelectionChanged: (selection) =>
+                    controller.setMode(selection.first),
+              ),
+              Material(
+                type: MaterialType.transparency,
+                child: SwitchListTile(
+                  title: Text(
+                    'AMOLED dark',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  value: theme.amoled,
+                  onChanged: (value) => controller.setAmoled(value: value),
+                ),
+              ),
+              Material(
+                type: MaterialType.transparency,
+                child: SwitchListTile(
+                  title: Text(
+                    'Colour from artwork',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  value: theme.source == ColourSource.artwork,
+                  onChanged: (value) => controller.setColourSource(
+                    value ? ColourSource.artwork : ColourSource.fixed,
+                  ),
+                ),
+              ),
+              Divider(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: 0.06),
+                height: 16,
+              ),
+              Material(
+                type: MaterialType.transparency,
+                child: ListTile(
+                  leading: Icon(
+                    Icons.bug_report_outlined,
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  ),
+                  title: Text(
+                    'Export Error Logs',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Download log file to report issues',
+                    style: TextStyle(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.6)
+                          : Colors.black54,
+                    ),
+                  ),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    final success = await LogExporter.exportLogs();
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            success
+                                ? 'Logs saved successfully! Share with developers.'
+                                : 'Log export failed or cancelled.',
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ),
+              Material(
+                type: MaterialType.transparency,
+                child: ListTile(
+                  leading: const Icon(
+                    Icons.settings_outlined,
+                    color: EuBrutal.accent,
+                  ),
+                  title: Text(
+                    'All Settings',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: isDark ? Colors.white54 : Colors.black38,
+                  ),
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    context.push('/settings');
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

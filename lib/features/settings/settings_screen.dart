@@ -87,16 +87,14 @@ class SettingsScreen extends ConsumerWidget {
                           title: 'Light',
                           icon: Icons.light_mode_rounded,
                           isSelected: theme.mode == ThemeMode.light,
-                          onTap: () =>
-                              themeController.setMode(ThemeMode.light),
+                          onTap: () => themeController.setMode(ThemeMode.light),
                         ),
                         const SizedBox(width: 8),
                         _ThemeModeButton(
                           title: 'Dark',
                           icon: Icons.dark_mode_rounded,
                           isSelected: theme.mode == ThemeMode.dark,
-                          onTap: () =>
-                              themeController.setMode(ThemeMode.dark),
+                          onTap: () => themeController.setMode(ThemeMode.dark),
                         ),
                       ],
                     ),
@@ -143,8 +141,9 @@ class SettingsScreen extends ConsumerWidget {
                       title: 'Data Saver Mode',
                       subtitle: 'Optimizes audio for 2G/3G mobile networks',
                       value: settings.audioQuality == 'LOW',
-                      onChanged: (value) =>
-                          settingsController.setAudioQuality(value ? 'LOW' : 'HIGH'),
+                      onChanged: (value) => settingsController.setAudioQuality(
+                        value ? 'LOW' : 'HIGH',
+                      ),
                     ),
                     const Divider(height: 1),
                     const SizedBox(height: EuSpace.sm),
@@ -199,7 +198,9 @@ class SettingsScreen extends ConsumerWidget {
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF3B82F6).withValues(alpha: 0.12),
+                          color: const Color(
+                            0xFF3B82F6,
+                          ).withValues(alpha: 0.12),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -234,8 +235,9 @@ class SettingsScreen extends ConsumerWidget {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black
-                                  .withValues(alpha: isDark ? 0.2 : 0.04),
+                              color: Colors.black.withValues(
+                                alpha: isDark ? 0.2 : 0.04,
+                              ),
                               blurRadius: 4,
                               offset: const Offset(0, 1),
                             ),
@@ -252,10 +254,7 @@ class SettingsScreen extends ConsumerWidget {
                               ),
                             ),
                             const SizedBox(width: 4),
-                            const Icon(
-                              Icons.arrow_drop_down_rounded,
-                              size: 16,
-                            ),
+                            const Icon(Icons.arrow_drop_down_rounded, size: 16),
                           ],
                         ),
                       ),
@@ -297,7 +296,6 @@ class SettingsScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: EuSpace.lg),
 
-                
                 // ---------------- 4. Storage, Cache & Data Card ----------------
                 _SettingsSectionCard(
                   icon: Icons.folder_special_rounded,
@@ -310,7 +308,9 @@ class SettingsScreen extends ConsumerWidget {
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF59E0B).withValues(alpha: 0.14),
+                          color: const Color(
+                            0xFFF59E0B,
+                          ).withValues(alpha: 0.14),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
@@ -480,8 +480,10 @@ class SettingsScreen extends ConsumerWidget {
         return Dialog(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          insetPadding:
-              const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
           child: Container(
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF161626) : Colors.white,
@@ -522,83 +524,85 @@ class SettingsScreen extends ConsumerWidget {
                             ),
                           ],
                         ),
-                      child: const Icon(
-                        Icons.public_rounded,
-                        color: EuBrutal.onAccent,
-                        size: 20,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    const Text(
-                      'SELECT CONTENT REGION',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.8,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxHeight: 380),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: countries.length,
-                    separatorBuilder: (_, _) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      final country = countries[index];
-                      final isSelected = country == currentRegion;
-                      return ListTile(
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 2,
+                        child: const Icon(
+                          Icons.public_rounded,
+                          color: EuBrutal.onAccent,
+                          size: 20,
                         ),
-                        title: Text(
-                          country,
-                          style: TextStyle(
-                            fontWeight: isSelected
-                                ? FontWeight.w900
-                                : FontWeight.w700,
-                            color: isSelected ? EuBrutal.accent : null,
-                          ),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'SELECT CONTENT REGION',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 0.8,
+                          fontSize: 16,
                         ),
-                        trailing: isSelected
-                            ? Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: EuBrutal.accent,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(
-                                  Icons.check_rounded,
-                                  size: 14,
-                                  color: EuBrutal.onAccent,
-                                ),
-                              )
-                            : null,
-                        onTap: () {
-                          controller.setContentRegion(country);
-                          Navigator.pop(context);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Content region updated to $country'),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
-                      );
-                    },
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 380),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: countries.length,
+                      separatorBuilder: (_, _) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final country = countries[index];
+                        final isSelected = country == currentRegion;
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 4,
+                            vertical: 2,
+                          ),
+                          title: Text(
+                            country,
+                            style: TextStyle(
+                              fontWeight: isSelected
+                                  ? FontWeight.w900
+                                  : FontWeight.w700,
+                              color: isSelected ? EuBrutal.accent : null,
+                            ),
+                          ),
+                          trailing: isSelected
+                              ? Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: EuBrutal.accent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.check_rounded,
+                                    size: 14,
+                                    color: EuBrutal.onAccent,
+                                  ),
+                                )
+                              : null,
+                          onTap: () {
+                            controller.setContentRegion(country);
+                            Navigator.pop(context);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Content region updated to $country',
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   Future<void> _clearCache(BuildContext context) async {
     await HapticFeedback.mediumImpact();
@@ -664,8 +668,9 @@ class _SettingsHeroBanner extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF4F46E5)
-                .withValues(alpha: isDark ? 0.35 : 0.25),
+            color: const Color(
+              0xFF4F46E5,
+            ).withValues(alpha: isDark ? 0.35 : 0.25),
             blurRadius: 20,
             spreadRadius: -2,
             offset: const Offset(0, 8),
@@ -742,10 +747,7 @@ class _SettingsHeroBanner extends StatelessWidget {
     );
   }
 
-  Widget _buildMiniStatusChip({
-    required IconData icon,
-    required String label,
-  }) {
+  Widget _buildMiniStatusChip({required IconData icon, required String label}) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -823,44 +825,42 @@ class _SettingsSectionCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(21),
         child: Container(
-          color: isDark
-              ? const Color(0xFF1B1B29)
-              : Colors.white,
+          color: isDark ? const Color(0xFF1B1B29) : Colors.white,
           padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header: Fresh circular icon avatar + bold title
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: iconColor.withValues(alpha: 0.14),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(icon, color: iconColor, size: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header: Fresh circular icon avatar + bold title
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: iconColor.withValues(alpha: 0.14),
+                      shape: BoxShape.circle,
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.2,
-                        ),
+                    child: Icon(icon, color: iconColor, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.2,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                ...children,
-              ],
-            ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              ...children,
+            ],
           ),
         ),
+      ),
     );
   }
 }
@@ -899,8 +899,8 @@ class _ThemeModeButton extends StatelessWidget {
               color: isSelected
                   ? EuBrutal.accent
                   : (isDark
-                      ? Colors.white.withValues(alpha: 0.12)
-                      : Colors.black.withValues(alpha: 0.08)),
+                        ? Colors.white.withValues(alpha: 0.12)
+                        : Colors.black.withValues(alpha: 0.08)),
               width: 1.2,
             ),
             boxShadow: isSelected
@@ -913,7 +913,9 @@ class _ThemeModeButton extends StatelessWidget {
                   ]
                 : [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.2 : 0.04,
+                      ),
                       blurRadius: 4,
                       offset: const Offset(0, 1),
                     ),
@@ -980,8 +982,8 @@ class _QualityChipButton extends StatelessWidget {
               color: isSelected
                   ? EuBrutal.accent
                   : (isDark
-                      ? Colors.white.withValues(alpha: 0.12)
-                      : Colors.black.withValues(alpha: 0.08)),
+                        ? Colors.white.withValues(alpha: 0.12)
+                        : Colors.black.withValues(alpha: 0.08)),
               width: 1.2,
             ),
             boxShadow: isSelected
@@ -994,7 +996,9 @@ class _QualityChipButton extends StatelessWidget {
                   ]
                 : [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                      color: Colors.black.withValues(
+                        alpha: isDark ? 0.2 : 0.04,
+                      ),
                       blurRadius: 4,
                       offset: const Offset(0, 1),
                     ),
@@ -1236,135 +1240,135 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(21),
         child: Container(
-          color: isDark
-              ? const Color(0xFF1B1B29)
-              : Colors.white,
+          color: isDark ? const Color(0xFF1B1B29) : Colors.white,
           padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withValues(alpha: 0.14),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.system_update_rounded,
-                        color: Color(0xFF10B981),
-                        size: 20,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.14),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.system_update_rounded,
+                      color: Color(0xFF10B981),
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Software Updates',
+                      style: themeData.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.2,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Software Updates',
-                        style: themeData.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -0.2,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Current Build: v${info?.currentVersion ?? ref.watch(appVersionProvider).asData?.value ?? '0.3.0'}',
+                          style: const TextStyle(fontWeight: FontWeight.w800),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                        const SizedBox(height: 2),
+                        if (info != null && info.hasUpdate)
                           Text(
-                            'Current Build: v${info?.currentVersion ?? ref.watch(appVersionProvider).asData?.value ?? '0.3.0'}',
-                            style: const TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                          const SizedBox(height: 2),
-                          if (info != null && info.hasUpdate)
-                            Text(
-                              'Update Available: v${info.latestVersion}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w900,
-                                color: EuBrutal.accent,
-                              ),
-                            )
-                          else
-                            const Text(
-                              'All system patches & components are up to date',
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey,
-                              ),
+                            'Update Available: v${info.latestVersion}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w900,
+                              color: EuBrutal.accent,
                             ),
-                        ],
-                      ),
+                          )
+                        else
+                          const Text(
+                            'All system patches & components are up to date',
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey,
+                            ),
+                          ),
+                      ],
                     ),
-                    const SizedBox(width: 12),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: (info != null && info.hasUpdate)
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: (info != null && info.hasUpdate)
+                          ? EuBrutal.accent
+                          : (isDark
+                                ? const Color(0x1F252538)
+                                : const Color(0xFFF1F5F9)),
+                      foregroundColor: (info != null && info.hasUpdate)
+                          ? EuBrutal.onAccent
+                          : context.eu.ink,
+                      side: BorderSide(
+                        color: (info != null && info.hasUpdate)
                             ? EuBrutal.accent
-                            : (isDark ? const Color(0x1F252538) : const Color(0xFFF1F5F9)),
-                        foregroundColor: (info != null && info.hasUpdate)
-                            ? EuBrutal.onAccent
-                            : context.eu.ink,
-                        side: BorderSide(
-                          color: (info != null && info.hasUpdate)
-                              ? EuBrutal.accent
-                              : (isDark
+                            : (isDark
                                   ? Colors.white.withValues(alpha: 0.14)
                                   : Colors.black.withValues(alpha: 0.1)),
-                          width: 1.2,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        elevation: 0,
-                        shadowColor: Colors.transparent,
+                        width: 1.2,
                       ),
-                      onPressed: _checking
-                          ? null
-                          : () async {
-                              await HapticFeedback.lightImpact();
-                              if (!context.mounted) return;
-                              if (info != null && info.hasUpdate) {
-                                unawaited(showUpdateDialog(context, info));
-                              } else {
-                                await _checkUpdate();
-                              }
-                            },
-                      icon: _checking
-                          ? const SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Icon(
-                              (info != null && info.hasUpdate)
-                                  ? Icons.file_download
-                                  : Icons.refresh_rounded,
-                              size: 18,
-                            ),
-                      label: Text(
-                        _checking
-                            ? 'Checking...'
-                            : (info != null && info.hasUpdate)
-                            ? 'UPDATE'
-                            : 'CHECK',
-                        style: const TextStyle(fontWeight: FontWeight.w900),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
+                      elevation: 0,
+                      shadowColor: Colors.transparent,
                     ),
-                  ],
-                ),
-              ],
-            ),
+                    onPressed: _checking
+                        ? null
+                        : () async {
+                            await HapticFeedback.lightImpact();
+                            if (!context.mounted) return;
+                            if (info != null && info.hasUpdate) {
+                              unawaited(showUpdateDialog(context, info));
+                            } else {
+                              await _checkUpdate();
+                            }
+                          },
+                    icon: _checking
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(
+                            (info != null && info.hasUpdate)
+                                ? Icons.file_download
+                                : Icons.refresh_rounded,
+                            size: 18,
+                          ),
+                    label: Text(
+                      _checking
+                          ? 'Checking...'
+                          : (info != null && info.hasUpdate)
+                          ? 'UPDATE'
+                          : 'CHECK',
+                      style: const TextStyle(fontWeight: FontWeight.w900),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
+      ),
     );
   }
 }
@@ -1409,147 +1413,156 @@ class _AboutEuphonyCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(21),
         child: Container(
-          color: isDark
-              ? const Color(0xFF1B1B29)
-              : Colors.white,
+          color: isDark ? const Color(0xFF1B1B29) : Colors.white,
           padding: const EdgeInsets.all(22),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: EuBrutal.highlight,
-                        borderRadius: BorderRadius.circular(14),
-                        boxShadow: [
-                          BoxShadow(
-                            color: EuBrutal.highlight.withValues(alpha: 0.35),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.graphic_eq_rounded,
-                        color: EuBrutal.onHighlight,
-                        size: 26,
-                      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: EuBrutal.highlight,
+                      borderRadius: BorderRadius.circular(14),
+                      boxShadow: [
+                        BoxShadow(
+                          color: EuBrutal.highlight.withValues(alpha: 0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'EUPHONY MUSIC',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          Text(
-                            'v$appVersion \u2022 Neo-Brutalist Glass Edition',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 12,
-                              color: EuBrutal.accent,
-                            ),
-                          ),
-                        ],
-                      ),
+                    child: const Icon(
+                      Icons.graphic_eq_rounded,
+                      color: EuBrutal.onHighlight,
+                      size: 26,
                     ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  'Music deserves better than interruptions.\n\n'
-                  'Euphony is an open-source, ad-free music streaming client built with Flutter.',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
-                    fontWeight: FontWeight.w500,
-                    height: 1.45,
                   ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'EUPHONY MUSIC',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        Text(
+                          'v$appVersion \u2022 Neo-Brutalist Glass Edition',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 12,
+                            color: EuBrutal.accent,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Music deserves better than interruptions.\n\n'
+                'Euphony is an open-source, ad-free music streaming client built with Flutter.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                  fontWeight: FontWeight.w500,
+                  height: 1.45,
                 ),
-                const SizedBox(height: 18),
-                const Divider(height: 1),
-                const SizedBox(height: 16),
-                // 2x2 Bento Tiles for By Fedaration & Ecosystem
-                // Row 1: Euphony Web, GitHub Core
-                // Row 2: Fedaration (3rd box as requested), Play Protect (4th box)
-                Row(
-                  children: [
-                    Expanded(
-                      child: _FedarationBentoTile(
-                        icon: Icons.web_rounded,
-                        title: 'Euphony Web',
-                        badge: 'WEB APP',
-                        badgeColor: const Color(0xFF3B82F6),
-                        subtitle: 'euphony.fedaration.in',
-                        onTap: () async {
-                          final uri = Uri.parse('https://euphony.fedaration.in/');
-                          if (await canLaunchUrl(uri)) {
-                            await launchUrl(uri, mode: LaunchMode.externalApplication);
-                          }
-                        },
-                      ),
+              ),
+              const SizedBox(height: 18),
+              const Divider(height: 1),
+              const SizedBox(height: 16),
+              // 2x2 Bento Tiles for By Fedaration & Ecosystem
+              // Row 1: Euphony Web, GitHub Core
+              // Row 2: Fedaration (3rd box as requested), Play Protect (4th box)
+              Row(
+                children: [
+                  Expanded(
+                    child: _FedarationBentoTile(
+                      icon: Icons.web_rounded,
+                      title: 'Euphony Web',
+                      badge: 'WEB APP',
+                      badgeColor: const Color(0xFF3B82F6),
+                      subtitle: 'euphony.fedaration.in',
+                      onTap: () async {
+                        final uri = Uri.parse('https://euphony.fedaration.in/');
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        }
+                      },
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _FedarationBentoTile(
-                        icon: Icons.code_rounded,
-                        title: 'GitHub Core',
-                        badge: 'SOURCE',
-                        badgeColor: const Color(0xFF10B981),
-                        subtitle: 'Open-source',
-                        onTap: () async {
-                          final uri = Uri.parse('https://github.com/MohammedNihadv/Euphony');
-                          if (await canLaunchUrl(uri)) {
-                            await launchUrl(uri, mode: LaunchMode.externalApplication);
-                          }
-                        },
-                      ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _FedarationBentoTile(
+                      icon: Icons.code_rounded,
+                      title: 'GitHub Core',
+                      badge: 'SOURCE',
+                      badgeColor: const Color(0xFF10B981),
+                      subtitle: 'Open-source',
+                      onTap: () async {
+                        final uri = Uri.parse(
+                          'https://github.com/MohammedNihadv/Euphony',
+                        );
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        }
+                      },
                     ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _FedarationBentoTile(
-                        icon: Icons.language_rounded,
-                        title: 'Fedaration',
-                        badge: 'OFFICIAL',
-                        badgeColor: EuBrutal.accent,
-                        subtitle: 'fedaration.in',
-                        onTap: () async {
-                          final uri = Uri.parse('https://fedaration.in/');
-                          if (await canLaunchUrl(uri)) {
-                            await launchUrl(uri, mode: LaunchMode.externalApplication);
-                          }
-                        },
-                      ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: _FedarationBentoTile(
+                      icon: Icons.language_rounded,
+                      title: 'Fedaration',
+                      badge: 'OFFICIAL',
+                      badgeColor: EuBrutal.accent,
+                      subtitle: 'fedaration.in',
+                      onTap: () async {
+                        final uri = Uri.parse('https://fedaration.in/');
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(
+                            uri,
+                            mode: LaunchMode.externalApplication,
+                          );
+                        }
+                      },
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _FedarationBentoTile(
-                        icon: Icons.shield_rounded,
-                        title: 'Play Protect',
-                        badge: '100% SAFE',
-                        badgeColor: const Color(0xFF10B981),
-                        subtitle: 'Tap to learn more',
-                        onTap: () => _showPlayProtectSheet(context),
-                      ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _FedarationBentoTile(
+                      icon: Icons.shield_rounded,
+                      title: 'Play Protect',
+                      badge: '100% SAFE',
+                      badgeColor: const Color(0xFF10B981),
+                      subtitle: 'Tap to learn more',
+                      onTap: () => _showPlayProtectSheet(context),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
+      ),
     );
   }
 
@@ -1564,9 +1577,7 @@ class _AboutEuphonyCard extends StatelessWidget {
       isScrollControlled: true,
       builder: (context) => Container(
         decoration: BoxDecoration(
-          color: isDark
-              ? const Color(0xFF141424)
-              : Colors.white,
+          color: isDark ? const Color(0xFF141424) : Colors.white,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           border: Border.all(
             color: isDark
@@ -1605,7 +1616,9 @@ class _AboutEuphonyCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF10B981).withValues(alpha: 0.16),
+                          color: const Color(
+                            0xFF10B981,
+                          ).withValues(alpha: 0.16),
                           borderRadius: BorderRadius.circular(14),
                         ),
                         child: const Icon(
@@ -1664,7 +1677,10 @@ class _AboutEuphonyCard extends StatelessWidget {
                           onPressed: () async {
                             final uri = Uri.parse('https://fedaration.in/');
                             if (await canLaunchUrl(uri)) {
-                              await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              await launchUrl(
+                                uri,
+                                mode: LaunchMode.externalApplication,
+                              );
                             }
                           },
                           icon: const Icon(Icons.language_rounded, size: 18),
@@ -1772,7 +1788,10 @@ class _FedarationBentoTile extends StatelessWidget {
                     child: Icon(icon, size: 16, color: badgeColor),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: badgeColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
@@ -1818,4 +1837,3 @@ class _FedarationBentoTile extends StatelessWidget {
     );
   }
 }
-

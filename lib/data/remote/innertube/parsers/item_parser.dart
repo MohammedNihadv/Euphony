@@ -250,8 +250,7 @@ Result<MusicItem> parseTwoRowItem(Map<String, dynamic> renderer) {
       renderer['navigationEndpoint'] as Map<String, dynamic>? ?? {};
 
   // 1. watchEndpoint → treat as song/video.
-  final watchEndpoint =
-      navEndpoint['watchEndpoint'] as Map<String, dynamic>?;
+  final watchEndpoint = navEndpoint['watchEndpoint'] as Map<String, dynamic>?;
   if (watchEndpoint != null) {
     final videoId = watchEndpoint['videoId'] as String?;
     if (videoId == null) {
@@ -283,8 +282,7 @@ Result<MusicItem> parseTwoRowItem(Map<String, dynamic> renderer) {
   }
 
   // 2. browseEndpoint → album / playlist / artist / station.
-  final browseEndpoint =
-      navEndpoint['browseEndpoint'] as Map<String, dynamic>?;
+  final browseEndpoint = navEndpoint['browseEndpoint'] as Map<String, dynamic>?;
   if (browseEndpoint != null) {
     final browseId = browseEndpoint['browseId'] as String?;
     if (browseId == null) {
@@ -306,15 +304,11 @@ Result<MusicItem> parseTwoRowItem(Map<String, dynamic> renderer) {
 
     switch (pageType) {
       case 'MUSIC_PAGE_TYPE_ALBUM' ||
-            'MUSIC_PAGE_TYPE_SINGLE' ||
-            'MUSIC_PAGE_TYPE_EP':
+          'MUSIC_PAGE_TYPE_SINGLE' ||
+          'MUSIC_PAGE_TYPE_EP':
         return Ok(
           AlbumItem(
-            Album(
-              browseId: browseId,
-              title: title,
-              artworkUrl: artworkUrl,
-            ),
+            Album(browseId: browseId, title: title, artworkUrl: artworkUrl),
           ),
         );
 
@@ -365,9 +359,9 @@ Result<MusicItem> parseTwoRowItem(Map<String, dynamic> renderer) {
   return Err(
     ParseFailure(
       'twoRowItem.navigationEndpoint',
-      message: 'neither watchEndpoint nor browseEndpoint found; '
+      message:
+          'neither watchEndpoint nor browseEndpoint found; '
           'keys: ${_runTexts(null)}',
     ),
   );
 }
-

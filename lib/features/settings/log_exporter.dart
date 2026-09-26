@@ -30,7 +30,9 @@ class LogExporter {
       buffer.writeln('====================================================');
       buffer.writeln('App Version: $appVersion');
       buffer.writeln('Package:     $packageName');
-      buffer.writeln('Platform:    ${Platform.operatingSystem} ${Platform.operatingSystemVersion}');
+      buffer.writeln(
+        'Platform:    ${Platform.operatingSystem} ${Platform.operatingSystemVersion}',
+      );
       buffer.writeln('Export Time: ${DateTime.now().toIso8601String()}');
       buffer.writeln('====================================================\n');
 
@@ -38,7 +40,9 @@ class LogExporter {
       if (logs.isEmpty) {
         buffer.writeln('No log entries recorded in this session.');
       } else {
-        buffer.writeln('--- RECENT LOG MESSAGES (${logs.length} entries) ---\n');
+        buffer.writeln(
+          '--- RECENT LOG MESSAGES (${logs.length} entries) ---\n',
+        );
         for (final entry in logs) {
           buffer.writeln(entry);
           buffer.writeln('---');

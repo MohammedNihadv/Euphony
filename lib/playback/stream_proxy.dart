@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-
 import '../core/log.dart';
 
 final _log = logFor('stream_proxy');
@@ -137,6 +136,7 @@ class StreamProxy {
       final v = response.headers.value(name);
       if (v != null) request.response.headers.set(name, v);
     }
+
     copy(HttpHeaders.contentTypeHeader);
     copy(HttpHeaders.contentRangeHeader);
     copy(HttpHeaders.contentLengthHeader);

@@ -96,9 +96,14 @@ Future<void> _warmUp(ProviderContainer container) async {
     // and resolves auth headers) by touching the provider.
     final client = container.read(innertubeClientProvider);
     // A lightweight ping — browse the home endpoint with a minimal payload.
-    unawaited(client.browse('FEmusic_home').then((_) {
-      debugPrint('flutterEngine warmed up');
-    }).catchError((_) {}));
+    unawaited(
+      client
+          .browse('FEmusic_home')
+          .then((_) {
+            debugPrint('flutterEngine warmed up');
+          })
+          .catchError((_) {}),
+    );
   } catch (_) {}
 
   // Boot the local StreamProxy HTTP server so its port is bound before
