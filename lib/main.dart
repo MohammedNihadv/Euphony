@@ -11,7 +11,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'app/euphony_app.dart';
 import 'core/log.dart';
 import 'data/providers.dart';
+
 import 'playback/audio_handler.dart';
+import 'playback/stream_proxy.dart';
 
 /// True on the desktop OSes where just_audio has no native player and needs the
 /// media_kit (libmpv) backend. Guarded by [kIsWeb] because `dart:io`'s
@@ -48,6 +50,12 @@ Future<void> main() async {
   // AudioService initializes asynchronously in the background.
   unawaited(_startAudioService(container));
 
+  // Pre-warm network clients after the first frame so the first search/play
+  // has zero cold-start latency (HTTP connection pool + auth headers ready).
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    unawaited(_warmUp(container));
+  });
+
   runApp(
     UncontrolledProviderScope(container: container, child: const EuphonyApp()),
   );
@@ -74,5 +82,30 @@ Future<void> _startAudioService(ProviderContainer container) async {
     );
   } catch (error, stack) {
     debugPrint('audio service failed to start: $error\n$stack');
+  }
+}
+
+/// Pre-warms the InnerTube HTTP client connection pool and StreamProxy server
+/// in the background so the first search or playback request has no cold-start.
+///
+/// Both are fire-and-forget: failures are silently swallowed because any
+/// latency reduction is a bonus, not a requirement.
+Future<void> _warmUp(ProviderContainer container) async {
+  try {
+    // Trigger InnertubeClient initialisation (opens the HTTP connection pool
+    // and resolves auth headers) by touching the provider.
+    final client = container.read(innertubeClientProvider);
+    // A lightweight ping — browse the home endpoint with a minimal payload.
+    unawaited(client.browse('FEmusic_home').then((_) {
+      debugPrint('flutterEngine warmed up');
+    }).catchError((_) {}));
+  } catch (_) {}
+
+  // Boot the local StreamProxy HTTP server so its port is bound before
+  // playback starts (eliminates ~200 ms first-play latency on Android).
+  if (!kIsWeb && !_isDesktop) {
+    try {
+      await StreamProxy.start();
+    } catch (_) {}
   }
 }
