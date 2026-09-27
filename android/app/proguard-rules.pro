@@ -25,16 +25,10 @@
 -dontwarn org.sqlite.**
 
 # --- Flutter ------------------------------------------------------------
-# Deferred components and plugin registration resolve by name.
--keep class io.flutter.embedding.** { *; }
+# Plugin registration resolves by name.
 -keep class io.flutter.plugin.** { *; }
-
-# Flutter's embedding carries a Play Core code path for deferred components
-# (FlutterPlayStoreSplitApplication, PlayStoreDeferredComponentManager). Euphony
-# ships a single APK and never pulls in the Play Core library, so those
-# references dangle and R8 fails the build outright rather than warning. Euphony
-# does not call them, so silencing is correct — adding the dependency would ship
-# a library purely to satisfy dead code.
+-keep class io.flutter.util.** { *; }
+-dontwarn io.flutter.embedding.engine.deferredcomponents.**
 -dontwarn com.google.android.play.core.**
 
 # Keep annotations that drive the above, and line numbers so release crash
