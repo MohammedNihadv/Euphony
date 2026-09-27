@@ -8,7 +8,7 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
 
 <br>
 
-<img src="docs/screenshots/banner.png" alt="Euphony Open Source Neo-Brutalist Music Player for Android, iOS, Windows, macOS and Linux" width="100%"/>
+<img src="fastlane/metadata/android/en-US/images/featureGraphic.png" alt="Euphony Open Source Neo-Brutalist Music Player for Android, iOS, Windows, macOS and Linux" width="100%"/>
 
 <br>
 
