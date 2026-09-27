@@ -16,33 +16,31 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
 
 <p align="center">
   <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/app-arm64-v8a-release.apk">
-    <img src="https://img.shields.io/badge/Android-Download%20APK-3DDC84?style=for-the-badge&labelColor=000000&logo=android&logoColor=3DDC84" alt="Download for Android"/>
+    <img src="https://img.shields.io/badge/Android-DOWNLOAD_APK-3DDC84?style=for-the-badge&logo=android&logoColor=3DDC84&labelColor=18181b" alt="Download for Android"/>
   </a>
-  &nbsp;
-  <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-windows-setup.exe">
-    <img src="https://img.shields.io/badge/Windows-Installer-0078D6?style=for-the-badge&labelColor=000000&logo=windows&logoColor=white" alt="Download for Windows"/>
-  </a>
-  &nbsp;
-  <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-macos.dmg">
-    <img src="https://img.shields.io/badge/macOS-.dmg-000000?style=for-the-badge&labelColor=000000&logo=apple&logoColor=white" alt="Download for macOS"/>
-  </a>
-  &nbsp;
-  <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-linux-x86_64.AppImage">
-    <img src="https://img.shields.io/badge/Linux-AppImage-FCC624?style=for-the-badge&labelColor=000000&logo=linux&logoColor=white" alt="Download for Linux"/>
-  </a>
-  &nbsp;
   <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-ios.ipa">
-    <img src="https://img.shields.io/badge/iOS-Sideload%20IPA-000000?style=for-the-badge&labelColor=000000&logo=apple&logoColor=white" alt="Download iOS IPA"/>
+    <img src="https://img.shields.io/badge/iOS-SIDELOAD_IPA-FFFFFF?style=for-the-badge&logo=apple&logoColor=FFFFFF&labelColor=18181b" alt="Download iOS IPA"/>
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-windows-setup.exe">
+    <img src="https://img.shields.io/badge/Windows-INSTALLER-0078D6?style=for-the-badge&logo=windows&logoColor=0078D6&labelColor=18181b" alt="Download for Windows"/>
+  </a>
+  <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-macos.dmg">
+    <img src="https://img.shields.io/badge/macOS-.DMG-EA005E?style=for-the-badge&logo=apple&logoColor=EA005E&labelColor=18181b" alt="Download for macOS"/>
+  </a>
+  <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-linux-x86_64.AppImage">
+    <img src="https://img.shields.io/badge/Linux-APPIMAGE-F5C518?style=for-the-badge&logo=linux&logoColor=F5C518&labelColor=18181b" alt="Download for Linux"/>
   </a>
 </p>
 
 <p align="center">
   <a href="https://euphonymusic.vercel.app/">
-    <img src="https://img.shields.io/badge/WEB-VISIT%20OFFICIAL%20SITE-6A4BE8?style=for-the-badge&labelColor=000000&logo=vercel&logoColor=white" alt="Official Website"/>
+    <img src="https://img.shields.io/badge/WEB-VISIT_OFFICIAL_SITE-6A4BE8?style=for-the-badge&logo=vercel&logoColor=6A4BE8&labelColor=18181b" alt="Official Website"/>
   </a>
-  &nbsp;
   <a href="https://github.com/MohammedNihadv/Euphony/releases/latest">
-    <img src="https://img.shields.io/badge/All%20Downloads-LATEST%20RELEASE-F5C518?style=for-the-badge&labelColor=000000&logo=github&logoColor=white" alt="All downloads"/>
+    <img src="https://img.shields.io/badge/All_Downloads-LATEST_RELEASE-2ea44f?style=for-the-badge&logo=github&logoColor=2ea44f&labelColor=18181b" alt="All downloads"/>
   </a>
 </p>
 
