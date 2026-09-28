@@ -71,6 +71,7 @@ jobs:
           cache: true
 
       - run: flutter pub get
+      - run: sed -i -e 's/-Wl,/-Wl,--build-id=none,/' $PUB_CACHE/hosted/pub.dev/jni-*/src/CMakeLists.txt
 
       - name: Generate code for Release build
         run: |
