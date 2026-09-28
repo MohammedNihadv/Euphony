@@ -1,1 +1,1 @@
-Euphony — a beautiful, ad-free music streaming client for Android.
+Euphony — a beautiful, ad-free music streaming client for Android
