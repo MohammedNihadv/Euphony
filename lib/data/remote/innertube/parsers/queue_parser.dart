@@ -8,7 +8,7 @@ import 'song_runs.dart';
 /// YouTube returns the up-next queue as a `playlistPanelRenderer` whose entries
 /// are `playlistPanelVideoRenderer`s — a different shape from the list rows
 /// elsewhere, with the artist line under `longBylineText` and the duration
-/// under `lengthText`. Ported from Harmony's parseWatchPlaylist.
+/// under `lengthText`.
 List<Song> parseWatchQueue(Map<String, dynamic> response) {
   final contents = navOrNull<List<dynamic>>(
     response,

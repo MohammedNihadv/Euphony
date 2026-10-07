@@ -45,10 +45,7 @@ final _viewsPattern = RegExp(r'^\d([^ ])* [^ ]*$');
 final _durationPattern = RegExp(r'^(\d+:)*\d+:\d+$');
 final _yearPattern = RegExp(r'^\d{4}$');
 
-/// Parses a metadata run list.
-///
-/// Ported from Harmony's `parseSongRuns`, with the same classification rules —
-/// they are the product of watching what YouTube actually sends:
+/// Parses a metadata run list based on YouTube classification rules:
 ///
 /// * odd indices are the ` • ` separators, skipped;
 /// * a run with a `navigationEndpoint` is an artist, unless its browse id

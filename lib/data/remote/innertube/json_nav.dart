@@ -4,14 +4,9 @@ import '../../../core/result.dart';
 /// Walks a decoded InnerTube response along a path of map keys and list
 /// indices.
 ///
-/// Harmony's `nav()` wrapped the whole walk in `try { … } catch (e) { return
-/// null; }` (developer guide 16.1). When YouTube renamed a renderer, every
-/// caller got `null`, the UI drew an empty list, and nothing anywhere said
-/// which key had moved — the bug took 23 duplicate issue reports to pin down.
-///
 /// Here a miss is a [ParseFailure] naming the exact prefix that resolved and
 /// the step that did not, so a broken parser identifies itself in one log line
-/// and in one failing golden test.
+/// and in failing tests.
 extension type const JsonPath(List<Object> steps) {
   /// `['contents', 'tabs', 0]` rendered as `contents.tabs[0]`.
   String render([int? upTo]) {
@@ -98,8 +93,7 @@ Result<T> nav<T extends Object>(Object? root, JsonPath path) {
 /// [nav] for values that are legitimately optional.
 ///
 /// Use this only where the field's absence is normal (a song with no album, a
-/// playlist with no description). Reaching for it to silence a failing path is
-/// how Harmony's parsers went quiet.
+/// playlist with no description).
 T? navOrNull<T extends Object>(Object? root, JsonPath path) =>
     nav<T>(root, path).valueOrNull;
 

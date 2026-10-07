@@ -3,8 +3,7 @@ import 'failure.dart';
 /// A value that is either a success ([Ok]) or a [Failure] ([Err]).
 ///
 /// Used across the data layer so parsers and network calls surface *why* they
-/// failed instead of silently returning null — the failure mode that made
-/// Harmony show blank screens when YouTube changed its response shape.
+/// failed instead of silently returning null.
 sealed class Result<T> {
   const Result();
 

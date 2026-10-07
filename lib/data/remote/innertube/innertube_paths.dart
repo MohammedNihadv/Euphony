@@ -2,10 +2,8 @@ import 'json_nav.dart';
 
 /// Response paths into InnerTube's renderer tree.
 ///
-/// Ported from Harmony's `nav_parser.dart`. These constants are the single most
-/// valuable thing in that project — each one is a piece of reverse engineering
-/// that took someone an afternoon with a JSON dump. They are centralised here
-/// so that when YouTube moves a renderer, exactly one file changes.
+/// These constants define navigation paths into YouTube's response tree,
+/// centralised here so that when YouTube moves a renderer, exactly one file changes.
 abstract final class P {
   // Renderer type keys, used as map keys rather than path steps.
   static const String twoRowItem = 'musicTwoRowItemRenderer';

@@ -1,12 +1,12 @@
-Euphony is a premium, beautifully designed music streaming application built for speed and aesthetics. 
+Euphony is an open-source music streaming client for Android, built with Flutter.
+
+Music is streamed from YouTube Music via the youtube_explode_dart library (InnerTube API). Lyrics are provided by LRCLIB (lrclib.net) and displayed as plain text.
 
 Features:
-* Ad-free music streaming
+* Ad-free music streaming from YouTube Music
 * Background playback & media controls
 * Offline downloads and local library support
-* Synchronized lyrics
+* Lyrics display (powered by LRCLIB)
 * Customizable UI themes and dynamic island
 * Curated regional home feeds
 * Battery and bandwidth efficient
-
-Built using Flutter.

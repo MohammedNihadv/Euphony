@@ -1,8 +1,6 @@
 /// Rewrites a YouTube thumbnail URL to a requested size.
 ///
-/// Ported near-verbatim from Harmony's `models/thumbnail.dart` — it is a small
-/// piece of genuinely good reverse engineering. YouTube serves art from three
-/// different hosts with three different sizing conventions:
+/// YouTube serves art from three different hosts with three different sizing conventions:
 ///
 /// * `…=w60-h60-l90-rj`   — Google user content, width/height in the query
 /// * `…=s60`              — the same host, square shorthand

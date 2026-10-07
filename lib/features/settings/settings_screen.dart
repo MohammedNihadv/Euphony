@@ -1205,6 +1205,7 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
 
   @override
   Widget build(BuildContext context) {
+    if (!kEnableUpdates) return const SizedBox.shrink();
     final themeData = Theme.of(context);
     final updateAsync = ref.watch(updateCheckFutureProvider);
     final info = _info ?? updateAsync.asData?.value;

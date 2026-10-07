@@ -131,8 +131,8 @@ class Failure implements Exception {
 
 /// A [Failure] carrying the JSON path that could not be resolved.
 ///
-/// Harmony's `nav()` swallowed every miss; Euphony records the exact path so a
-/// broken parser names itself in the logs and in golden tests.
+/// Records the exact path so a broken parser names itself in the logs
+/// and in golden tests.
 class ParseFailure extends Failure {
   const ParseFailure(this.path, {String? message, Object? cause})
     : super(FailureKind.parse, message: message, cause: cause);

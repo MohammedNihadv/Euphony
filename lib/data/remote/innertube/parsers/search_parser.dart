@@ -23,10 +23,8 @@ final _log = logFor('search_parser');
 /// * **filtered** — a single `musicShelfRenderer` with everything, plus a
 ///   continuation token.
 ///
-/// Harmony handled both in one 200-line method that returned a
-/// `Map<String, dynamic>` keyed by display strings, which is why its search
-/// broke silently when a shelf title changed. Here the shape is typed and every
-/// unparseable row is logged with the path that failed.
+/// The returned shape is typed and every unparseable row is logged with the
+/// path that failed.
 Result<SearchResults> parseSearch(
   Map<String, dynamic> response, {
   required String query,

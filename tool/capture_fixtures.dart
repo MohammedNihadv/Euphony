@@ -6,8 +6,7 @@
 //   dart run tool/capture_fixtures.dart search_songs   # just one
 //
 // Then re-run `flutter test`. A test that starts failing after a capture means
-// YouTube changed the response and a parser needs updating — which is exactly
-// the signal Harmony never had. Review the diff before committing it.
+// YouTube changed the response and a parser needs updating. Review the diff before committing it.
 //
 // Fixtures are large and mostly noise, so each one is trimmed to the subtree
 // its parser actually reads.

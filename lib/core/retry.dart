@@ -9,9 +9,7 @@ final _log = logFor('retry');
 
 /// Retries [body] with exponential back-off, capped at [maxAttempts].
 ///
-/// Harmony retried failed InnerTube calls by calling itself again with no cap
-/// and no delay, which turned one bad response into a recursion storm. This is
-/// the bounded replacement: attempts are counted, delays grow, and a failure
+/// Attempts are counted, delays grow with exponential back-off, and a failure
 /// the [Failure.isRetryable] check rejects (a parse error, a 404) fails fast.
 Future<Result<T>> retry<T>(
   Future<Result<T>> Function() body, {

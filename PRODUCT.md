@@ -6,17 +6,16 @@ product
 
 ## Users
 
-Android listeners who want a lightweight YouTube Music client, especially users
-coming from Harmony Music who value familiar streaming, library, and playback
-workflows without fragile behavior. Secondary users are maintainers who need the
-InnerTube integration to be understandable, typed, and testable when YouTube
-changes response shapes.
+Android listeners who want a lightweight YouTube Music client with familiar
+streaming, library, and playback workflows. Secondary users are maintainers who
+need the InnerTube integration to be understandable, typed, and testable when
+YouTube changes response shapes.
 
 ## Product Purpose
 
-Euphony rebuilds Harmony Music from scratch with a layered Flutter architecture.
-Its purpose is to reach Harmony feature parity while making the brittle parts,
-especially InnerTube parsing and playback, explicit, tested, and replaceable.
+Euphony is a music client built with a layered Flutter architecture.
+Its purpose is to provide robust music streaming and playback where
+InnerTube parsing and playback are explicit, tested, and maintainable.
 Success means a user can search, play, collect, cache, and manage music on
 Android with predictable behavior and installable APKs at each phase.
 
@@ -37,7 +36,7 @@ Avoid the soft-gradient, glassmorphic streaming look, and generic card-heavy
 dashboards. Equally, avoid brutalism as an excuse for noise: a new colour per
 surface, arbitrary border widths, or shadows that vary from screen to screen.
 
-Avoid Harmony's fragile patterns: untyped dynamic maps, silent parser failures,
+Avoid fragile patterns: untyped dynamic maps, silent parser failures,
 recursive retries, misspelled load-bearing setting keys, and storage models that
 make ordering or migration brittle.
 

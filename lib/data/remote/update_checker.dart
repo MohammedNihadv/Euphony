@@ -26,6 +26,11 @@ class UpdateInfo {
   final bool hasUpdate;
 }
 
+/// Whether update checking is enabled at build time.
+/// Defaults to false for F-Droid and reproducible release builds.
+const bool kEnableUpdates =
+    bool.fromEnvironment('ENABLE_UPDATES', defaultValue: false);
+
 class UpdateChecker {
   UpdateChecker({Dio? dio}) : _dio = dio ?? Dio();
 
@@ -45,6 +50,7 @@ class UpdateChecker {
   }
 
   Future<UpdateInfo?> checkUpdate() async {
+    if (!kEnableUpdates) return null;
     try {
       final currentVersion = await getCurrentVersion();
 
@@ -121,6 +127,7 @@ final updateCheckerProvider = Provider<UpdateChecker>((ref) {
 });
 
 final updateCheckFutureProvider = FutureProvider<UpdateInfo?>((ref) async {
+  if (!kEnableUpdates) return null;
   final checker = ref.watch(updateCheckerProvider);
   return checker.checkUpdate();
 });

@@ -1,52 +1,27 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../data/remote/app_updater.dart';
 import '../data/remote/update_checker.dart';
 import '../design/tokens/brutal.dart';
 
-/// Surfaces a "new version available" popup shortly after launch.
+/// Shows a "new version available" dialog when the user manually triggers an
+/// update check from Settings.
 ///
-/// Before this, the only place an update was ever checked was the Settings
-/// screen — so a user on an old build had no way to learn a fix had shipped
-/// unless they went looking. This runs the check once per app session and, if
-/// a newer release exists, shows a dismissible dialog that downloads and
-/// installs the update in-app.
+/// Automatic on-launch checking is intentionally removed: on F-Droid the
+/// client manages updates; on GitHub users can tap "Check for updates" in
+/// Settings at any time.
 class UpdatePrompt {
   UpdatePrompt._();
 
-  static bool _checkedThisSession = false;
-
-  /// Checks for an update and shows the popup at most once per app session.
-  static Future<void> maybeShowOnLaunch(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
-    if (_checkedThisSession) return;
-    _checkedThisSession = true;
-
-    // Let the app settle (splash + first real frame) before interrupting.
-    await Future<void>.delayed(const Duration(seconds: 3));
-
-    UpdateInfo? info;
-    try {
-      info = await ref.read(updateCheckerProvider).checkUpdate();
-    } catch (_) {
-      return; // Offline or API error: stay quiet.
-    }
-
-    if (info == null || !info.hasUpdate) return;
-    if (!context.mounted) return;
-    await showUpdateDialog(context, info);
-  }
+  // no-op: kept so call-sites that still reference this compile cleanly.
+  // Will be removed after callers are cleaned up.
 }
 
-/// The shared "update available" dialog. Downloads the matching APK inside the
-/// app and hands it to the system installer — no trip to the browser or the
-/// website — with a progress bar and a "download in browser" fallback.
+/// The shared "update available" dialog.  The primary action opens the release
+/// page (or ABI-matched APK) in the system browser; no APK is downloaded
+/// inside the app.
 Future<void> showUpdateDialog(BuildContext context, UpdateInfo info) {
   return showDialog<void>(
     context: context,
@@ -65,50 +40,25 @@ class _UpdateDialog extends StatefulWidget {
 }
 
 class _UpdateDialogState extends State<_UpdateDialog> {
-  final _updater = AppUpdater();
-  bool _downloading = false;
-  double _progress = 0;
+  bool _opening = false;
   String? _error;
 
-  Future<void> _startUpdate() async {
+  Future<void> _openRelease() async {
     setState(() {
-      _downloading = true;
+      _opening = true;
       _error = null;
-      _progress = 0;
     });
 
-    final url = await AppUpdater.pickApkUrl(widget.info);
-    if (url == null) {
-      setState(() {
-        _downloading = false;
-        _error = 'No download is available for this release.';
-      });
-      return;
-    }
-
-    final error = await _updater.downloadAndInstall(
-      url,
-      onProgress: (p) {
-        if (mounted) setState(() => _progress = p);
-      },
-    );
+    final error = await AppUpdater.openReleasePage(widget.info);
 
     if (!mounted) return;
     if (error != null) {
       setState(() {
-        _downloading = false;
+        _opening = false;
         _error = error;
       });
     } else {
-      // The system installer is now in front; close our dialog.
       Navigator.of(context).pop();
-    }
-  }
-
-  Future<void> _openInBrowser() async {
-    final uri = Uri.tryParse(widget.info.releaseUrl);
-    if (uri != null && await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
 
@@ -226,7 +176,7 @@ class _UpdateDialogState extends State<_UpdateDialog> {
               ),
               const SizedBox(height: 16),
 
-              // Concise Description
+              // Description
               Text(
                 'Upgrading preserves all your liked songs, playlists, downloads, and app settings.',
                 style: TextStyle(
@@ -270,69 +220,6 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                 ),
               ],
 
-              // Downloading Progress Bar & Percentage
-              if (_downloading) ...[
-                const SizedBox(height: 18),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: EuBrutal.accent,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _progress > 0
-                              ? 'Downloading update…'
-                              : 'Connecting to server…',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: isDark ? Colors.white70 : Colors.black87,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: EuBrutal.accent.withValues(alpha: 0.18),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '${(_progress * 100).round()}%',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w900,
-                          color: EuBrutal.accent,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(
-                    value: _progress > 0 ? _progress : null,
-                    minHeight: 8,
-                    backgroundColor: isDark
-                        ? Colors.white.withValues(alpha: 0.08)
-                        : Colors.black.withValues(alpha: 0.06),
-                    valueColor: const AlwaysStoppedAnimation(EuBrutal.accent),
-                  ),
-                ),
-              ],
-
               if (_error != null) ...[
                 const SizedBox(height: 14),
                 Container(
@@ -360,75 +247,52 @@ class _UpdateDialogState extends State<_UpdateDialog> {
               // Action buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: _downloading
-                    ? [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 6),
-                          child: Text(
-                            'Please wait for installer…',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: isDark ? Colors.white54 : Colors.black45,
+                children: [
+                  TextButton(
+                    onPressed: _opening ? null : () => Navigator.pop(context),
+                    style: TextButton.styleFrom(
+                      foregroundColor: isDark ? Colors.white60 : Colors.black54,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                    ),
+                    child: const Text(
+                      'Later',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: EuBrutal.accent,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 11,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    onPressed: _opening ? null : _openRelease,
+                    icon: _opening
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
                             ),
-                          ),
-                        ),
-                      ]
-                    : [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: TextButton.styleFrom(
-                            foregroundColor: isDark
-                                ? Colors.white60
-                                : Colors.black54,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 10,
-                            ),
-                          ),
-                          child: const Text(
-                            'Later',
-                            style: TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                        ),
-                        if (_error != null) ...[
-                          const SizedBox(width: 6),
-                          TextButton(
-                            onPressed: _openInBrowser,
-                            style: TextButton.styleFrom(
-                              foregroundColor: EuBrutal.accent,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 10,
-                              ),
-                            ),
-                            child: const Text(
-                              'In browser',
-                              style: TextStyle(fontWeight: FontWeight.w700),
-                            ),
-                          ),
-                        ],
-                        const SizedBox(width: 8),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: EuBrutal.accent,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: 11,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
-                          onPressed: _startUpdate,
-                          child: Text(
-                            _error != null ? 'Retry' : 'Update now',
-                            style: const TextStyle(fontWeight: FontWeight.w900),
-                          ),
-                        ),
-                      ],
+                          )
+                        : const Icon(Icons.open_in_browser_rounded, size: 16),
+                    label: Text(
+                      _error != null ? 'Retry' : 'View release',
+                      style: const TextStyle(fontWeight: FontWeight.w900),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

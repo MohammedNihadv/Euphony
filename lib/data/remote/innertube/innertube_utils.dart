@@ -1,6 +1,6 @@
 import 'json_nav.dart';
 
-/// Small helpers ported from Harmony's `services/utils.dart`.
+/// Helper utilities for parsing InnerTube responses.
 
 /// Parses `"3:45"` or `"1:02:03"` into a [Duration].
 ///
@@ -117,9 +117,7 @@ enum SearchFilter {
 
 /// Builds the opaque `params` value that scopes a search to one result type.
 ///
-/// These are protobuf fragments YouTube's own client sends; they are copied
-/// from Harmony, which copied them from ytmusicapi. Nobody derives them — they
-/// are observed.
+/// These are protobuf fragments observed in YouTube Music client requests.
 String? searchParams({SearchFilter? filter, bool ignoreSpelling = false}) {
   if (filter == null) {
     return ignoreSpelling ? 'EhGKAQ4IARABGAEgASgAOAFAAUICCAE%3D' : null;

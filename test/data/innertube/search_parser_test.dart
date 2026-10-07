@@ -7,9 +7,7 @@ import '../../fixtures.dart';
 
 /// Golden tests against real captured responses.
 ///
-/// This is the gate the whole data layer stands on. Harmony had no equivalent,
-/// which is why its search could break in the wild and stay broken across 23
-/// duplicate issue reports before anyone traced it to a moved key.
+/// Tests against real captured InnerTube responses to ensure parsing integrity.
 void main() {
   group('unfiltered search', () {
     late final results = parseSearch(
@@ -28,7 +26,7 @@ void main() {
 
     test('returns a titled section holding a mix of item types', () {
       // YouTube's current unfiltered response is a flat list of self-typed
-      // rows, not the titled per-type shelves Harmony assumed. This test
+      // rows, not titled per-type shelves. This test
       // pins that shape: if YouTube goes back to shelves, it fails here
       // rather than in a user's empty search screen.
       expect(results.sections, isNotEmpty);

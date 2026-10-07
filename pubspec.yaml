@@ -1,7 +1,7 @@
 name: euphony
 description: "Euphony — a music streaming client for Android."
 publish_to: 'none'
-version: 1.0.0+10000
+version: 1.0.1+10001
 
 environment:
   sdk: ^3.12.1
@@ -24,7 +24,7 @@ dependencies:
   media_kit_libs_linux: ^1.2.1
   media_kit_libs_windows_audio: ^1.0.9
   meta: ^1.18.0
-  open_filex: ^4.7.0
+
   package_info_plus: ^8.3.0
   path_provider: ^2.1.6
   permission_handler: ^11.3.1
@@ -53,3 +53,11 @@ flutter:
   assets:
     - assets/
     - assets/images/
+
+hooks:
+  user_defines:
+    sqlite3:
+      source: source
+      path: third_party/sqlite/sqlite3.c
+      additional_flags:
+        - -Wl,--build-id=none

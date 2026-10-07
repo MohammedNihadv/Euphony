@@ -31,13 +31,11 @@ class ArtworkScheme {
 
 /// Derives [ColorScheme]s from album artwork, with an LRU cache keyed by song.
 ///
-/// This replaces Harmony's `PaletteGenerator` + hand-built `MaterialColor`
-/// swatch + luminance clamping (developer guide 11.7) with the framework's own
-/// `ColorScheme.fromImageProvider`, which runs the same quantiser Material 3
-/// specifies and returns a scheme that is contrast-correct by construction.
+/// Uses the framework's `ColorScheme.fromImageProvider`, which runs the quantiser
+/// specified by Material 3 and returns a scheme that is contrast-correct by construction.
 ///
-/// Extraction is expensive, so artwork is downsampled to [_sampleSize] first —
-/// the same trick Harmony used with `cacheHeight: 200`.
+/// Extraction is expensive, so artwork is downsampled to [_sampleSize] first
+/// with `cacheHeight: 200`.
 class ArtworkPalette {
   ArtworkPalette({this.maxEntries = 60});
 

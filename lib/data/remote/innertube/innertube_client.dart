@@ -47,13 +47,9 @@ class MemoryVisitorIdStore implements VisitorIdStore {
 
 /// The YouTube Music private API client.
 ///
-/// Ported from Harmony's `music_service.dart`, keeping its request context,
-/// header set and visitor-id scrape — all of which are load-bearing; YouTube
-/// answers differently or not at all without them. What changed:
-///
+/// Features request context, header set and visitor-id handling:
 /// * every call returns [Result], never `dynamic`;
-/// * non-200 responses go through [retry] with capped exponential back-off
-///   instead of Harmony's `_sendRequest` calling itself with no bound;
+/// * non-200 responses go through [retry] with capped exponential back-off;
 /// * the client only fetches and decodes — parsing lives in `parsers/`.
 class InnertubeClient {
   InnertubeClient({
@@ -102,10 +98,9 @@ class InnertubeClient {
 
   /// The `context` block YouTube requires on every InnerTube call.
   ///
-  /// `clientVersion` is a date stamp: YouTube rejects versions that are too old,
-  /// so Harmony generated today's. `signatureTimestamp` is yesterday's day
-  /// count since epoch, which the player endpoint needs to hand back stream
-  /// URLs.
+  /// `clientVersion` is a date stamp: YouTube rejects versions that are too old.
+  /// `signatureTimestamp` is yesterday's day count since epoch, which the player
+  /// endpoint needs to hand back stream URLs.
   Map<String, dynamic> get context {
     final now = _now();
     final version =
@@ -260,7 +255,7 @@ class InnertubeClient {
   /// This is what powers autoplay: YouTube returns a `playlistPanelRenderer`
   /// of related tracks that keep the music going after the current queue ends.
   /// The `RDAMVM<videoId>` playlist id and `wAEB` params are the radio-mode
-  /// values YouTube's own client sends (ported from Harmony's getWatchPlaylist).
+  /// values YouTube's own client sends.
   Future<Result<Map<String, dynamic>>> next(String videoId) =>
       post(Innertube.next, {
         ...context,

@@ -11,7 +11,7 @@ import '../features/player/dynamic_island.dart';
 import '../features/player/mini_player.dart';
 import '../features/settings/settings_provider.dart';
 import '../playback/player_provider.dart';
-import 'update_prompt.dart';
+
 
 class _Dest {
   const _Dest(this.icon, this.selectedIcon, this.label);
@@ -47,9 +47,6 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
   void initState() {
     super.initState();
     HardwareKeyboard.instance.addHandler(_handleGlobalKey);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) UpdatePrompt.maybeShowOnLaunch(context, ref);
-    });
   }
 
   @override
@@ -65,39 +62,13 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
     final controller = ref.read(playerControllerProvider);
     final player = ref.read(audioPlayerProvider);
 
-    final isDedicatedMediaKey =
-        key == LogicalKeyboardKey.mediaPlayPause ||
-        key == LogicalKeyboardKey.mediaPlay ||
-        key == LogicalKeyboardKey.mediaPause ||
-        key == LogicalKeyboardKey.mediaTrackNext ||
-        key == LogicalKeyboardKey.mediaTrackPrevious ||
-        key == LogicalKeyboardKey.mediaFastForward ||
-        key == LogicalKeyboardKey.mediaRewind ||
-        key == LogicalKeyboardKey.mediaStop ||
-        key == LogicalKeyboardKey.mediaSkip;
-
-    // Do not intercept text editing keys if user is typing in a text field
-    if (!isDedicatedMediaKey) {
-      final primaryFocus = FocusManager.instance.primaryFocus;
-      if (primaryFocus != null && primaryFocus.context != null) {
-        final widget = primaryFocus.context!.widget;
-        if (widget is EditableText) {
-          return false;
-        }
-      }
-    }
-
-    final isShiftOrCtrl =
-        HardwareKeyboard.instance.isShiftPressed ||
-        HardwareKeyboard.instance.isControlPressed ||
-        HardwareKeyboard.instance.isMetaPressed;
-
+    // Only handle dedicated hardware / bluetooth / headset media keys.
+    // Alphanumeric keys (j, k, l, space, etc.) are excluded so they never
+    // interfere with text input or search fields.
     // 1. Play / Pause / Resume
     if (key == LogicalKeyboardKey.mediaPlayPause ||
         key == LogicalKeyboardKey.mediaPlay ||
-        key == LogicalKeyboardKey.mediaPause ||
-        key == LogicalKeyboardKey.space ||
-        key == LogicalKeyboardKey.keyK) {
+        key == LogicalKeyboardKey.mediaPause) {
       controller.togglePlayPause();
       return true;
     }
@@ -110,27 +81,19 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
 
     // 3. Skip to Next track
     if (key == LogicalKeyboardKey.mediaTrackNext ||
-        key == LogicalKeyboardKey.mediaSkip ||
-        (isShiftOrCtrl &&
-            (key == LogicalKeyboardKey.arrowRight ||
-                key == LogicalKeyboardKey.keyN))) {
+        key == LogicalKeyboardKey.mediaSkip) {
       controller.skipNext();
       return true;
     }
 
     // 4. Skip to Previous track
-    if (key == LogicalKeyboardKey.mediaTrackPrevious ||
-        (isShiftOrCtrl &&
-            (key == LogicalKeyboardKey.arrowLeft ||
-                key == LogicalKeyboardKey.keyP))) {
+    if (key == LogicalKeyboardKey.mediaTrackPrevious) {
       controller.skipPrevious();
       return true;
     }
 
     // 5. Fast-Forward (10s)
-    if (key == LogicalKeyboardKey.mediaFastForward ||
-        key == LogicalKeyboardKey.arrowRight ||
-        key == LogicalKeyboardKey.keyL) {
+    if (key == LogicalKeyboardKey.mediaFastForward) {
       final pos = player.position;
       final total = player.duration ?? Duration.zero;
       final target = pos + const Duration(seconds: 10);
@@ -139,9 +102,7 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
     }
 
     // 6. Rewind / Backward (10s)
-    if (key == LogicalKeyboardKey.mediaRewind ||
-        key == LogicalKeyboardKey.arrowLeft ||
-        key == LogicalKeyboardKey.keyJ) {
+    if (key == LogicalKeyboardKey.mediaRewind) {
       final pos = player.position;
       final target = pos - const Duration(seconds: 10);
       controller.seek(target < Duration.zero ? Duration.zero : target);

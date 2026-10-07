@@ -2,8 +2,7 @@ import 'dart:convert';
 
 /// InnerTube endpoint constants.
 ///
-/// Ported from Harmony's `constant.dart`. The API key is the public web-client
-/// key YouTube Music ships in its own page source, not a secret credential.
+/// The API key is the public web-client key YouTube Music ships in its own page source.
 abstract final class Innertube {
   static const String domain = 'https://music.youtube.com/';
 

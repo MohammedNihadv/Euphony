@@ -16,10 +16,8 @@ enum ColourSource {
 
 /// Typed access to user settings.
 ///
-/// Harmony stored settings as untyped Hive map entries, which let two
-/// misspelled keys (`restrorePlaybackSession`, `stopPlyabackOnSwipeAway`)
-/// become load-bearing (developer guide 7.3). Here every setting is a getter
-/// and a setter on this class; the string keys are private and appear once.
+/// Every setting is a getter and a setter on this class; the string keys are
+/// private and appear once.
 class SettingsRepository {
   SettingsRepository(this._prefs);
 
