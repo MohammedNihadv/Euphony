@@ -1725,7 +1725,16 @@ class $$SearchHistoryTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SearchHistoryTable, SearchHistoryEntry>(table),
+                  BaseReferences<
+                    _$EuphonyDatabase,
+                    $SearchHistoryTable,
+                    SearchHistoryEntry
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -1994,7 +2003,16 @@ class $$LikedSongsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$LikedSongsTable, LikedSongEntry>(table),
+                  BaseReferences<
+                    _$EuphonyDatabase,
+                    $LikedSongsTable,
+                    LikedSongEntry
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2219,7 +2237,16 @@ class $$SavedAlbumsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SavedAlbumsTable, SavedAlbumEntry>(table),
+                  BaseReferences<
+                    _$EuphonyDatabase,
+                    $SavedAlbumsTable,
+                    SavedAlbumEntry
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
@@ -2448,7 +2475,16 @@ class $$SavedPlaylistsTableTableManager
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable<$SavedPlaylistsTable, SavedPlaylistEntry>(table),
+                  BaseReferences<
+                    _$EuphonyDatabase,
+                    $SavedPlaylistsTable,
+                    SavedPlaylistEntry
+                  >(db, table, e),
+                ),
+              )
               .toList(),
           prefetchHooksCallback: null,
         ),
