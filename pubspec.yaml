@@ -59,5 +59,3 @@ hooks:
     sqlite3:
       source: source
       path: third_party/sqlite/sqlite3.c
-      additional_flags:
-        - -Wl,--build-id=none
