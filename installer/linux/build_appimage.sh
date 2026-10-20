@@ -20,13 +20,18 @@ for lib in /usr/lib/x86_64-linux-gnu/libmpv.so*; do
   fi
 done
 
-# Copy direct dynamic dependencies of libmpv (excluding core glibc)
+# Copy direct dynamic dependencies of libmpv, strictly excluding system/base libraries
+# (AppImageKit excludelist: libc, gcc, X11, wayland, systemd, selinux, glib, dbus, etc.)
 if ls "$APPDIR/usr/bin/lib/libmpv.so"* >/dev/null 2>&1; then
   MPV_LIB=$(ls "$APPDIR/usr/bin/lib/libmpv.so"* | head -1)
   ldd "$MPV_LIB" | grep "=> /" | awk '{print $3}' | while read -r dep; do
-    case "$dep" in
-      *libc.so*|*libm.so*|*libpthread.so*|*libdl.so*|*ld-linux*|*librt.so*|*libresolv.so*) ;;
-      *) cp -d "$dep" "$APPDIR/usr/bin/lib/" 2>/dev/null || true ;;
+    base=$(basename "$dep")
+    case "$base" in
+      libc.*|libm.*|libpthread.*|libdl.*|ld-linux*|librt.*|libresolv.*|libselinux*|libsystemd*|libudev*|libglib*|libgobject*|libgio*|libgmodule*|libdbus*|libcap*|libz.*|liblzma*|libzstd*|libcrypt*|libgcc*|libstdc++*|libX*|libxcb*|libwayland*|libdrm*|libgbm*|libasound*|libpulse*|libGL*|libEGL*)
+        ;;
+      *)
+        cp -d "$dep" "$APPDIR/usr/bin/lib/" 2>/dev/null || true
+        ;;
     esac
   done
 fi
