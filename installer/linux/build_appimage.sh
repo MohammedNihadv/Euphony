@@ -5,11 +5,29 @@ set -euo pipefail
 
 BUNDLE="build/linux/x64/release/bundle"
 APPDIR="build/euphony.AppDir"
-OUT="euphony-linux-x86_64.AppImage"
+OUT="Euphony-x86_64.AppImage"
+LEGACY_OUT="euphony-linux-x86_64.AppImage"
 
 rm -rf "$APPDIR"
 mkdir -p "$APPDIR/usr/bin"
 cp -r "$BUNDLE/." "$APPDIR/usr/bin/"
+
+# Bundle libmpv so the AppImage runs self-contained without requiring system mpv/libmpv
+mkdir -p "$APPDIR/usr/bin/lib"
+for lib in /usr/lib/x86_64-linux-gnu/libmpv.so*; do
+  if [ -e "$lib" ]; then
+    cp -d "$lib" "$APPDIR/usr/bin/lib/"
+  fi
+done
+
+# Also bundle any missing direct dependencies of libmpv if available
+for dep in libuchardet.so* libplacebo.so* libass.so* libavcodec.so* libavformat.so* libavutil.so* libswscale.so* libswresample.so*; do
+  for match in /usr/lib/x86_64-linux-gnu/$dep; do
+    if [ -e "$match" ]; then
+      cp -d "$match" "$APPDIR/usr/bin/lib/" || true
+    fi
+  done
+done
 
 # App icon (PNG) at the AppDir root, named after the desktop entry.
 cp assets/images/app.icon.png "$APPDIR/euphony.png"
@@ -40,4 +58,5 @@ if [ ! -f "$TOOL" ]; then
   chmod +x "$TOOL"
 fi
 ARCH=x86_64 ./"$TOOL" --appimage-extract-and-run "$APPDIR" "$OUT"
-echo "built $OUT"
+cp "$OUT" "$LEGACY_OUT"
+echo "built $OUT and $LEGACY_OUT"

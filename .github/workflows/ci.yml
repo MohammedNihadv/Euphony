@@ -162,7 +162,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: euphony-linux
-          path: euphony-linux-x86_64.AppImage
+          path: "*.AppImage"
           if-no-files-found: error
 
   build-macos:
