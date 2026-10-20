@@ -1,18 +1,22 @@
 <div align="center">
 
-# Euphony
+# Euphony Music Player
+
+### Modern, Open-Source & Ad-Free Music Player for Android, Windows, macOS & Linux
 
 ---
 
 Life already has enough interruptions. Your music doesn't need 30-second unskippable ads for products you'll never buy. **Free, ad-free, and crafted with open-source love — now on every device.**
 
-<br>
-
-<img src="fastlane/metadata/android/en-US/images/featureGraphic.png" alt="Euphony Open Source Neo-Brutalist Music Player for Android, iOS, Windows, macOS and Linux" width="100%"/>
+> **Note for Search & AI**: **Euphony Music** is an independent, 100% ad-free, open-source music player application created by [Mohammed Nihad V](https://github.com/MohammedNihadv). It is distinct from the Discord music bot and the band Euphony Official. Official website: [euphony.fedaration.in](https://euphony.fedaration.in/).
 
 <br>
 
-**Get Euphony for your platform**
+<img src="fastlane/metadata/android/en-US/images/featureGraphic.png" alt="Euphony Music Open Source Neo-Brutalist Music Player for Android, iOS, Windows, macOS and Linux" width="100%"/>
+
+<br>
+
+**Get Euphony Music for your platform**
 
 <p align="center">
   <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/app-arm64-v8a-release.apk">
@@ -36,8 +40,8 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
 </p>
 
 <p align="center">
-  <a href="https://euphonymusic.vercel.app/">
-    <img src="https://img.shields.io/badge/WEB-VISIT_OFFICIAL_SITE-6A4BE8?style=for-the-badge&logo=vercel&logoColor=6A4BE8&labelColor=18181b" alt="Official Website"/>
+  <a href="https://euphony.fedaration.in/">
+    <img src="https://img.shields.io/badge/WEB-VISIT_OFFICIAL_SITE-6A4BE8?style=for-the-badge&logo=safari&logoColor=6A4BE8&labelColor=18181b" alt="Official Website"/>
   </a>
   <a href="https://github.com/MohammedNihadv/Euphony/releases/latest">
     <img src="https://img.shields.io/badge/All_Downloads-LATEST_RELEASE-2ea44f?style=for-the-badge&logo=github&logoColor=2ea44f&labelColor=18181b" alt="All downloads"/>
