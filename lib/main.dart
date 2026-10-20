@@ -28,7 +28,11 @@ Future<void> main() async {
   // On Windows and Linux just_audio ships no native player, so route it through
   // media_kit (libmpv). Android, iOS and macOS keep their built-in backend.
   if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
-    JustAudioMediaKit.ensureInitialized(windows: true, linux: true);
+    try {
+      JustAudioMediaKit.ensureInitialized(windows: true, linux: true);
+    } catch (e, st) {
+      debugPrint('JustAudioMediaKit initialization error: $e\n$st');
+    }
   }
 
   SharedPreferences? prefs;

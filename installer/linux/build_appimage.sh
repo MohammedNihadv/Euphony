@@ -16,9 +16,21 @@ cp -r "$BUNDLE/." "$APPDIR/usr/bin/"
 mkdir -p "$APPDIR/usr/bin/lib"
 for lib in /usr/lib/x86_64-linux-gnu/libmpv.so*; do
   if [ -e "$lib" ]; then
-    cp -d "$lib" "$APPDIR/usr/bin/lib/"
+    cp -a "$lib" "$APPDIR/usr/bin/lib/"
   fi
 done
+
+# Ensure libmpv.so.2 and libmpv.so symlinks exist for media_kit
+(
+  cd "$APPDIR/usr/bin/lib"
+  if [ -f libmpv.so.1 ] && [ ! -e libmpv.so.2 ]; then
+    ln -sf libmpv.so.1 libmpv.so.2
+  fi
+  if [ -f libmpv.so.1 ] && [ ! -e libmpv.so ]; then
+    ln -sf libmpv.so.1 libmpv.so
+  fi
+)
+ln -sf bin/lib "$APPDIR/usr/lib"
 
 # Copy direct dynamic dependencies of libmpv, strictly excluding system/base libraries
 # (AppImageKit excludelist: libc, gcc, X11, wayland, systemd, selinux, glib, dbus, etc.)
@@ -30,7 +42,7 @@ if ls "$APPDIR/usr/bin/lib/libmpv.so"* >/dev/null 2>&1; then
       libc.*|libm.*|libpthread.*|libdl.*|ld-linux*|librt.*|libresolv.*|libselinux*|libsystemd*|libudev*|libglib*|libgobject*|libgio*|libgmodule*|libdbus*|libcap*|libz.*|liblzma*|libzstd*|libcrypt*|libgcc*|libstdc++*|libX*|libxcb*|libwayland*|libdrm*|libgbm*|libasound*|libpulse*|libGL*|libEGL*)
         ;;
       *)
-        cp -d "$dep" "$APPDIR/usr/bin/lib/" 2>/dev/null || true
+        cp -a "$dep" "$APPDIR/usr/bin/lib/" 2>/dev/null || true
         ;;
     esac
   done
@@ -53,7 +65,16 @@ DESKTOP
 cat > "$APPDIR/AppRun" <<'APPRUN'
 #!/bin/sh
 HERE="$(dirname "$(readlink -f "$0")")"
-export LD_LIBRARY_PATH="$HERE/usr/bin/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$HERE/usr/bin/lib:$HERE/usr/lib:$LD_LIBRARY_PATH"
+
+# Point media_kit directly to bundled libmpv
+for f in "$HERE/usr/bin/lib"/libmpv.so*; do
+  if [ -e "$f" ]; then
+    export LIBMPV_LIBRARY_PATH="$f"
+    break
+  fi
+done
+
 exec "$HERE/usr/bin/euphony" "$@"
 APPRUN
 chmod +x "$APPDIR/AppRun"
