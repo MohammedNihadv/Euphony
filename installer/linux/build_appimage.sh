@@ -20,14 +20,16 @@ for lib in /usr/lib/x86_64-linux-gnu/libmpv.so*; do
   fi
 done
 
-# Also bundle any missing direct dependencies of libmpv if available
-for dep in libuchardet.so* libplacebo.so* libass.so* libavcodec.so* libavformat.so* libavutil.so* libswscale.so* libswresample.so*; do
-  for match in /usr/lib/x86_64-linux-gnu/$dep; do
-    if [ -e "$match" ]; then
-      cp -d "$match" "$APPDIR/usr/bin/lib/" || true
-    fi
+# Copy direct dynamic dependencies of libmpv (excluding core glibc)
+if ls "$APPDIR/usr/bin/lib/libmpv.so"* >/dev/null 2>&1; then
+  MPV_LIB=$(ls "$APPDIR/usr/bin/lib/libmpv.so"* | head -1)
+  ldd "$MPV_LIB" | grep "=> /" | awk '{print $3}' | while read -r dep; do
+    case "$dep" in
+      *libc.so*|*libm.so*|*libpthread.so*|*libdl.so*|*ld-linux*|*librt.so*|*libresolv.so*) ;;
+      *) cp -d "$dep" "$APPDIR/usr/bin/lib/" 2>/dev/null || true ;;
+    esac
   done
-done
+fi
 
 # App icon (PNG) at the AppDir root, named after the desktop entry.
 cp assets/images/app.icon.png "$APPDIR/euphony.png"
