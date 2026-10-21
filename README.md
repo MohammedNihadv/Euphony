@@ -34,8 +34,11 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
   <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-macos.dmg">
     <img src="https://img.shields.io/badge/macOS-.DMG-EA005E?style=for-the-badge&logo=apple&logoColor=EA005E&labelColor=18181b" alt="Download for macOS"/>
   </a>
+  <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-linux-amd64.deb">
+    <img src="https://img.shields.io/badge/Linux-.DEB-E95420?style=for-the-badge&logo=ubuntu&logoColor=E95420&labelColor=18181b" alt="Download for Linux DEB"/>
+  </a>
   <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-linux-x86_64.AppImage">
-    <img src="https://img.shields.io/badge/Linux-APPIMAGE-F5C518?style=for-the-badge&logo=linux&logoColor=F5C518&labelColor=18181b" alt="Download for Linux"/>
+    <img src="https://img.shields.io/badge/Linux-APPIMAGE-F5C518?style=for-the-badge&logo=linux&logoColor=F5C518&labelColor=18181b" alt="Download for Linux AppImage"/>
   </a>
 </p>
 
@@ -79,7 +82,8 @@ Grab the [**latest release**](https://github.com/MohammedNihadv/Euphony/releases
 | :--- | :--- | :--- |
 | 🪟 **Windows** 10/11 | `euphony-windows-setup.exe` | Run the installer — no admin needed, adds Start-menu & desktop shortcuts. |
 | 🍏 **macOS** | `euphony-macos.dmg` | Open the disk image and drag **Euphony** to Applications. |
-| 🐧 **Linux** | `euphony-linux-x86_64.AppImage` | `chmod +x` the file and run it (requires `libmpv`). |
+| 🐧 **Linux** (Debian / Ubuntu / Mint) | `euphony-linux-amd64.deb` | Double-click or `sudo apt install ./euphony-linux-amd64.deb` (auto-installs all audio dependencies). |
+| 🐧 **Linux** (Universal) | `euphony-linux-x86_64.AppImage` | `chmod +x` the file and run it. |
 | 📱 **Android** | `app-arm64-v8a-release.apk` | ⭐ Best for 99% of phones (2017+). Tap to install. |
 | 📱 Android (legacy) | `app-armeabi-v7a-release.apk` | Older 32-bit devices. |
 | 📱 Android (x86) | `app-x86_64-release.apk` | Emulators & Intel Chromebooks. |
