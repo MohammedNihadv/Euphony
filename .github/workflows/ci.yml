@@ -155,14 +155,17 @@ jobs:
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
       - run: flutter build linux --release
-      - name: Build AppImage
+      - name: Build AppImage and Debian package
         run: |
-          sudo apt-get install -y wget file
+          sudo apt-get install -y wget file dpkg-dev
           bash installer/linux/build_appimage.sh
+          bash installer/linux/build_deb.sh
       - uses: actions/upload-artifact@v7
         with:
           name: euphony-linux
-          path: "*.AppImage"
+          path: |
+            *.AppImage
+            dist/*.deb
           if-no-files-found: error
 
   build-macos:
@@ -245,6 +248,7 @@ jobs:
             dist/euphony-release-apks/*.apk
             dist/euphony-windows/*.exe
             dist/euphony-linux/*.AppImage
+            dist/euphony-linux/*.deb
             dist/euphony-macos/*.dmg
             dist/euphony-ios/*.ipa
           # Human-written, community-friendly notes live in RELEASE_NOTES.md so

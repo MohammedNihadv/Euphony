@@ -32,7 +32,9 @@ Issues-photo/
 .pub-cache/
 .pub/
 /build/
+/dist/
 /coverage/
+*.deb
 
 # Symbolication related
 app.*.symbols

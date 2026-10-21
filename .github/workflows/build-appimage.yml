@@ -1,10 +1,10 @@
-name: Build and update Linux AppImage
+name: Build and update Linux packages (AppImage & Deb)
 
 on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: 'Release tag to attach the AppImage to'
+        description: 'Release tag to attach the packages to'
         required: true
         default: 'v1.0.1'
 
@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 jobs:
-  appimage:
+  linux-packages:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v7
@@ -20,7 +20,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential clang cmake ninja-build \
-            pkg-config libgtk-3-dev liblzma-dev libmpv-dev mpv wget file
+            pkg-config libgtk-3-dev liblzma-dev libmpv-dev mpv wget file dpkg-dev
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.44.1'
@@ -31,8 +31,10 @@ jobs:
       - run: flutter build linux --release
       - name: Build AppImage
         run: bash installer/linux/build_appimage.sh
+      - name: Build Debian Package
+        run: bash installer/linux/build_deb.sh
       - name: Upload to Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ inputs.release_tag }} Euphony-x86_64.AppImage euphony-linux-x86_64.AppImage --clobber --repo ${{ github.repository }}
+          gh release upload ${{ inputs.release_tag }} Euphony-x86_64.AppImage euphony-linux-x86_64.AppImage dist/*.deb --clobber --repo ${{ github.repository }}
