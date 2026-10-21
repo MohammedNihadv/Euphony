@@ -1,0 +1,89 @@
+name: "🐛 Bug Report"
+description: "File a bug or unexpected behavior in Euphony"
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue and help improve Euphony!
+        Please search existing issues first to avoid duplicates.
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Operating System / Platform
+      description: What platform did you experience the bug on?
+      options:
+        - "Android (.apk / F-Droid)"
+        - "Linux (Debian / Ubuntu / Mint .deb)"
+        - "Linux (Universal AppImage)"
+        - "Windows (.exe / WinGet)"
+        - "macOS (.dmg)"
+        - "iOS (.ipa sideload)"
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Euphony Version
+      description: The version of Euphony you are using (e.g. v1.0.1).
+      placeholder: "v1.0.1"
+    validations:
+      required: true
+
+  - type: input
+    id: device_os
+    attributes:
+      label: Device / OS Details
+      description: Specific device and OS version (e.g., Pixel 8 running Android 14, or Linux Mint 22 Cinnamon).
+      placeholder: "e.g., Samsung S23 - Android 14 / Ubuntu 24.04"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of what the problem is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: How can we reproduce this issue?
+      value: |
+        1. Go to '...'
+        2. Tap on '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs_screenshots
+    attributes:
+      label: Screenshots or Logs
+      description: Drag and drop screenshots or paste log output (if available).
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: "I have checked for existing issues before opening this report."
+          required: true
+        - label: "I am using the latest released version of Euphony."
+          required: false

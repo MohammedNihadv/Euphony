@@ -1,0 +1,52 @@
+name: "✨ Feature Request"
+description: "Suggest an idea or improvement for Euphony"
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea for Euphony? We would love to hear it!
+        Please describe your feature idea and why it would be beneficial.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Feature Summary
+      description: A short, one-sentence summary of your request.
+      placeholder: "e.g., Add sleep timer fade-out duration option"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Is your feature request related to a problem?
+      description: A clear and concise description of what the problem or limitation is.
+      placeholder: "I'm always frustrated when..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution / Design
+      description: Describe what you want to happen and how you envision this feature working in Euphony.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Any alternative solutions or features you've considered.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: "I have checked that this feature hasn't already been suggested."
+          required: true

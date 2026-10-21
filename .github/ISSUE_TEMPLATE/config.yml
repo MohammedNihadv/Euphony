@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: "Official Website"
+    url: "https://euphony.fedaration.in"
+    about: "Learn more about Euphony features and releases."
+  - name: "Ask a Question"
+    url: "https://github.com/MohammedNihadv/Euphony/discussions"
+    about: "Have general questions or need help? Join discussions."
