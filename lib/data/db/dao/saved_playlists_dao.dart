@@ -20,6 +20,11 @@ class SavedPlaylistsDao extends DatabaseAccessor<EuphonyDatabase>
     return rows.isNotEmpty;
   }
 
+  Stream<bool> watchIsSaved(String id) {
+    final query = savedPlaylists.select()..where((t) => t.id.equals(id));
+    return query.watch().map((rows) => rows.isNotEmpty);
+  }
+
   Future<void> save({
     required String id,
     required String title,

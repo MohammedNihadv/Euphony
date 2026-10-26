@@ -23,6 +23,10 @@ class AlbumScreen extends ConsumerStatefulWidget {
 class _AlbumScreenState extends ConsumerState<AlbumScreen> {
   String? _title;
   String? _artworkUrl;
+  String? _artists;
+  int? _year;
+  String? _author;
+  int? _trackCount;
   List<Song> _tracks = const [];
   bool _loading = true;
   String? _error;
@@ -68,6 +72,8 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
         (details) => setState(() {
           _title = details.playlist.title;
           _artworkUrl = details.playlist.artworkUrl;
+          _author = details.playlist.author;
+          _trackCount = details.playlist.trackCount;
           _tracks = details.tracks;
           _loading = false;
         }),
@@ -83,6 +89,8 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
         (details) => setState(() {
           _title = details.album.title;
           _artworkUrl = details.album.artworkUrl;
+          _artists = details.album.artistNames;
+          _year = details.album.year;
           _tracks = details.tracks;
           _loading = false;
         }),
@@ -131,6 +139,79 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
             fontWeight: FontWeight.w900,
           ),
         ),
+        actions: _loading || isLocal
+            ? null
+            : [
+                StreamBuilder<bool>(
+                  stream: widget.isPlaylist
+                      ? ref
+                            .watch(savedPlaylistsDaoProvider)
+                            .watchIsSaved(widget.id)
+                      : ref
+                            .watch(savedAlbumsDaoProvider)
+                            .watchIsSaved(widget.id),
+                  builder: (context, snapshot) {
+                    final isSaved = snapshot.data ?? false;
+                    return IconButton(
+                      icon: Icon(
+                        isSaved
+                            ? Icons.favorite_rounded
+                            : Icons.favorite_border_rounded,
+                        color: isSaved ? EuBrutal.alert : null,
+                      ),
+                      tooltip: isSaved
+                          ? 'Remove from library'
+                          : 'Save to library',
+                      onPressed: () {
+                        final messenger = ScaffoldMessenger.of(context);
+                        if (isSaved) {
+                          if (widget.isPlaylist) {
+                            ref
+                                .read(savedPlaylistsDaoProvider)
+                                .remove(widget.id);
+                          } else {
+                            ref.read(savedAlbumsDaoProvider).remove(widget.id);
+                          }
+                          messenger.showSnackBar(
+                            const SnackBar(
+                              content: Text('Removed from library'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        } else {
+                          if (widget.isPlaylist) {
+                            ref
+                                .read(savedPlaylistsDaoProvider)
+                                .save(
+                                  id: widget.id,
+                                  title: _title ?? 'Playlist',
+                                  author: _author,
+                                  artworkUrl: _artworkUrl,
+                                  trackCount: _trackCount ?? _tracks.length,
+                                );
+                          } else {
+                            ref
+                                .read(savedAlbumsDaoProvider)
+                                .save(
+                                  browseId: widget.id,
+                                  title: _title ?? 'Album',
+                                  artists: _artists ?? '',
+                                  artworkUrl: _artworkUrl,
+                                  year: _year,
+                                );
+                          }
+                          messenger.showSnackBar(
+                            const SnackBar(
+                              content: Text('Saved to library'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      },
+                    );
+                  },
+                ),
+              ],
       ),
       body: SafeArea(
         child: _loading
