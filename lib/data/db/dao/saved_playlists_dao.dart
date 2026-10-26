@@ -20,6 +20,11 @@ class SavedPlaylistsDao extends DatabaseAccessor<EuphonyDatabase>
     return rows.isNotEmpty;
   }
 
+  Stream<bool> watchIsSaved(String id) {
+    final query = savedPlaylists.select()..where((t) => t.id.equals(id));
+    return query.watch().map((rows) => rows.isNotEmpty);
+  }
+
   Future<void> save({
     required String id,
     required String title,
@@ -37,6 +42,11 @@ class SavedPlaylistsDao extends DatabaseAccessor<EuphonyDatabase>
         savedAt: Value(DateTime.now()),
       ),
     );
+  }
+
+  Future<void> rename(String id, String title) async {
+    await (savedPlaylists.update()..where((t) => t.id.equals(id)))
+        .write(SavedPlaylistsCompanion(title: Value(title)));
   }
 
   Future<void> remove(String id) async {
