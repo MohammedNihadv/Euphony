@@ -46,6 +46,11 @@ class SavedAlbumsDao extends DatabaseAccessor<EuphonyDatabase>
     );
   }
 
+  Future<void> rename(String browseId, String title) async {
+    await (savedAlbums.update()..where((t) => t.browseId.equals(browseId)))
+        .write(SavedAlbumsCompanion(title: Value(title)));
+  }
+
   Future<void> remove(String browseId) async {
     await (savedAlbums.delete()..where((t) => t.browseId.equals(browseId)))
         .go();

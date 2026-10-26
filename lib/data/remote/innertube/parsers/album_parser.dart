@@ -28,8 +28,28 @@ Result<AlbumDetails> parseAlbumDetails(
   Map<String, dynamic> root,
   String browseId,
 ) {
-  final title = navOrNull<String>(root, P.titleText) ?? 'Album';
-  final artworkUrl = navOrNull<String>(root, P.thumbnails + [0, 'url']);
+  // Album pages put the header either at the root of a two-column layout or
+  // under `header`; try both before falling back.
+  final title =
+      navOrNull<String>(root, P.titleText) ??
+      navOrNull<String>(
+        root,
+        P.twoColumnTab +
+            P.sectionListItem.steps +
+            [P.responsiveHeader] +
+            P.titleText.steps,
+      ) ??
+      'Album';
+  final artworkUrl =
+      navOrNull<String>(root, P.thumbnails + [0, 'url']) ??
+      navOrNull<String>(
+        root,
+        P.twoColumnTab +
+            P.sectionListItem.steps +
+            [P.responsiveHeader] +
+            P.thumbnailNested.steps +
+            [0, 'url'],
+      );
 
   final secondary = navOrNull<List<dynamic>>(root, P.twoColumnSecondary);
   final contentsList =
@@ -75,6 +95,13 @@ Result<PlaylistDetails> parsePlaylistDetails(
       navOrNull<String>(root, P.titleText) ??
       navOrNull<String>(
         root,
+        P.twoColumnTab +
+            P.sectionListItem.steps +
+            [P.responsiveHeader] +
+            P.titleText.steps,
+      ) ??
+      navOrNull<String>(
+        root,
         const JsonPath([
           'header',
           'musicDetailHeaderRenderer',
@@ -111,6 +138,14 @@ Result<PlaylistDetails> parsePlaylistDetails(
       'Playlist';
   final artworkUrl =
       navOrNull<String>(root, P.thumbnails + [0, 'url']) ??
+      navOrNull<String>(
+        root,
+        P.twoColumnTab +
+            P.sectionListItem.steps +
+            [P.responsiveHeader] +
+            P.thumbnailNested.steps +
+            [0, 'url'],
+      ) ??
       navOrNull<String>(
         root,
         const JsonPath([

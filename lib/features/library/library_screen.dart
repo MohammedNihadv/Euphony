@@ -317,6 +317,169 @@ class _LikedSongsTab extends ConsumerWidget {
   }
 }
 
+Future<void> _showRenameDialog(
+  BuildContext context, {
+  required String currentTitle,
+  required Future<void> Function(String newTitle) onRename,
+}) {
+  final controller = TextEditingController(text: currentTitle);
+  final theme = Theme.of(context);
+  final isDark = theme.brightness == Brightness.dark;
+
+  return showDialog<void>(
+    context: context,
+    barrierColor: Colors.black.withValues(alpha: 0.70),
+    builder: (context) => Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Container(
+        padding: const EdgeInsets.all(22),
+        decoration: BoxDecoration(
+          color: isDark
+              ? const Color(0xF5141424)
+              : Colors.white.withValues(alpha: 0.95),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.16)
+                : Colors.black.withValues(alpha: 0.10),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.40),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: EuBrutal.accent.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: EuBrutal.accent.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.edit_rounded,
+                    color: EuBrutal.accent,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'RENAME',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                      letterSpacing: 0.8,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: controller,
+              autofocus: true,
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: isDark
+                    ? Colors.white.withValues(alpha: 0.05)
+                    : Colors.black.withValues(alpha: 0.04),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(
+                    color: isDark ? Colors.white12 : Colors.black12,
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: BorderSide(
+                    color: isDark ? Colors.white12 : Colors.black12,
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(
+                    color: EuBrutal.accent,
+                    width: 1.6,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 22),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    foregroundColor: isDark ? Colors.white70 : Colors.black54,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: EuBrutal.accent,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  onPressed: () async {
+                    final name = controller.text.trim();
+                    if (name.isNotEmpty) {
+                      await onRename(name);
+                      if (context.mounted) Navigator.pop(context);
+                    }
+                  },
+                  child: const Text(
+                    'Rename',
+                    style: TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 class _SavedPlaylistsTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -466,6 +629,12 @@ class _SavedPlaylistsTab extends ConsumerWidget {
                     artworkUrl: entry.artworkUrl,
                     leadingIcon: Icons.playlist_play,
                     onTap: () => context.push('/playlist/${entry.id}'),
+                    onLongPress: () => _showRenameDialog(
+                      context,
+                      currentTitle: entry.title,
+                      onRename: (newTitle) =>
+                          dao.rename(entry.id, newTitle),
+                    ),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete_outline, size: 20),
                       onPressed: () => dao.remove(entry.id),
@@ -679,6 +848,11 @@ class _SavedAlbumsTab extends ConsumerWidget {
         artworkUrl: entry.artworkUrl,
         leadingIcon: Icons.album,
         onTap: () => context.push('/album/${entry.browseId}'),
+        onLongPress: () => _showRenameDialog(
+          context,
+          currentTitle: entry.title,
+          onRename: (newTitle) => dao.rename(entry.browseId, newTitle),
+        ),
         trailing: IconButton(
           icon: const Icon(Icons.delete_outline, size: 20),
           onPressed: () => dao.remove(entry.browseId),
@@ -766,6 +940,7 @@ class _LibraryTile extends StatelessWidget {
     this.artworkUrl,
     this.leadingIcon,
     required this.onTap,
+    this.onLongPress,
     this.trailing,
   });
 
@@ -774,6 +949,7 @@ class _LibraryTile extends StatelessWidget {
   final String? artworkUrl;
   final IconData? leadingIcon;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
   final Widget? trailing;
 
   @override
@@ -806,6 +982,7 @@ class _LibraryTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         child: ListTile(
           onTap: onTap,
+          onLongPress: onLongPress,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),

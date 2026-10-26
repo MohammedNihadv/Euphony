@@ -79,4 +79,42 @@ void main() {
     expect(saved.first.title, 'Second');
     expect(saved.first.trackCount, 2);
   });
+
+  test('album rename updates title and is visible via watchAll', () async {
+    await albumsDao.save(
+      browseId: 'MPREb_test',
+      title: 'Old Title',
+      artists: 'Artist',
+    );
+
+    await albumsDao.rename('MPREb_test', 'New Title');
+
+    final saved = await albumsDao.watchAll().first;
+    expect(saved, hasLength(1));
+    expect(saved.first.title, 'New Title');
+    expect(saved.first.artists, 'Artist');
+    expect(await albumsDao.watchIsSaved('MPREb_test').first, isTrue);
+  });
+
+  test('playlist rename updates title and keeps other fields', () async {
+    await playlistsDao.save(
+      id: 'PL_test',
+      title: 'Old Title',
+      author: 'Author',
+      trackCount: 5,
+    );
+
+    await playlistsDao.rename('PL_test', 'New Title');
+
+    final saved = await playlistsDao.watchAll().first;
+    expect(saved, hasLength(1));
+    expect(saved.first.title, 'New Title');
+    expect(saved.first.author, 'Author');
+    expect(saved.first.trackCount, 5);
+  });
+
+  test('renaming a missing id is a no-op', () async {
+    await albumsDao.rename('MPREb_missing', 'Ghost');
+    expect(await albumsDao.watchAll().first, isEmpty);
+  });
 }

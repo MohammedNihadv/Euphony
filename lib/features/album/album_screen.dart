@@ -139,7 +139,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
             fontWeight: FontWeight.w900,
           ),
         ),
-        actions: _loading || isLocal
+        actions: _loading || isLocal || _title == null
             ? null
             : [
                 StreamBuilder<bool>(
