@@ -481,6 +481,9 @@ class PlayerController {
   /// Guards against firing autoplay twice for the same queue-end.
   bool _loadingAutoplay = false;
 
+  /// Guards against duplicate track-completion events advancing the queue twice.
+  bool _advancing = false;
+
   StreamSubscription<PlayerState>? _stateSub;
   bool _disposed = false;
 
@@ -523,10 +526,14 @@ class PlayerController {
     // source that index is always 0, so playing track 5 immediately reset the
     // queue position to 0. The queue is the single source of truth now, and
     // the player is told what to play rather than asked.
+    ProcessingState? lastProcessingState;
     _stateSub = _player.playerStateStream.listen((state) {
       if (_disposed) return;
       _mediaControls.setPlaying(playing: state.playing);
-      if (state.processingState == ProcessingState.completed) {
+      final prev = lastProcessingState;
+      lastProcessingState = state.processingState;
+      if (state.processingState == ProcessingState.completed &&
+          prev != ProcessingState.completed) {
         unawaited(_onTrackCompleted());
       }
     });
@@ -543,33 +550,39 @@ class PlayerController {
   /// Nothing did this before, so playback simply stopped at the end of every
   /// track.
   Future<void> _onTrackCompleted() async {
-    final repeat = _repeatMode();
-    if (repeat == LoopMode.one) {
-      await _player.seek(Duration.zero);
-      await _player.play();
-      return;
-    }
-
-    final next = _queue.nextIndex(wrap: repeat == LoopMode.all);
-    if (next == null) {
-      // End of the queue with repeat off: try to keep the music going with
-      // related tracks (autoplay radio) before giving up.
-      if (await _extendWithAutoplay()) {
-        final resumed = _queue.nextIndex(wrap: false);
-        if (resumed != null) {
-          _queue.setIndex(resumed);
-          await _playCurrent();
-          return;
-        }
+    if (_advancing) return;
+    _advancing = true;
+    try {
+      final repeat = _repeatMode();
+      if (repeat == LoopMode.one) {
+        await _player.seek(Duration.zero);
+        await _player.play();
+        return;
       }
-      // Nothing to play next: stop cleanly rather than sitting in `completed`,
-      // which reports as "playing" to the UI.
-      await _player.stop();
-      _queue.clearQueue();
-      return;
+
+      final next = _queue.nextIndex(wrap: repeat == LoopMode.all);
+      if (next == null) {
+        // End of the queue with repeat off: try to keep the music going with
+        // related tracks (autoplay radio) before giving up.
+        if (await _extendWithAutoplay()) {
+          final resumed = _queue.nextIndex(wrap: false);
+          if (resumed != null) {
+            _queue.setIndex(resumed);
+            await _playCurrent();
+            return;
+          }
+        }
+        // Nothing to play next: stop cleanly rather than sitting in `completed`,
+        // which reports as "playing" to the UI.
+        await _player.stop();
+        _queue.clearQueue();
+        return;
+      }
+      _queue.setIndex(next);
+      await _playCurrent();
+    } finally {
+      _advancing = false;
     }
-    _queue.setIndex(next);
-    await _playCurrent();
   }
 
   /// Fetches related tracks for the last song and appends them to the queue.
