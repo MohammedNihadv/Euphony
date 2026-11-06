@@ -176,6 +176,7 @@ abstract final class P {
     'title',
     'runs',
     0,
+    'text',
   ]);
 
   // Search.
