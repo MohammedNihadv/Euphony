@@ -302,13 +302,26 @@ Result<MusicItem> parseTwoRowItem(Map<String, dynamic> renderer) {
         .where((t) => t.trim().isNotEmpty && t.trim() != '•')
         .join(' ');
 
+    final meta = parseSongRuns(subtitleRuns);
+    final year = meta.year ??
+        int.tryParse(
+          RegExp(r'\b(19\d\d|20\d\d)\b').firstMatch(subtitleText)?.group(1) ??
+              '',
+        );
+
     switch (pageType) {
       case 'MUSIC_PAGE_TYPE_ALBUM' ||
           'MUSIC_PAGE_TYPE_SINGLE' ||
           'MUSIC_PAGE_TYPE_EP':
         return Ok(
           AlbumItem(
-            Album(browseId: browseId, title: title, artworkUrl: artworkUrl),
+            Album(
+              browseId: browseId,
+              title: title,
+              artists: meta.artists,
+              artworkUrl: artworkUrl,
+              year: year,
+            ),
           ),
         );
 
@@ -320,8 +333,21 @@ Result<MusicItem> parseTwoRowItem(Map<String, dynamic> renderer) {
         );
 
       case 'MUSIC_PAGE_TYPE_PLAYLIST' || 'MUSIC_PAGE_TYPE_PODCAST' || null:
-        // null pageType falls back to playlist / station.
-        if (browseId.startsWith('MPREb') || browseId.startsWith('FEmusic')) {
+        // null pageType falls back to album if MPREb, or playlist / station.
+        if (browseId.startsWith('MPREb')) {
+          return Ok(
+            AlbumItem(
+              Album(
+                browseId: browseId,
+                title: title,
+                artists: meta.artists,
+                artworkUrl: artworkUrl,
+                year: year,
+              ),
+            ),
+          );
+        }
+        if (browseId.startsWith('FEmusic')) {
           // Treat as a radio/station.
           return Ok(
             StationItem(
@@ -343,6 +369,19 @@ Result<MusicItem> parseTwoRowItem(Map<String, dynamic> renderer) {
         );
 
       default:
+        if (browseId.startsWith('MPREb')) {
+          return Ok(
+            AlbumItem(
+              Album(
+                browseId: browseId,
+                title: title,
+                artists: meta.artists,
+                artworkUrl: artworkUrl,
+                year: year,
+              ),
+            ),
+          );
+        }
         return Ok(
           PlaylistItem(
             Playlist(

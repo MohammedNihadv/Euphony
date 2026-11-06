@@ -1,6 +1,9 @@
 import '../../../../core/result.dart';
+import '../../../../domain/album.dart';
 import '../../../../domain/artist.dart';
+import '../../../../domain/artist_ref.dart';
 import '../../../../domain/music_item.dart';
+import '../../../../domain/playlist.dart';
 import '../../../../domain/song.dart';
 import '../innertube_paths.dart';
 import '../json_nav.dart';
@@ -69,6 +72,8 @@ Result<Artist> parseArtistPage(Map<String, dynamic> root, String browseId) {
 
     final contentsList = shelf['contents'] as List<dynamic>? ?? const [];
     final songs = <Song>[];
+    final albums = <Album>[];
+    final playlists = <Playlist>[];
     final artists = <Artist>[];
 
     for (final rawItem in contentsList) {
@@ -83,6 +88,15 @@ Result<Artist> parseArtistPage(Map<String, dynamic> root, String browseId) {
         switch (value) {
           case SongItem(:final song):
             songs.add(song);
+          case AlbumItem(:final album):
+            final attributed = album.artists.isEmpty
+                ? album.copyWith(
+                    artists: [ArtistRef(name: name, browseId: browseId)],
+                  )
+                : album;
+            albums.add(attributed);
+          case PlaylistItem(:final playlist):
+            playlists.add(playlist);
           case ArtistItem(:final artist):
             artists.add(artist);
           default:
@@ -91,9 +105,32 @@ Result<Artist> parseArtistPage(Map<String, dynamic> root, String browseId) {
       }
     }
 
-    if (songs.isNotEmpty || artists.isNotEmpty) {
+    final moreBrowseId = navOrNull<String>(
+      shelf,
+      const JsonPath([
+        'header',
+        'musicCarouselShelfBasicHeaderRenderer',
+        'moreContentButton',
+        'buttonRenderer',
+        'navigationEndpoint',
+        'browseEndpoint',
+        'browseId',
+      ]),
+    );
+
+    if (songs.isNotEmpty ||
+        albums.isNotEmpty ||
+        playlists.isNotEmpty ||
+        artists.isNotEmpty) {
       artistSections.add(
-        ArtistSection(title: title, songs: songs, relatedArtists: artists),
+        ArtistSection(
+          title: title,
+          browseId: moreBrowseId,
+          songs: songs,
+          albums: albums,
+          playlists: playlists,
+          relatedArtists: artists,
+        ),
       );
     }
   }
