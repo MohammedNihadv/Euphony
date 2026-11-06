@@ -78,12 +78,20 @@ Result<Artist> parseArtistPage(Map<String, dynamic> root, String browseId) {
 
     for (final rawItem in contentsList) {
       if (rawItem is! Map<String, dynamic>) continue;
-      final renderer =
-          rawItem['musicResponsiveListItemRenderer'] as Map<String, dynamic>? ??
-          rawItem['musicTwoRowItemRenderer'] as Map<String, dynamic>? ??
-          rawItem;
+      final twoRow =
+          rawItem['musicTwoRowItemRenderer'] as Map<String, dynamic>?;
+      final listRow =
+          rawItem['musicResponsiveListItemRenderer'] as Map<String, dynamic>?;
 
-      final parsed = parseListItem(renderer);
+      final Result<MusicItem> parsed;
+      if (twoRow != null) {
+        parsed = parseTwoRowItem(twoRow);
+      } else if (listRow != null) {
+        parsed = parseListItem(listRow);
+      } else {
+        parsed = parseListItem(rawItem);
+      }
+
       if (parsed case Ok(:final value)) {
         switch (value) {
           case SongItem(:final song):
