@@ -8,6 +8,7 @@ import '../../design/tokens/tokens.dart';
 import '../../domain/song.dart';
 import '../../playback/player_provider.dart';
 import 'lyrics_service.dart';
+import 'romanizer.dart';
 
 /// Shows a Frosted Neo-Glassmorphic synchronized lyrics modal sheet for the given [song].
 void showLyricsSheet(BuildContext context, Song song) {
@@ -37,6 +38,7 @@ class _LyricsSheetState extends ConsumerState<_LyricsSheet> {
   bool _loading = true;
   String? _error;
   bool _viewPlain = false;
+  bool _showRomanization = false;
   final ScrollController _scrollController = ScrollController();
   int _lastActiveIndex = -1;
   bool _userIsScrolling = false;
@@ -295,6 +297,29 @@ class _LyricsSheetState extends ConsumerState<_LyricsSheet> {
                           ),
                         ),
 
+                        // Romanization Toggle (Romaji / Phonetic)
+                        if (lyrics != null &&
+                            (Romanizer.hasAsianScript(lyrics.plainLyrics ?? '') ||
+                                lyrics.syncedLines
+                                    .any((l) => Romanizer.hasAsianScript(l.text))))
+                          IconButton(
+                            tooltip: _showRomanization
+                                ? 'Original Script'
+                                : 'Phonetic Romanization (Romaji)',
+                            icon: Icon(
+                              _showRomanization
+                                  ? Icons.translate_rounded
+                                  : Icons.translate_outlined,
+                              color: _showRomanization
+                                  ? EuBrutal.accent
+                                  : (isDark ? Colors.white70 : Colors.black54),
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              setState(() => _showRomanization = !_showRomanization);
+                            },
+                          ),
+
                         // Toggle between Synced & Plain mode
                         if (lyrics != null && lyrics.isSynced)
                           IconButton(
@@ -521,24 +546,51 @@ class _LyricsSheetState extends ConsumerState<_LyricsSheet> {
                                                     )
                                                   : null,
                                             ),
-                                            child: Text(
-                                              line.text.isEmpty ? '♪' : line.text,
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                fontSize: isActive ? 21.0 : 16.5,
-                                                fontWeight: isActive
-                                                    ? FontWeight.w900
-                                                    : FontWeight.w600,
-                                                letterSpacing: isActive ? 0.3 : 0.1,
-                                                color: isActive
-                                                    ? (isDark
-                                                        ? Colors.white
-                                                        : EuBrutal.accent)
-                                                    : (isDark
-                                                        ? Colors.white.withValues(alpha: 0.35)
-                                                        : Colors.black.withValues(alpha: 0.35)),
-                                                height: 1.45,
-                                              ),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Text(
+                                                  line.text.isEmpty ? '♪' : line.text,
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontSize: isActive ? 21.0 : 16.5,
+                                                    fontWeight: isActive
+                                                        ? FontWeight.w900
+                                                        : FontWeight.w600,
+                                                    letterSpacing: isActive ? 0.3 : 0.1,
+                                                    color: isActive
+                                                        ? (isDark
+                                                            ? Colors.white
+                                                            : EuBrutal.accent)
+                                                        : (isDark
+                                                            ? Colors.white.withValues(alpha: 0.35)
+                                                            : Colors.black.withValues(alpha: 0.35)),
+                                                    height: 1.45,
+                                                  ),
+                                                ),
+                                                if (_showRomanization &&
+                                                    Romanizer.hasAsianScript(line.text)) ...[
+                                                  const SizedBox(height: 3),
+                                                  Text(
+                                                    Romanizer.romanize(line.text),
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontSize: isActive ? 14.0 : 11.5,
+                                                      fontWeight: isActive
+                                                          ? FontWeight.w700
+                                                          : FontWeight.w500,
+                                                      fontStyle: FontStyle.italic,
+                                                      color: isActive
+                                                          ? (isDark
+                                                              ? EuBrutal.accent
+                                                              : const Color(0xFF6D28D9))
+                                                          : (isDark
+                                                              ? Colors.white.withValues(alpha: 0.45)
+                                                              : Colors.black45),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
                                             ),
                                           ),
                                         );
@@ -551,7 +603,11 @@ class _LyricsSheetState extends ConsumerState<_LyricsSheet> {
                                       vertical: EuSpace.lg,
                                     ),
                                     child: SelectableText(
-                                      lyrics?.plainLyrics ?? '',
+                                      _showRomanization
+                                          ? Romanizer.romanize(
+                                              lyrics?.plainLyrics ?? '',
+                                            )
+                                          : (lyrics?.plainLyrics ?? ''),
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         fontSize: 18,

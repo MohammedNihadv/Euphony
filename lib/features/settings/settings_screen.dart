@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +14,7 @@ import '../../design/theme/theme_controller.dart';
 import '../../design/tokens/brutal.dart';
 import '../../design/tokens/tokens.dart';
 import '../../design/widgets/brand_badge.dart';
+import '../../playback/desktop_media_controls.dart';
 import 'backup_service.dart';
 import 'log_exporter.dart';
 import 'settings_provider.dart';
@@ -292,8 +294,173 @@ class SettingsScreen extends ConsumerWidget {
                       onChanged: (value) =>
                           settingsController.setSkipSilence(value),
                     ),
+                    const Divider(height: 1),
+                    const SizedBox(height: EuSpace.xs),
+
+                    // Audio Crossfade
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF6366F1).withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.tune_rounded,
+                          color: Color(0xFF6366F1),
+                          size: 20,
+                        ),
+                      ),
+                      title: const Text(
+                        'Track Crossfade',
+                        style: TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                      subtitle: Text(
+                        settings.crossfadeSeconds == 0
+                            ? 'Off — immediate cut between tracks'
+                            : '${settings.crossfadeSeconds}s seamless audio dissolve',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      trailing: DropdownButton<int>(
+                        value: settings.crossfadeSeconds,
+                        underline: const SizedBox.shrink(),
+                        borderRadius: BorderRadius.circular(12),
+                        items: const [
+                          DropdownMenuItem(value: 0, child: Text('Off')),
+                          DropdownMenuItem(value: 2, child: Text('2s')),
+                          DropdownMenuItem(value: 4, child: Text('4s')),
+                          DropdownMenuItem(value: 6, child: Text('6s')),
+                          DropdownMenuItem(value: 8, child: Text('8s')),
+                          DropdownMenuItem(value: 12, child: Text('12s')),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) {
+                            settingsController.setCrossfadeSeconds(val);
+                          }
+                        },
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    const SizedBox(height: EuSpace.xs),
+
+                    // DSP Presets (Nightcore / Slowed & Lo-Fi / Sped Up / Normal)
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEC4899).withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.speed_rounded,
+                          color: Color(0xFFEC4899),
+                          size: 20,
+                        ),
+                      ),
+                      title: const Text(
+                        'Audio DSP Preset',
+                        style: TextStyle(fontWeight: FontWeight.w900),
+                      ),
+                      subtitle: Text(
+                        'Speed: ${settings.audioSpeed.toStringAsFixed(2)}x · Pitch: ${settings.audioPitch.toStringAsFixed(2)}x',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      trailing: DropdownButton<String>(
+                        value: settings.audioDspPreset,
+                        underline: const SizedBox.shrink(),
+                        borderRadius: BorderRadius.circular(12),
+                        items: const [
+                          DropdownMenuItem(value: 'normal', child: Text('Normal (1.0x)')),
+                          DropdownMenuItem(value: 'nightcore', child: Text('Nightcore (1.25x)')),
+                          DropdownMenuItem(value: 'slowed', child: Text('Slowed & Lo-Fi (0.85x)')),
+                          DropdownMenuItem(value: 'spedUp', child: Text('Sped Up (1.15x)')),
+                          DropdownMenuItem(value: 'fast', child: Text('Fast (1.50x)')),
+                        ],
+                        onChanged: (val) {
+                          if (val != null) {
+                            settingsController.setAudioDspPreset(val);
+                            switch (val) {
+                              case 'normal':
+                                settingsController.setAudioSpeed(1.0);
+                                settingsController.setAudioPitch(1.0);
+                              case 'nightcore':
+                                settingsController.setAudioSpeed(1.25);
+                                settingsController.setAudioPitch(1.25);
+                              case 'slowed':
+                                settingsController.setAudioSpeed(0.85);
+                                settingsController.setAudioPitch(0.85);
+                              case 'spedUp':
+                                settingsController.setAudioSpeed(1.15);
+                                settingsController.setAudioPitch(1.0);
+                              case 'fast':
+                                settingsController.setAudioSpeed(1.50);
+                                settingsController.setAudioPitch(1.0);
+                            }
+                          }
+                        },
+                      ),
+                    ),
+                    const Divider(height: 1),
+                    const SizedBox(height: EuSpace.xs),
+
+                    // Gentle Sleep Fade-Out
+                    _SettingsSwitchRow(
+                      icon: Icons.bedtime_rounded,
+                      iconColor: Colors.indigo,
+                      title: 'Gentle Sleep Fade-Out',
+                      subtitle:
+                          'Gradually attenuates volume over the final 30 seconds before pausing',
+                      value: settings.sleepFadeOut,
+                      onChanged: (value) =>
+                          settingsController.setSleepFadeOut(value),
+                    ),
                   ],
                 ),
+
+                // ---------------- Desktop Integrations Card ----------------
+                if (!kIsWeb &&
+                    (Platform.isWindows ||
+                        Platform.isLinux ||
+                        Platform.isMacOS)) ...[
+                  const SizedBox(height: EuSpace.lg),
+                  _SettingsSectionCard(
+                    icon: Icons.desktop_windows_rounded,
+                    iconColor: const Color(0xFF5865F2),
+                    title: 'Desktop Integrations',
+                    children: [
+                      _SettingsSwitchRow(
+                        icon: Icons.album_rounded,
+                        iconColor: const Color(0xFF5865F2),
+                        title: 'Discord Rich Presence',
+                        subtitle:
+                            'Broadcast current song, artist, album art and playback progress to Discord',
+                        value: settings.discordRpcEnabled,
+                        onChanged: (value) =>
+                            settingsController.setDiscordRpcEnabled(value),
+                      ),
+                      if (Platform.isWindows) ...[
+                        const Divider(height: 1),
+                        const SizedBox(height: EuSpace.xs),
+                        _SettingsSwitchRow(
+                          icon: Icons.archive_rounded,
+                          iconColor: Colors.teal,
+                          title: 'Minimize to System Tray',
+                          subtitle:
+                              'Keep playing in background when closing or minimizing main window',
+                          value: settings.closeToTray,
+                          onChanged: (value) {
+                            settingsController.setCloseToTray(value);
+                            DesktopMediaControls().setCloseToTray(enabled: value);
+                          },
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
                 const SizedBox(height: EuSpace.lg),
 
                 // ---------------- 4. Storage, Cache & Data Card ----------------

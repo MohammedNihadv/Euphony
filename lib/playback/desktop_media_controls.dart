@@ -20,6 +20,8 @@ class DesktopMediaControls {
 
   static bool get isSupported => !kIsWeb && Platform.isWindows;
 
+  static final ValueNotifier<bool> isMiniPlayer = ValueNotifier<bool>(false);
+
   VoidCallback? _onPlay;
   VoidCallback? _onPause;
   VoidCallback? _onPlayPause;
@@ -27,6 +29,52 @@ class DesktopMediaControls {
   VoidCallback? _onPrevious;
   VoidCallback? _onStop;
   bool _isPlaying = false;
+
+  void toggleMiniPlayer() {
+    if (!isSupported) return;
+    final next = !isMiniPlayer.value;
+    isMiniPlayer.value = next;
+    try {
+      _channel.invokeMethod(next ? 'enterMiniPlayer' : 'exitMiniPlayer');
+    } catch (_) {}
+  }
+
+  void enterMiniPlayer() {
+    if (!isSupported) return;
+    isMiniPlayer.value = true;
+    try {
+      _channel.invokeMethod('enterMiniPlayer');
+    } catch (_) {}
+  }
+
+  void exitMiniPlayer() {
+    if (!isSupported) return;
+    isMiniPlayer.value = false;
+    try {
+      _channel.invokeMethod('exitMiniPlayer');
+    } catch (_) {}
+  }
+
+  void minimizeToTray() {
+    if (!isSupported) return;
+    try {
+      _channel.invokeMethod('minimizeToTray');
+    } catch (_) {}
+  }
+
+  void restoreFromTray() {
+    if (!isSupported) return;
+    try {
+      _channel.invokeMethod('restoreFromTray');
+    } catch (_) {}
+  }
+
+  void setCloseToTray({required bool enabled}) {
+    if (!isSupported) return;
+    try {
+      _channel.invokeMethod('setCloseToTray', {'enabled': enabled});
+    } catch (_) {}
+  }
 
   void init({
     required VoidCallback onPlay,

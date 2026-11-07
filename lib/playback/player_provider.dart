@@ -16,6 +16,7 @@ import '../data/remote/innertube/innertube_utils.dart';
 import '../domain/song.dart';
 import '../features/settings/settings_provider.dart';
 import 'desktop_media_controls.dart';
+import 'discord_rpc.dart';
 import 'stream_proxy.dart';
 
 final _log = logFor('playback');
@@ -364,17 +365,53 @@ class RepeatNotifier extends Notifier<LoopMode> {
   }
 }
 
+enum AudioDspPreset {
+  normal('Normal', 1.0, 1.0),
+  nightcore('Nightcore', 1.25, 1.25),
+  slowed('Slowed & Lo-Fi', 0.85, 0.85),
+  spedUp('Sped Up', 1.15, 1.00),
+  fast('Fast (1.5x)', 1.50, 1.00),
+  custom('Custom', 1.0, 1.0);
+
+  const AudioDspPreset(this.label, this.speed, this.pitch);
+  final String label;
+  final double speed;
+  final double pitch;
+}
+
 final playbackSpeedProvider = NotifierProvider<PlaybackSpeedNotifier, double>(
   PlaybackSpeedNotifier.new,
 );
 
 class PlaybackSpeedNotifier extends Notifier<double> {
   @override
-  double build() => 1.0;
+  double build() {
+    final repo = ref.watch(settingsRepositoryProvider);
+    return repo.audioSpeed;
+  }
 
   void setSpeed(double speed) {
     state = speed;
+    ref.read(settingsRepositoryProvider).setAudioSpeed(speed);
     ref.read(audioPlayerProvider).setSpeed(speed);
+  }
+}
+
+final playbackPitchProvider = NotifierProvider<PlaybackPitchNotifier, double>(
+  PlaybackPitchNotifier.new,
+);
+
+class PlaybackPitchNotifier extends Notifier<double> {
+  @override
+  double build() {
+    final repo = ref.watch(settingsRepositoryProvider);
+    return repo.audioPitch;
+  }
+
+  void setPitch(double pitch) {
+    state = pitch;
+    ref.read(settingsRepositoryProvider).setAudioPitch(pitch);
+    ref.read(audioPlayerProvider).setPitch(pitch);
   }
 }
 
@@ -417,11 +454,11 @@ class PlayerVolumeNotifier extends Notifier<double> {
 
 final playerControllerProvider = Provider<PlayerController>((ref) {
   final player = ref.read(audioPlayerProvider);
-  ref.listen(settingsControllerProvider, (prev, next) {
-    if (prev?.skipSilence != next.skipSilence) {
-      player.setSkipSilenceEnabled(next.skipSilence);
-    }
-  });
+  final repo = ref.read(settingsRepositoryProvider);
+
+  // Initialize playback speed and pitch from persistent user settings
+  player.setSpeed(repo.audioSpeed);
+  player.setPitch(repo.audioPitch);
 
   final controller = PlayerController(
     player: player,
@@ -430,6 +467,8 @@ final playerControllerProvider = Provider<PlayerController>((ref) {
     repeatMode: () => ref.read(repeatModeProvider),
     shuffleEnabled: () => ref.read(shuffleModeProvider),
     audioQuality: () => ref.read(settingsRepositoryProvider).audioQuality,
+    crossfadeSeconds: () => ref.read(settingsRepositoryProvider).crossfadeSeconds,
+    discordRpcEnabled: () => ref.read(settingsRepositoryProvider).discordRpcEnabled,
     onEnableShuffle: () {
       if (!ref.read(shuffleModeProvider)) {
         ref.read(shuffleModeProvider.notifier).toggle();
@@ -445,6 +484,22 @@ final playerControllerProvider = Provider<PlayerController>((ref) {
       return ref.read(musicDetailRepositoryProvider).relatedSongs(seed.id);
     },
   );
+
+  ref.listen(settingsControllerProvider, (prev, next) {
+    if (prev?.skipSilence != next.skipSilence) {
+      player.setSkipSilenceEnabled(next.skipSilence);
+    }
+    if (prev?.discordRpcEnabled != next.discordRpcEnabled) {
+      controller.setDiscordRpcEnabled(next.discordRpcEnabled);
+    }
+    if (prev?.audioSpeed != next.audioSpeed) {
+      player.setSpeed(next.audioSpeed);
+    }
+    if (prev?.audioPitch != next.audioPitch) {
+      player.setPitch(next.audioPitch);
+    }
+  });
+
   ref.onDispose(controller.dispose);
   return controller;
 });
@@ -478,6 +533,8 @@ class PlayerController {
     required LoopMode Function() repeatMode,
     required bool Function() shuffleEnabled,
     required String Function() audioQuality,
+    int Function()? crossfadeSeconds,
+    bool Function()? discordRpcEnabled,
     void Function()? onEnableShuffle,
     void Function(String message)? onError,
     Future<List<Song>> Function(Song seed)? fetchAutoplay,
@@ -493,12 +550,15 @@ class PlayerController {
        _shuffleEnabled = shuffleEnabled,
        // ignore: prefer_initializing_formals
        _audioQuality = audioQuality,
+       _crossfadeSeconds = crossfadeSeconds ?? (() => 0),
+       _discordRpcEnabled = discordRpcEnabled ?? (() => true),
        // ignore: prefer_initializing_formals
        _onEnableShuffle = onEnableShuffle,
        // ignore: prefer_initializing_formals
        _onError = onError,
        // ignore: prefer_initializing_formals
        _fetchAutoplay = fetchAutoplay {
+    _discordRpc.setEnabled(_discordRpcEnabled());
     _setupListeners();
   }
 
@@ -508,6 +568,8 @@ class PlayerController {
   final LoopMode Function() _repeatMode;
   final bool Function() _shuffleEnabled;
   final String Function() _audioQuality;
+  final int Function() _crossfadeSeconds;
+  final bool Function() _discordRpcEnabled;
   final void Function()? _onEnableShuffle;
   final void Function(String message)? _onError;
 
@@ -549,6 +611,9 @@ class PlayerController {
   /// Windows media-key / SMTC integration. No-op off Windows.
   final DesktopMediaControls _mediaControls = DesktopMediaControls();
 
+  /// Discord Rich Presence IPC client. No-op when Discord is not running.
+  final DiscordRpc _discordRpc = DiscordRpc();
+
   void _setupListeners() {
     // Wire the OS media keys / SMTC flyout (Windows) to the player.
     _mediaControls.init(
@@ -569,6 +634,11 @@ class PlayerController {
     _stateSub = _player.playerStateStream.listen((state) {
       if (_disposed) return;
       _mediaControls.setPlaying(playing: state.playing);
+      _discordRpc.setPlaying(
+        isPlaying: state.playing,
+        position: _player.position,
+        duration: _player.duration,
+      );
       final prev = lastProcessingState;
       lastProcessingState = state.processingState;
       if (state.processingState == ProcessingState.completed &&
@@ -582,6 +652,7 @@ class PlayerController {
     _disposed = true;
     unawaited(_stateSub?.cancel());
     _mediaControls.dispose();
+    _discordRpc.dispose();
   }
 
   /// Advances when a track plays out, honouring the repeat mode.
@@ -776,6 +847,12 @@ class PlayerController {
       await _player.setAudioSource(AudioSource.uri(playbackUri));
       if (_disposed || token.isCompleted) return;
       _mediaControls.updateSong(song);
+      _discordRpc.updateActivity(
+        song: song,
+        isPlaying: true,
+        position: Duration.zero,
+        duration: _player.duration,
+      );
       await _player.play();
       unawaited(_quickFadeIn());
       _log.info('playing: ${song.title}');
@@ -789,14 +866,18 @@ class PlayerController {
     }
   }
 
-  /// Gently fades down volume before switching tracks to avoid harsh cuts or pops.
+  /// Gently fades down volume before switching tracks with configurable crossfade.
   Future<void> _quickFadeOut() async {
     try {
       if (!_player.playing) return;
-      const steps = 4;
+      final crossfadeSec = _crossfadeSeconds();
+      final totalMs = crossfadeSec > 0 ? (crossfadeSec * 1000) ~/ 2 : 100;
+      final steps = (totalMs ~/ 25).clamp(4, 40);
+      final stepDelay = Duration(milliseconds: (totalMs / steps).round());
+      final originalVol = _player.volume;
       for (var i = steps - 1; i >= 0; i--) {
-        await _player.setVolume(i / steps);
-        await Future<void>.delayed(const Duration(milliseconds: 25));
+        await _player.setVolume((originalVol * (i / steps)).clamp(0.0, 1.0));
+        await Future<void>.delayed(stepDelay);
       }
     } catch (_) {}
   }
@@ -804,11 +885,14 @@ class PlayerController {
   /// Smoothly ramps volume up after starting a new track.
   Future<void> _quickFadeIn() async {
     try {
-      const steps = 5;
-      await _player.setVolume(0.15);
-      for (var i = 2; i <= steps; i++) {
-        await Future<void>.delayed(const Duration(milliseconds: 30));
-        await _player.setVolume(i / steps);
+      final crossfadeSec = _crossfadeSeconds();
+      final totalMs = crossfadeSec > 0 ? (crossfadeSec * 1000) ~/ 2 : 150;
+      final steps = (totalMs ~/ 25).clamp(5, 40);
+      final stepDelay = Duration(milliseconds: (totalMs / steps).round());
+      await _player.setVolume(0.05);
+      for (var i = 1; i <= steps; i++) {
+        await Future<void>.delayed(stepDelay);
+        await _player.setVolume((i / steps).clamp(0.0, 1.0));
       }
     } catch (_) {
       try {
@@ -1006,6 +1090,12 @@ class PlayerController {
     _cancelToken = null;
     await _player.stop();
     _queue.clearQueue();
+    _mediaControls.setStopped();
+    _discordRpc.clearActivity();
+  }
+
+  void setDiscordRpcEnabled(bool enabled) {
+    _discordRpc.setEnabled(enabled);
   }
 }
 

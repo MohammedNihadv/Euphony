@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 
+import '../data/providers.dart';
 import 'player_provider.dart';
 
 enum SleepTimerPreset {
@@ -65,13 +66,27 @@ class SleepTimerNotifier extends Notifier<SleepTimerState> {
 
     ref.onDispose(() {
       _timer?.cancel();
+      if (_preFadeVolume != null) {
+        try {
+          ref.read(audioPlayerProvider).setVolume(_preFadeVolume!);
+        } catch (_) {}
+      }
     });
 
     return const SleepTimerState(preset: SleepTimerPreset.off);
   }
 
+  double? _preFadeVolume;
+
   void setPreset(SleepTimerPreset preset) {
     _timer?.cancel();
+    if (_preFadeVolume != null) {
+      try {
+        ref.read(audioPlayerProvider).setVolume(_preFadeVolume!);
+      } catch (_) {}
+      _preFadeVolume = null;
+    }
+
     if (preset == SleepTimerPreset.off) {
       state = const SleepTimerState(preset: SleepTimerPreset.off);
       return;
@@ -96,9 +111,20 @@ class SleepTimerNotifier extends Notifier<SleepTimerState> {
       if (current == null || current.inSeconds <= 1) {
         _triggerSleep();
       } else {
-        state = state.copyWith(
-          remaining: Duration(seconds: current.inSeconds - 1),
-        );
+        final nextSec = current.inSeconds - 1;
+        state = state.copyWith(remaining: Duration(seconds: nextSec));
+
+        // Smooth fade-out in final 30 seconds
+        final shouldFade = ref.read(settingsRepositoryProvider).sleepFadeOut;
+        if (shouldFade && nextSec <= 30 && nextSec > 0) {
+          _preFadeVolume ??= ref.read(playerVolumeProvider);
+          final fadeFactor = nextSec / 30.0;
+          try {
+            ref
+                .read(audioPlayerProvider)
+                .setVolume((_preFadeVolume! * fadeFactor).clamp(0.0, 1.0));
+          } catch (_) {}
+        }
       }
     });
   }
@@ -106,6 +132,12 @@ class SleepTimerNotifier extends Notifier<SleepTimerState> {
   void _triggerSleep() {
     _timer?.cancel();
     ref.read(playerControllerProvider).pause();
+    if (_preFadeVolume != null) {
+      try {
+        ref.read(audioPlayerProvider).setVolume(_preFadeVolume!);
+      } catch (_) {}
+      _preFadeVolume = null;
+    }
     state = const SleepTimerState(preset: SleepTimerPreset.off);
   }
 }

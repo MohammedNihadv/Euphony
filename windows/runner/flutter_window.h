@@ -5,6 +5,7 @@
 #include <flutter/flutter_view_controller.h>
 #include <flutter/method_channel.h>
 #include <flutter/standard_method_codec.h>
+#include <shellapi.h>
 
 #include <memory>
 
@@ -25,6 +26,12 @@ class FlutterWindow : public Win32Window {
                          LPARAM const lparam) noexcept override;
 
  private:
+  void SetMiniMode(bool enable);
+  void ShowTrayIcon();
+  void HideTrayIcon();
+  void MinimizeToTray();
+  void RestoreFromTray();
+
   // The project to run.
   flutter::DartProject project_;
 
@@ -33,6 +40,12 @@ class FlutterWindow : public Win32Window {
 
   // Channel to dispatch hardware media keys & Bluetooth AVRCP actions to Dart.
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> media_channel_;
+
+  bool is_mini_mode_ = false;
+  bool close_to_tray_ = false;
+  RECT normal_rect_ = {0};
+  NOTIFYICONDATA nid_ = {0};
+  bool tray_icon_active_ = false;
 };
 
 #endif  // RUNNER_FLUTTER_WINDOW_H_

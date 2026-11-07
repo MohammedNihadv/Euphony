@@ -11,6 +11,7 @@ import '../design/tokens/brutal.dart';
 import '../design/widgets/brand_badge.dart';
 import '../domain/song.dart';
 import '../features/library/library_screen.dart';
+import '../features/player/desktop_mini_player_hud.dart';
 import '../features/player/desktop_player_bar.dart';
 import '../features/player/dynamic_island.dart';
 import '../features/player/lyrics_sheet.dart';
@@ -18,6 +19,7 @@ import '../features/player/mini_player.dart';
 import '../features/player/player_screen.dart';
 import '../features/player/queue_sheet.dart';
 import '../features/settings/settings_provider.dart';
+import '../playback/desktop_media_controls.dart';
 import '../playback/player_provider.dart';
 
 
@@ -159,6 +161,10 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
         _goBranch(1);
         return true;
       }
+      if (key == LogicalKeyboardKey.keyM) {
+        DesktopMediaControls().toggleMiniPlayer();
+        return true;
+      }
       if (key == LogicalKeyboardKey.digit1) {
         _goBranch(0);
         return true;
@@ -238,12 +244,25 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
       ref.read(playbackErrorProvider.notifier).clear();
     });
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth >= _desktopBreakpoint) {
-          return _buildDesktop(context);
+    return ValueListenableBuilder<bool>(
+      valueListenable: DesktopMediaControls.isMiniPlayer,
+      builder: (context, isMini, child) {
+        if (isMini &&
+            !kIsWeb &&
+            (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+          return const Scaffold(
+            backgroundColor: Color(0xFF101018),
+            body: DesktopMiniPlayerHud(),
+          );
         }
-        return _buildMobile(context);
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth >= _desktopBreakpoint) {
+              return _buildDesktop(context);
+            }
+            return _buildMobile(context);
+          },
+        );
       },
     );
   }

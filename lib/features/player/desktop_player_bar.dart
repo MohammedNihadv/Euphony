@@ -9,6 +9,7 @@ import '../../data/providers.dart';
 import '../../design/tokens/brutal.dart';
 import '../../design/tokens/tokens.dart';
 import '../../domain/song.dart';
+import '../../playback/desktop_media_controls.dart';
 import '../../playback/player_provider.dart';
 import 'lyrics_sheet.dart';
 import 'player_screen.dart';
@@ -637,6 +638,16 @@ class _RightUtilitySection extends ConsumerWidget {
                   .push(buildPlayerRoute())
               : null,
         ),
+
+        // Mini Player toggle
+        if (DesktopMediaControls.isSupported)
+          IconButton(
+            icon: const Icon(Icons.picture_in_picture_alt_rounded),
+            iconSize: 18,
+            color: context.eu.ink.withValues(alpha: 0.75),
+            tooltip: 'Mini Player (Ctrl+M)',
+            onPressed: () => DesktopMediaControls().toggleMiniPlayer(),
+          ),
 
         const SizedBox(width: 6),
 

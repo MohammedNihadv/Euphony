@@ -10,6 +10,7 @@ import '../../design/widgets/brand_badge.dart';
 import '../../domain/artist_ref.dart';
 import '../../domain/song.dart';
 import '../../playback/download_provider.dart';
+import '../../playback/local_playlist_provider.dart';
 import '../../playback/player_provider.dart';
 
 final librarySelectedTabProvider = NotifierProvider<LibrarySelectedTabNotifier, int>(
@@ -629,6 +630,110 @@ class _SavedPlaylistsTab extends ConsumerWidget {
               ),
             ),
 
+            // Import Online Playlist Action Tile
+            Container(
+              margin: const EdgeInsets.only(bottom: EuSpace.md),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: isDark
+                      ? [
+                          const Color(0xFF3B82F6).withValues(alpha: 0.22),
+                          const Color(0x60161626),
+                        ]
+                      : [
+                          const Color(0xFF3B82F6).withValues(alpha: 0.12),
+                          Colors.white.withValues(alpha: 0.9),
+                        ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: const Color(0xFF3B82F6).withValues(
+                    alpha: isDark ? 0.38 : 0.28,
+                  ),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF3B82F6).withValues(
+                      alpha: isDark ? 0.18 : 0.08,
+                    ),
+                    blurRadius: 14,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Material(
+                type: MaterialType.transparency,
+                borderRadius: BorderRadius.circular(16),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  onTap: () => _showImportPlaylistDialog(context, ref),
+                  leading: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF3B82F6).withValues(alpha: 0.4),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.cloud_download_rounded,
+                      color: Colors.white,
+                      size: 26,
+                    ),
+                  ),
+                  title: Text(
+                    'Import Online Playlist',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 15,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Paste YouTube or YouTube Music playlist link',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                      color: isDark ? Colors.white60 : Colors.black54,
+                    ),
+                  ),
+                  trailing: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white10
+                          : Colors.black.withValues(alpha: 0.05),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: isDark ? Colors.white70 : Colors.black54,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
             if (entries.isEmpty)
               Padding(
                 padding: const EdgeInsets.all(EuSpace.xl),
@@ -859,6 +964,231 @@ class _SavedPlaylistsTab extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showImportPlaylistDialog(BuildContext context, WidgetRef ref) {
+    final controller = TextEditingController();
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    bool isLoading = false;
+
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.70),
+      builder: (dialogCtx) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Container(
+              padding: const EdgeInsets.all(22),
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xF5141424)
+                    : Colors.white.withValues(alpha: 0.95),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.16)
+                      : Colors.black.withValues(alpha: 0.10),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    blurRadius: 28,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF3B82F6).withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.link_rounded,
+                          color: Color(0xFF3B82F6),
+                          size: 22,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Text(
+                        'Import Playlist',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Paste any YouTube or YouTube Music playlist URL to import all songs directly into your library.',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? Colors.white60 : Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: controller,
+                    enabled: !isLoading,
+                    decoration: InputDecoration(
+                      hintText: 'https://music.youtube.com/playlist?list=...',
+                      prefixIcon: const Icon(Icons.playlist_play_rounded),
+                      filled: true,
+                      fillColor: isDark
+                          ? const Color(0xFF1E1E2E)
+                          : const Color(0xFFF1F5F9),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: isLoading
+                            ? null
+                            : () => Navigator.of(dialogCtx).pop(),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            color: isDark ? Colors.white60 : Colors.black54,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF3B82F6),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: isLoading
+                            ? null
+                            : () async {
+                                final input = controller.text.trim();
+                                if (input.isEmpty) return;
+
+                                // Extract playlist ID
+                                String playlistId = input;
+                                final match = RegExp(r'[?&]list=([a-zA-Z0-9_-]+)')
+                                    .firstMatch(input);
+                                if (match != null) {
+                                  playlistId = match.group(1)!;
+                                }
+
+                                setDialogState(() => isLoading = true);
+                                try {
+                                  final repo = ref.read(
+                                    musicDetailRepositoryProvider,
+                                  );
+                                  final res = await repo.fetchPlaylist(
+                                    playlistId,
+                                  );
+                                  await res.fold(
+                                    (details) async {
+                                      // Save playlist entry
+                                      final dao = ref.read(
+                                        savedPlaylistsDaoProvider,
+                                      );
+                                      await dao.save(
+                                        id: playlistId,
+                                        title: details.playlist.title,
+                                        author: details.playlist.author,
+                                        artworkUrl: details.playlist.artworkUrl,
+                                        trackCount: details.tracks.length,
+                                      );
+
+                                      // Save tracks into local playlist
+                                      final localNotifier = ref.read(
+                                        localPlaylistTracksProvider.notifier,
+                                      );
+                                      for (final song in details.tracks) {
+                                        await localNotifier.addSongToPlaylist(
+                                          playlistId,
+                                          song,
+                                        );
+                                      }
+
+                                      if (dialogCtx.mounted) {
+                                        Navigator.of(dialogCtx).pop();
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Imported "${details.playlist.title}" (${details.tracks.length} songs)!',
+                                            ),
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    (failure) async {
+                                      setDialogState(() => isLoading = false);
+                                      if (dialogCtx.mounted) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'Failed to import playlist: $failure',
+                                            ),
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  );
+                                } catch (e) {
+                                  setDialogState(() => isLoading = false);
+                                  if (dialogCtx.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Error importing: $e'),
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
+                                    );
+                                  }
+                                }
+                              },
+                        child: isLoading
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text(
+                                'Import',
+                                style: TextStyle(fontWeight: FontWeight.w800),
+                              ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }

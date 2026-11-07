@@ -79,4 +79,40 @@ class SettingsRepository {
       _prefs.getBool(_kHideMiniPlayerWithIsland) ?? true;
   Future<void> setHideMiniPlayerWithIsland(bool value) =>
       _prefs.setBool(_kHideMiniPlayerWithIsland, value);
+
+  static const _kDiscordRpc = 'discord_rpc_enabled';
+  bool get discordRpcEnabled => _prefs.getBool(_kDiscordRpc) ?? true;
+  Future<void> setDiscordRpcEnabled(bool value) =>
+      _prefs.setBool(_kDiscordRpc, value);
+
+  static const _kCrossfadeSeconds = 'crossfade_seconds';
+  int get crossfadeSeconds => _prefs.getInt(_kCrossfadeSeconds) ?? 0;
+  Future<void> setCrossfadeSeconds(int value) =>
+      _prefs.setInt(_kCrossfadeSeconds, value);
+
+  static const _kSleepFadeOut = 'sleep_fade_out';
+  bool get sleepFadeOut => _prefs.getBool(_kSleepFadeOut) ?? true;
+  Future<void> setSleepFadeOut(bool value) =>
+      _prefs.setBool(_kSleepFadeOut, value);
+
+  static const _kAudioSpeed = 'audio_speed';
+  double get audioSpeed => _prefs.getDouble(_kAudioSpeed) ?? 1.0;
+  Future<void> setAudioSpeed(double value) =>
+      _prefs.setDouble(_kAudioSpeed, value);
+
+  static const _kAudioPitch = 'audio_pitch';
+  double get audioPitch => _prefs.getDouble(_kAudioPitch) ?? 1.0;
+  Future<void> setAudioPitch(double value) =>
+      _prefs.setDouble(_kAudioPitch, value);
+
+  static const _kAudioDspPreset = 'audio_dsp_preset';
+  String get audioDspPreset =>
+      _prefs.getString(_kAudioDspPreset) ?? 'normal';
+  Future<void> setAudioDspPreset(String value) =>
+      _prefs.setString(_kAudioDspPreset, value);
+
+  static const _kCloseToTray = 'close_to_tray';
+  bool get closeToTray => _prefs.getBool(_kCloseToTray) ?? false;
+  Future<void> setCloseToTray(bool value) =>
+      _prefs.setBool(_kCloseToTray, value);
 }
