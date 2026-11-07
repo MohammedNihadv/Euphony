@@ -1213,8 +1213,9 @@ class _FeaturedChartsCarousel extends StatefulWidget {
 }
 
 class _FeaturedChartsCarouselState extends State<_FeaturedChartsCarousel> {
-  late final PageController _pageController;
   int _currentPage = 0;
+  PageController? _pageController;
+  double _lastFraction = 0.90;
 
   final List<_ChartCardData> _cards = const [
     _ChartCardData(
@@ -1255,15 +1256,21 @@ class _FeaturedChartsCarouselState extends State<_FeaturedChartsCarousel> {
     ),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(viewportFraction: 0.90);
+  PageController _getOrCreateController(double fraction) {
+    if (_pageController == null || (_lastFraction - fraction).abs() > 0.01) {
+      _pageController?.dispose();
+      _pageController = PageController(
+        viewportFraction: fraction,
+        initialPage: _currentPage,
+      );
+      _lastFraction = fraction;
+    }
+    return _pageController!;
   }
 
   @override
   void dispose() {
-    _pageController.dispose();
+    _pageController?.dispose();
     super.dispose();
   }
 
@@ -1272,62 +1279,78 @@ class _FeaturedChartsCarouselState extends State<_FeaturedChartsCarousel> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            EuSpace.screenGutter,
-            EuSpace.lg,
-            EuSpace.screenGutter,
-            EuSpace.xs,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Featured & Charts',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w900,
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isDesktop = constraints.maxWidth >= 900;
+        final viewportFraction = isDesktop
+            ? (constraints.maxWidth >= 1400 ? 0.32 : 0.48)
+            : 0.90;
+        final controller = _getOrCreateController(viewportFraction);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                EuSpace.screenGutter,
+                EuSpace.sm,
+                EuSpace.screenGutter,
+                EuSpace.xs,
               ),
-              Row(
-                children: List.generate(
-                  _cards.length,
-                  (index) => AnimatedContainer(
-                    duration: const Duration(milliseconds: 250),
-                    margin: const EdgeInsets.symmetric(horizontal: 2.5),
-                    width: _currentPage == index ? 16 : 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: _currentPage == index
-                          ? EuBrutal.accent
-                          : (isDark ? Colors.white24 : Colors.black12),
-                      borderRadius: BorderRadius.circular(3),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Featured & Charts',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
-                ),
+                  Row(
+                    children: List.generate(
+                      _cards.length,
+                      (index) => AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                        width: _currentPage == index ? 16 : 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: _currentPage == index
+                              ? EuBrutal.accent
+                              : (isDark ? Colors.white24 : Colors.black12),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-        SizedBox(
-          height: 148,
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: _cards.length,
-            onPageChanged: (page) => setState(() => _currentPage = page),
-            itemBuilder: (context, index) {
-              final card = _cards[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 6),
-                child: GestureDetector(
-                  onTap: () {
-                    context.push(
-                      '/search?q=${Uri.encodeComponent(card.query)}',
-                    );
-                  },
-                  child: Container(
+            ),
+            SizedBox(
+              height: 148,
+              child: PageView.builder(
+                controller: controller,
+                padEnds: false,
+                itemCount: _cards.length,
+                onPageChanged: (page) => setState(() => _currentPage = page),
+                itemBuilder: (context, index) {
+                  final card = _cards[index];
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      left: index == 0 ? EuSpace.screenGutter : 6,
+                      right: index == _cards.length - 1
+                          ? EuSpace.screenGutter
+                          : 6,
+                      top: 4,
+                      bottom: 8,
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        context.push(
+                          '/search?q=${Uri.encodeComponent(card.query)}',
+                        );
+                      },
+                      child: Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: card.gradient,
@@ -1443,6 +1466,8 @@ class _FeaturedChartsCarouselState extends State<_FeaturedChartsCarousel> {
           ),
         ),
       ],
+    );
+      },
     );
   }
 }

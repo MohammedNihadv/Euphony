@@ -68,78 +68,52 @@ class _DesktopPlayerBarState extends ConsumerState<DesktopPlayerBar> {
             ),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-          child: song == null
-              ? _buildEmptyState(context)
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // ── Left: Track info & Like button ──────────────────────
-                    SizedBox(
-                      width: 280,
-                      child: _LeftTrackSection(song: song),
-                    ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // ── Left: Track info & Like button ──────────────────────
+              SizedBox(
+                width: 280,
+                child: _LeftTrackSection(song: song),
+              ),
 
-                    const SizedBox(width: 16),
+              const SizedBox(width: 16),
 
-                    // ── Center: Transport controls & scrubber ───────────────
-                    Expanded(
-                      child: _CenterTransportSection(
-                        song: song,
-                        isPlaying: isPlaying,
-                        isBuffering: isBuffering,
-                        shuffleEnabled: shuffleEnabled,
-                        repeatMode: repeatMode,
-                        displayedSeconds: displayedSeconds,
-                        maxSeconds: maxSeconds,
-                        onSeekChanged: (val) {
-                          setState(() => _dragPositionSeconds = val);
-                        },
-                        onSeekEnded: (val) {
-                          setState(() => _dragPositionSeconds = null);
-                          ref
-                              .read(playerControllerProvider)
-                              .seek(Duration(milliseconds: (val * 1000).round()));
-                        },
-                      ),
-                    ),
-
-                    const SizedBox(width: 16),
-
-                    // ── Right: Volume, Queue, Lyrics, Fullscreen ────────────
-                    SizedBox(
-                      width: 290,
-                      child: _RightUtilitySection(
-                        song: song,
-                        volume: volume,
-                      ),
-                    ),
-                  ],
+              // ── Center: Transport controls & scrubber ───────────────
+              Expanded(
+                child: _CenterTransportSection(
+                  song: song,
+                  isPlaying: isPlaying,
+                  isBuffering: isBuffering,
+                  shuffleEnabled: shuffleEnabled,
+                  repeatMode: repeatMode,
+                  displayedSeconds: displayedSeconds,
+                  maxSeconds: maxSeconds,
+                  onSeekChanged: (val) {
+                    setState(() => _dragPositionSeconds = val);
+                  },
+                  onSeekEnded: (val) {
+                    setState(() => _dragPositionSeconds = null);
+                    ref
+                        .read(playerControllerProvider)
+                        .seek(Duration(milliseconds: (val * 1000).round()));
+                  },
                 ),
-        ),
-      ),
-    );
-  }
+              ),
 
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.music_note_rounded,
-            size: 20,
-            color: context.eu.ink.withValues(alpha: 0.4),
+              const SizedBox(width: 16),
+
+              // ── Right: Volume, Queue, Lyrics, Fullscreen ────────────
+              SizedBox(
+                width: 290,
+                child: _RightUtilitySection(
+                  song: song,
+                  volume: volume,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          Text(
-            'Select a song or album to begin playing',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: context.eu.ink.withValues(alpha: 0.45),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -152,7 +126,7 @@ class _DesktopPlayerBarState extends ConsumerState<DesktopPlayerBar> {
 class _LeftTrackSection extends ConsumerStatefulWidget {
   const _LeftTrackSection({required this.song});
 
-  final Song song;
+  final Song? song;
 
   @override
   ConsumerState<_LeftTrackSection> createState() => _LeftTrackSectionState();
@@ -165,6 +139,70 @@ class _LeftTrackSectionState extends ConsumerState<_LeftTrackSection> {
   Widget build(BuildContext context) {
     final song = widget.song;
     final dao = ref.watch(likedSongsDaoProvider);
+
+    if (song == null) {
+      return Row(
+        children: [
+          Container(
+            width: 54,
+            height: 54,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: context.eu.ink.withValues(alpha: 0.15),
+                width: 1.5,
+              ),
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            ),
+            child: Icon(
+              Icons.music_note_rounded,
+              color: context.eu.ink.withValues(alpha: 0.35),
+              size: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Ready to Play',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.2,
+                    color: context.eu.ink.withValues(alpha: 0.8),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Select a song or album',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: context.eu.ink.withValues(alpha: 0.45),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 6),
+          IconButton(
+            icon: Icon(
+              Icons.favorite_border_rounded,
+              size: 20,
+              color: context.eu.ink.withValues(alpha: 0.20),
+            ),
+            onPressed: null,
+          ),
+        ],
+      );
+    }
 
     return Row(
       children: [
@@ -310,7 +348,7 @@ class _CenterTransportSection extends ConsumerWidget {
     required this.onSeekEnded,
   });
 
-  final Song song;
+  final Song? song;
   final bool isPlaying;
   final bool isBuffering;
   final bool shuffleEnabled;
@@ -323,6 +361,7 @@ class _CenterTransportSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final controller = ref.read(playerControllerProvider);
+    final hasSong = song != null;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -335,9 +374,15 @@ class _CenterTransportSection extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.shuffle_rounded),
               iconSize: 19,
-              color: shuffleEnabled ? EuBrutal.accent : context.eu.ink.withValues(alpha: 0.6),
+              color: !hasSong
+                  ? context.eu.ink.withValues(alpha: 0.25)
+                  : (shuffleEnabled
+                      ? EuBrutal.accent
+                      : context.eu.ink.withValues(alpha: 0.6)),
               tooltip: 'Shuffle (S)',
-              onPressed: () => ref.read(shuffleModeProvider.notifier).toggle(),
+              onPressed: hasSong
+                  ? () => ref.read(shuffleModeProvider.notifier).toggle()
+                  : null,
             ),
 
             const SizedBox(width: 4),
@@ -346,9 +391,11 @@ class _CenterTransportSection extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.skip_previous_rounded),
               iconSize: 26,
-              color: context.eu.ink,
+              color: !hasSong
+                  ? context.eu.ink.withValues(alpha: 0.25)
+                  : context.eu.ink,
               tooltip: 'Previous (Ctrl+Left)',
-              onPressed: controller.skipPrevious,
+              onPressed: hasSong ? controller.skipPrevious : null,
             ),
 
             const SizedBox(width: 8),
@@ -363,15 +410,24 @@ class _CenterTransportSection extends ConsumerWidget {
                   height: 38,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: EuBrutal.accent,
-                    border: Border.all(color: context.eu.ink, width: 2),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black,
-                        offset: Offset(2, 2),
-                        blurRadius: 0,
-                      ),
-                    ],
+                    color: hasSong
+                        ? EuBrutal.accent
+                        : Theme.of(context).colorScheme.surfaceContainerHighest,
+                    border: Border.all(
+                      color: hasSong
+                          ? context.eu.ink
+                          : context.eu.ink.withValues(alpha: 0.3),
+                      width: hasSong ? 2 : 1.5,
+                    ),
+                    boxShadow: hasSong
+                        ? const [
+                            BoxShadow(
+                              color: Colors.black,
+                              offset: Offset(2, 2),
+                              blurRadius: 0,
+                            ),
+                          ]
+                        : null,
                   ),
                   child: Center(
                     child: isBuffering
@@ -384,9 +440,13 @@ class _CenterTransportSection extends ConsumerWidget {
                             ),
                           )
                         : Icon(
-                            isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                            isPlaying
+                                ? Icons.pause_rounded
+                                : Icons.play_arrow_rounded,
                             size: 24,
-                            color: EuBrutal.onAccent,
+                            color: hasSong
+                                ? EuBrutal.onAccent
+                                : context.eu.ink.withValues(alpha: 0.45),
                           ),
                   ),
                 ),
@@ -399,9 +459,11 @@ class _CenterTransportSection extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.skip_next_rounded),
               iconSize: 26,
-              color: context.eu.ink,
+              color: !hasSong
+                  ? context.eu.ink.withValues(alpha: 0.25)
+                  : context.eu.ink,
               tooltip: 'Next (Ctrl+Right)',
-              onPressed: controller.skipNext,
+              onPressed: hasSong ? controller.skipNext : null,
             ),
 
             const SizedBox(width: 4),
@@ -409,14 +471,20 @@ class _CenterTransportSection extends ConsumerWidget {
             // Repeat
             IconButton(
               icon: Icon(
-                repeatMode == LoopMode.one ? Icons.repeat_one_rounded : Icons.repeat_rounded,
+                repeatMode == LoopMode.one
+                    ? Icons.repeat_one_rounded
+                    : Icons.repeat_rounded,
               ),
               iconSize: 19,
-              color: repeatMode != LoopMode.off
-                  ? EuBrutal.accent
-                  : context.eu.ink.withValues(alpha: 0.6),
+              color: !hasSong
+                  ? context.eu.ink.withValues(alpha: 0.25)
+                  : (repeatMode != LoopMode.off
+                      ? EuBrutal.accent
+                      : context.eu.ink.withValues(alpha: 0.6)),
               tooltip: 'Repeat (R)',
-              onPressed: () => ref.read(repeatModeProvider.notifier).cycle(),
+              onPressed: hasSong
+                  ? () => ref.read(repeatModeProvider.notifier).cycle()
+                  : null,
             ),
           ],
         ),
@@ -430,13 +498,17 @@ class _CenterTransportSection extends ConsumerWidget {
               SizedBox(
                 width: 42,
                 child: Text(
-                  formatPlaybackDuration(Duration(seconds: displayedSeconds.round())),
+                  !hasSong
+                      ? '0:00'
+                      : formatPlaybackDuration(
+                          Duration(seconds: displayedSeconds.round()),
+                        ),
                   textAlign: TextAlign.right,
                   style: TextStyle(
                     fontSize: 11,
                     fontFeatures: const [FontFeature.tabularFigures()],
                     fontWeight: FontWeight.w700,
-                    color: context.eu.ink.withValues(alpha: 0.6),
+                    color: context.eu.ink.withValues(alpha: hasSong ? 0.6 : 0.35),
                   ),
                 ),
               ),
@@ -448,21 +520,32 @@ class _CenterTransportSection extends ConsumerWidget {
                 child: SliderTheme(
                   data: SliderTheme.of(context).copyWith(
                     trackHeight: 3.5,
-                    thumbShape: const RoundSliderThumbShape(
-                      enabledThumbRadius: 6,
-                      elevation: 2,
-                    ),
+                    thumbShape: hasSong
+                        ? const RoundSliderThumbShape(
+                            enabledThumbRadius: 6,
+                            elevation: 2,
+                          )
+                        : const RoundSliderThumbShape(
+                            enabledThumbRadius: 0,
+                          ),
                     overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-                    activeTrackColor: EuBrutal.accent,
-                    inactiveTrackColor: context.eu.ink.withValues(alpha: 0.16),
+                    activeTrackColor: hasSong
+                        ? EuBrutal.accent
+                        : context.eu.divider,
+                    inactiveTrackColor: context.eu.divider.withValues(alpha: 0.4),
                     thumbColor: EuBrutal.accent,
                     overlayColor: EuBrutal.accent.withValues(alpha: 0.2),
                   ),
                   child: Slider(
-                    value: displayedSeconds.clamp(0.0, maxSeconds > 0 ? maxSeconds : 1.0),
-                    max: maxSeconds > 0 ? maxSeconds : 1.0,
-                    onChanged: onSeekChanged,
-                    onChangeEnd: onSeekEnded,
+                    value: !hasSong
+                        ? 0.0
+                        : displayedSeconds.clamp(
+                            0.0,
+                            maxSeconds > 0 ? maxSeconds : 1.0,
+                          ),
+                    max: !hasSong ? 1.0 : (maxSeconds > 0 ? maxSeconds : 1.0),
+                    onChanged: hasSong ? onSeekChanged : null,
+                    onChangeEnd: hasSong ? onSeekEnded : null,
                   ),
                 ),
               ),
@@ -473,12 +556,16 @@ class _CenterTransportSection extends ConsumerWidget {
               SizedBox(
                 width: 42,
                 child: Text(
-                  formatPlaybackDuration(Duration(seconds: maxSeconds.round())),
+                  !hasSong
+                      ? '0:00'
+                      : formatPlaybackDuration(
+                          Duration(seconds: maxSeconds.round()),
+                        ),
                   style: TextStyle(
                     fontSize: 11,
                     fontFeatures: const [FontFeature.tabularFigures()],
                     fontWeight: FontWeight.w700,
-                    color: context.eu.ink.withValues(alpha: 0.6),
+                    color: context.eu.ink.withValues(alpha: hasSong ? 0.6 : 0.35),
                   ),
                 ),
               ),
@@ -500,12 +587,13 @@ class _RightUtilitySection extends ConsumerWidget {
     required this.volume,
   });
 
-  final Song song;
+  final Song? song;
   final double volume;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final volumeNotifier = ref.read(playerVolumeProvider.notifier);
+    final hasSong = song != null;
 
     final IconData volumeIcon = volume <= 0
         ? Icons.volume_off_rounded
@@ -520,12 +608,14 @@ class _RightUtilitySection extends ConsumerWidget {
         IconButton(
           icon: const Icon(Icons.lyrics_outlined),
           iconSize: 20,
-          color: context.eu.ink.withValues(alpha: 0.75),
-          tooltip: 'Lyrics (L)',
-          onPressed: () => showLyricsSheet(context, song),
+          color: hasSong
+              ? context.eu.ink.withValues(alpha: 0.75)
+              : context.eu.ink.withValues(alpha: 0.25),
+          tooltip: hasSong ? 'Lyrics (L)' : null,
+          onPressed: hasSong ? () => showLyricsSheet(context, song!) : null,
         ),
 
-        // Queue toggle
+        // Queue toggle (always active!)
         IconButton(
           icon: const Icon(Icons.queue_music_rounded),
           iconSize: 20,
@@ -538,14 +628,19 @@ class _RightUtilitySection extends ConsumerWidget {
         IconButton(
           icon: const Icon(Icons.open_in_full_rounded),
           iconSize: 18,
-          color: context.eu.ink.withValues(alpha: 0.75),
-          tooltip: 'Full Player (F)',
-          onPressed: () => Navigator.of(context, rootNavigator: true).push(buildPlayerRoute()),
+          color: hasSong
+              ? context.eu.ink.withValues(alpha: 0.75)
+              : context.eu.ink.withValues(alpha: 0.25),
+          tooltip: hasSong ? 'Full Player (F)' : null,
+          onPressed: hasSong
+              ? () => Navigator.of(context, rootNavigator: true)
+                  .push(buildPlayerRoute())
+              : null,
         ),
 
         const SizedBox(width: 6),
 
-        // Volume controller with Mouse Wheel support
+        // Volume controller with Mouse Wheel support (always active!)
         Listener(
           onPointerSignal: (pointerSignal) {
             if (pointerSignal is PointerScrollEvent) {

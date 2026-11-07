@@ -69,38 +69,28 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
     final key = event.logicalKey;
     final controller = ref.read(playerControllerProvider);
     final player = ref.read(audioPlayerProvider);
+    final volumeNotifier = ref.read(playerVolumeProvider.notifier);
 
-    // Only handle dedicated hardware / bluetooth / headset media keys.
-    // Alphanumeric keys (j, k, l, space, etc.) are excluded so they never
-    // interfere with text input or search fields.
-    // 1. Play / Pause / Resume
+    // 1. Dedicated hardware / bluetooth / headset media keys always work anywhere.
     if (key == LogicalKeyboardKey.mediaPlayPause ||
         key == LogicalKeyboardKey.mediaPlay ||
         key == LogicalKeyboardKey.mediaPause) {
       controller.togglePlayPause();
       return true;
     }
-
-    // 2. Stop
     if (key == LogicalKeyboardKey.mediaStop) {
       controller.stop();
       return true;
     }
-
-    // 3. Skip to Next track
     if (key == LogicalKeyboardKey.mediaTrackNext ||
         key == LogicalKeyboardKey.mediaSkip) {
       controller.skipNext();
       return true;
     }
-
-    // 4. Skip to Previous track
     if (key == LogicalKeyboardKey.mediaTrackPrevious) {
       controller.skipPrevious();
       return true;
     }
-
-    // 5. Fast-Forward (10s)
     if (key == LogicalKeyboardKey.mediaFastForward) {
       final pos = player.position;
       final total = player.duration ?? Duration.zero;
@@ -108,12 +98,109 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
       controller.seek(target > total ? total : target);
       return true;
     }
-
-    // 6. Rewind / Backward (10s)
     if (key == LogicalKeyboardKey.mediaRewind) {
       final pos = player.position;
       final target = pos - const Duration(seconds: 10);
       controller.seek(target < Duration.zero ? Duration.zero : target);
+      return true;
+    }
+
+    // 2. Guard: if user is typing into any text input field (e.g. search bar),
+    // NEVER intercept bare letters (m, l, q, f) or bare space!
+    final focus = FocusManager.instance.primaryFocus;
+    final ctx = focus?.context;
+    final isEditing = ctx != null &&
+        (ctx.widget is EditableText ||
+            ctx.findAncestorWidgetOfExactType<EditableText>() != null);
+
+    if (isEditing) {
+      // While typing in an input field, only allow Ctrl-modified playback shortcuts:
+      if (HardwareKeyboard.instance.isControlPressed) {
+        if (key == LogicalKeyboardKey.arrowRight) {
+          controller.skipNext();
+          return true;
+        }
+        if (key == LogicalKeyboardKey.arrowLeft) {
+          controller.skipPrevious();
+          return true;
+        }
+        if (key == LogicalKeyboardKey.arrowUp) {
+          volumeNotifier.stepUp();
+          return true;
+        }
+        if (key == LogicalKeyboardKey.arrowDown) {
+          volumeNotifier.stepDown();
+          return true;
+        }
+      }
+      // Return false so the key event passes directly to the focused EditableText!
+      return false;
+    }
+
+    // 3. Desktop shortcuts when NOT typing into an input field:
+    if (HardwareKeyboard.instance.isControlPressed) {
+      if (key == LogicalKeyboardKey.arrowRight) {
+        controller.skipNext();
+        return true;
+      }
+      if (key == LogicalKeyboardKey.arrowLeft) {
+        controller.skipPrevious();
+        return true;
+      }
+      if (key == LogicalKeyboardKey.arrowUp) {
+        volumeNotifier.stepUp();
+        return true;
+      }
+      if (key == LogicalKeyboardKey.arrowDown) {
+        volumeNotifier.stepDown();
+        return true;
+      }
+      if (key == LogicalKeyboardKey.keyF) {
+        _goBranch(1);
+        return true;
+      }
+      if (key == LogicalKeyboardKey.digit1) {
+        _goBranch(0);
+        return true;
+      }
+      if (key == LogicalKeyboardKey.digit2) {
+        _goBranch(1);
+        return true;
+      }
+      if (key == LogicalKeyboardKey.digit3) {
+        _goBranch(2);
+        return true;
+      }
+      if (key == LogicalKeyboardKey.digit4) {
+        _goBranch(3);
+        return true;
+      }
+      return false;
+    }
+
+    // Bare keys when browsing (NOT focused on a text box):
+    if (key == LogicalKeyboardKey.space) {
+      controller.togglePlayPause();
+      return true;
+    }
+    if (key == LogicalKeyboardKey.keyM) {
+      volumeNotifier.toggleMute();
+      return true;
+    }
+    if (key == LogicalKeyboardKey.keyL) {
+      final song = ref.read(activeSongProvider);
+      if (song != null) showLyricsSheet(context, song);
+      return true;
+    }
+    if (key == LogicalKeyboardKey.keyQ) {
+      showQueueSheet(context);
+      return true;
+    }
+    if (key == LogicalKeyboardKey.keyF) {
+      final song = ref.read(activeSongProvider);
+      if (song != null) {
+        Navigator.of(context, rootNavigator: true).push(buildPlayerRoute());
+      }
       return true;
     }
 
@@ -184,96 +271,24 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
   }
 
   // ── Desktop: glass sidebar + content + full-width desktop player bar ────
-  bool _isEditableFocused() {
-    final focus = FocusManager.instance.primaryFocus;
-    if (focus == null) return false;
-    final ctx = focus.context;
-    if (ctx == null) return false;
-    return ctx.widget is EditableText ||
-        ctx.findAncestorWidgetOfExactType<EditableText>() != null;
-  }
-
   Widget _buildDesktop(BuildContext context) {
-    return CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.space): () {
-          if (!_isEditableFocused()) {
-            ref.read(playerControllerProvider).togglePlayPause();
-          }
-        },
-        const SingleActivator(LogicalKeyboardKey.arrowRight, control: true): () {
-          ref.read(playerControllerProvider).skipNext();
-        },
-        const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true): () {
-          ref.read(playerControllerProvider).skipPrevious();
-        },
-        const SingleActivator(LogicalKeyboardKey.arrowUp, control: true): () {
-          ref.read(playerVolumeProvider.notifier).stepUp();
-        },
-        const SingleActivator(LogicalKeyboardKey.arrowDown, control: true): () {
-          ref.read(playerVolumeProvider.notifier).stepDown();
-        },
-        const SingleActivator(LogicalKeyboardKey.keyM): () {
-          if (!_isEditableFocused()) {
-            ref.read(playerVolumeProvider.notifier).toggleMute();
-          }
-        },
-        const SingleActivator(LogicalKeyboardKey.keyL): () {
-          if (!_isEditableFocused()) {
-            final song = ref.read(activeSongProvider);
-            if (song != null) showLyricsSheet(context, song);
-          }
-        },
-        const SingleActivator(LogicalKeyboardKey.keyQ): () {
-          if (!_isEditableFocused()) {
-            showQueueSheet(context);
-          }
-        },
-        const SingleActivator(LogicalKeyboardKey.keyF): () {
-          if (!_isEditableFocused()) {
-            final song = ref.read(activeSongProvider);
-            if (song != null) {
-              Navigator.of(context, rootNavigator: true).push(buildPlayerRoute());
-            }
-          }
-        },
-        const SingleActivator(LogicalKeyboardKey.keyF, control: true): () {
-          _goBranch(1);
-        },
-        const SingleActivator(LogicalKeyboardKey.digit1, control: true): () {
-          _goBranch(0);
-        },
-        const SingleActivator(LogicalKeyboardKey.digit2, control: true): () {
-          _goBranch(1);
-        },
-        const SingleActivator(LogicalKeyboardKey.digit3, control: true): () {
-          _goBranch(2);
-        },
-        const SingleActivator(LogicalKeyboardKey.digit4, control: true): () {
-          _goBranch(3);
-        },
-      },
-      child: Focus(
-        autofocus: true,
-        child: Scaffold(
-          body: Column(
-            children: [
-              Expanded(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _DesktopSidebar(
-                      selectedIndex: navigationShell.currentIndex,
-                      onSelected: _goBranch,
-                    ),
-                    Expanded(child: ClipRect(child: navigationShell)),
-                  ],
+    return Scaffold(
+      body: Column(
+        children: [
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _DesktopSidebar(
+                  selectedIndex: navigationShell.currentIndex,
+                  onSelected: _goBranch,
                 ),
-              ),
-              const DesktopPlayerBar(),
-            ],
+                Expanded(child: ClipRect(child: navigationShell)),
+              ],
+            ),
           ),
-        ),
+          const DesktopPlayerBar(),
+        ],
       ),
     );
   }
