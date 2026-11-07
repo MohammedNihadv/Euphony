@@ -12,6 +12,17 @@ import '../../domain/song.dart';
 import '../../playback/download_provider.dart';
 import '../../playback/player_provider.dart';
 
+final librarySelectedTabProvider = NotifierProvider<LibrarySelectedTabNotifier, int>(
+  LibrarySelectedTabNotifier.new,
+);
+
+class LibrarySelectedTabNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void selectTab(int index) => state = index.clamp(0, 4);
+}
+
 class LibraryScreen extends ConsumerStatefulWidget {
   const LibraryScreen({super.key});
 
@@ -26,7 +37,16 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(
+      length: 5,
+      vsync: this,
+      initialIndex: ref.read(librarySelectedTabProvider),
+    );
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        ref.read(librarySelectedTabProvider.notifier).selectTab(_tabController.index);
+      }
+    });
   }
 
   @override
@@ -37,6 +57,12 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<int>(librarySelectedTabProvider, (previous, next) {
+      if (_tabController.index != next) {
+        _tabController.animateTo(next);
+      }
+    });
+
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -90,15 +116,20 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _LikedSongsTab(),
-          _DownloadsTab(),
-          _SavedPlaylistsTab(),
-          _SavedAlbumsTab(),
-          _SearchHistoryTab(),
-        ],
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1180),
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _LikedSongsTab(),
+              _DownloadsTab(),
+              _SavedPlaylistsTab(),
+              _SavedAlbumsTab(),
+              _SearchHistoryTab(),
+            ],
+          ),
+        ),
       ),
     );
   }

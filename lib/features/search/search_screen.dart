@@ -990,6 +990,12 @@ class _SectionBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final isDesktop = width >= 900;
+    final isCardSection = section.items.any(
+      (item) => item is AlbumItem || item is ArtistItem || item is PlaylistItem,
+    );
+
     return Padding(
       padding: const EdgeInsets.only(bottom: EuSpace.xl),
       child: Column(
@@ -997,9 +1003,145 @@ class _SectionBlock extends StatelessWidget {
         children: [
           Text(section.title, style: Theme.of(context).textTheme.sectionTitle),
           const SizedBox(height: EuSpace.sm),
-          for (final item in section.items)
-            _MusicItemTile(item: item, sectionItems: section.items),
+          if (isDesktop && isCardSection)
+            _DesktopCardGrid(section: section)
+          else
+            for (final item in section.items)
+              _MusicItemTile(item: item, sectionItems: section.items),
         ],
+      ),
+    );
+  }
+}
+
+class _DesktopCardGrid extends ConsumerWidget {
+  const _DesktopCardGrid({required this.section});
+
+  final SearchSection section;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cols = (constraints.maxWidth / 190).floor().clamp(3, 6);
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: cols,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 0.76,
+          ),
+          itemCount: section.items.length,
+          itemBuilder: (context, index) {
+            final item = section.items[index];
+            return _DesktopItemCard(item: item, sectionItems: section.items);
+          },
+        );
+      },
+    );
+  }
+}
+
+class _DesktopItemCard extends ConsumerStatefulWidget {
+  const _DesktopItemCard({required this.item, this.sectionItems});
+
+  final MusicItem item;
+  final List<MusicItem>? sectionItems;
+
+  @override
+  ConsumerState<_DesktopItemCard> createState() => _DesktopItemCardState();
+}
+
+class _DesktopItemCardState extends ConsumerState<_DesktopItemCard> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final item = widget.item;
+    final isArtist = item is ArtistItem;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: () => _navigateToItem(ref, context, item, widget.sectionItems),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDark
+                ? (_hovered ? const Color(0xFF202036) : const Color(0xFF141424))
+                : (_hovered ? Colors.white : const Color(0xFFF8F8FC)),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: _hovered
+                  ? EuBrutal.accent
+                  : (isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.08)),
+              width: _hovered ? 1.5 : 1.0,
+            ),
+            boxShadow: _hovered ? EuBrutal.smHardShadow : null,
+          ),
+          child: Column(
+            crossAxisAlignment: isArtist ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Center(
+                  child: AspectRatio(
+                    aspectRatio: 1.0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: isArtist ? BoxShape.circle : BoxShape.rectangle,
+                        borderRadius: isArtist ? null : BorderRadius.circular(10),
+                        border: Border.all(color: context.eu.ink, width: 1.2),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: isArtist
+                            ? BorderRadius.circular(100)
+                            : BorderRadius.circular(9),
+                        child: _artworkUrlFor(item) != null
+                            ? Image.network(
+                                _artworkUrlFor(item)!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) =>
+                                    Icon(isArtist ? Icons.person_rounded : Icons.album_rounded),
+                              )
+                            : Icon(isArtist ? Icons.person_rounded : Icons.album_rounded),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                _titleFor(item),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: isArtist ? TextAlign.center : TextAlign.left,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                _subtitleFor(item),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: isArtist ? TextAlign.center : TextAlign.left,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white60 : Colors.black54,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

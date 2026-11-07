@@ -1479,3 +1479,26 @@ void _showSleepTimerSheet(BuildContext context, WidgetRef ref) {
     ),
   );
 }
+
+PageRouteBuilder<void> buildPlayerRoute() {
+  return PageRouteBuilder<void>(
+    pageBuilder: (context, animation, secondaryAnimation) =>
+        const PlayerScreen(),
+    transitionDuration: EuMotion.standard,
+    reverseTransitionDuration: EuMotion.quick,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: EuMotion.emphasized,
+        reverseCurve: EuMotion.emphasizedIn,
+      );
+      return SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 1),
+          end: Offset.zero,
+        ).animate(curved),
+        child: child,
+      );
+    },
+  );
+}

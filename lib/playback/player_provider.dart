@@ -378,6 +378,43 @@ class PlaybackSpeedNotifier extends Notifier<double> {
   }
 }
 
+final playerVolumeProvider = NotifierProvider<PlayerVolumeNotifier, double>(
+  PlayerVolumeNotifier.new,
+);
+
+class PlayerVolumeNotifier extends Notifier<double> {
+  double _lastNonZero = 1.0;
+
+  @override
+  double build() {
+    final player = ref.watch(audioPlayerProvider);
+    final sub = player.volumeStream.listen((v) {
+      if (state != v) state = v;
+    });
+    ref.onDispose(sub.cancel);
+    return player.volume;
+  }
+
+  void setVolume(double volume) {
+    final clamped = volume.clamp(0.0, 1.0);
+    state = clamped;
+    if (clamped > 0) _lastNonZero = clamped;
+    ref.read(audioPlayerProvider).setVolume(clamped);
+  }
+
+  void toggleMute() {
+    if (state > 0) {
+      _lastNonZero = state;
+      setVolume(0.0);
+    } else {
+      setVolume(_lastNonZero > 0 ? _lastNonZero : 1.0);
+    }
+  }
+
+  void stepUp([double step = 0.05]) => setVolume(state + step);
+  void stepDown([double step = 0.05]) => setVolume(state - step);
+}
+
 final playerControllerProvider = Provider<PlayerController>((ref) {
   final player = ref.read(audioPlayerProvider);
   ref.listen(settingsControllerProvider, (prev, next) {
@@ -517,8 +554,10 @@ class PlayerController {
     _mediaControls.init(
       onPlay: () => unawaited(_player.play()),
       onPause: () => unawaited(_player.pause()),
+      onPlayPause: () => unawaited(togglePlayPause()),
       onNext: skipNext,
       onPrevious: skipPrevious,
+      onStop: () => unawaited(stop()),
     );
 
     // The old listener mirrored just_audio's `sequenceState.currentIndex` back

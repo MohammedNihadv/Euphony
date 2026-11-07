@@ -26,12 +26,20 @@ jobs:
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
       - run: flutter build windows --release
-      - name: Package
+      - name: Build Inno Setup Installer
+        shell: pwsh
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=1.0.1 installer/windows/euphony.iss
+      - name: Package Portable Zip
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath euphony-windows-x64.zip
       - uses: actions/upload-artifact@v7
         with:
-          name: euphony-windows
+          name: euphony-windows-portable
           path: euphony-windows-x64.zip
+      - uses: actions/upload-artifact@v7
+        with:
+          name: euphony-windows-installer
+          path: installer/windows/installer_out/euphony-windows-setup.exe
 
   linux:
     name: Build Linux

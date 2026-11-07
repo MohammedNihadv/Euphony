@@ -1,5 +1,7 @@
+import 'dart:io' show Platform;
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,8 +9,14 @@ import 'package:go_router/go_router.dart';
 
 import '../design/tokens/brutal.dart';
 import '../design/widgets/brand_badge.dart';
+import '../domain/song.dart';
+import '../features/library/library_screen.dart';
+import '../features/player/desktop_player_bar.dart';
 import '../features/player/dynamic_island.dart';
+import '../features/player/lyrics_sheet.dart';
 import '../features/player/mini_player.dart';
+import '../features/player/player_screen.dart';
+import '../features/player/queue_sheet.dart';
 import '../features/settings/settings_provider.dart';
 import '../playback/player_provider.dart';
 
@@ -121,6 +129,18 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
 
   @override
   Widget build(BuildContext context) {
+    // Dynamically update desktop OS window caption with current playing song
+    ref.listen<Song?>(activeSongProvider, (previous, next) {
+      if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+        final title = next != null
+            ? '${next.title} • ${next.artistNames} — Euphony'
+            : 'Euphony';
+        SystemChrome.setApplicationSwitcherDescription(
+          ApplicationSwitcherDescription(label: title),
+        );
+      }
+    });
+
     ref.listen<String?>(playbackErrorProvider, (previous, next) {
       if (next == null) return;
       ScaffoldMessenger.of(context)
@@ -163,32 +183,97 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
     );
   }
 
-  // ── Desktop: glass sidebar + content + full-width player bar ─────────────
+  // ── Desktop: glass sidebar + content + full-width desktop player bar ────
+  bool _isEditableFocused() {
+    final focus = FocusManager.instance.primaryFocus;
+    if (focus == null) return false;
+    final ctx = focus.context;
+    if (ctx == null) return false;
+    return ctx.widget is EditableText ||
+        ctx.findAncestorWidgetOfExactType<EditableText>() != null;
+  }
+
   Widget _buildDesktop(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _DesktopSidebar(
-                  selectedIndex: navigationShell.currentIndex,
-                  onSelected: _goBranch,
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.space): () {
+          if (!_isEditableFocused()) {
+            ref.read(playerControllerProvider).togglePlayPause();
+          }
+        },
+        const SingleActivator(LogicalKeyboardKey.arrowRight, control: true): () {
+          ref.read(playerControllerProvider).skipNext();
+        },
+        const SingleActivator(LogicalKeyboardKey.arrowLeft, control: true): () {
+          ref.read(playerControllerProvider).skipPrevious();
+        },
+        const SingleActivator(LogicalKeyboardKey.arrowUp, control: true): () {
+          ref.read(playerVolumeProvider.notifier).stepUp();
+        },
+        const SingleActivator(LogicalKeyboardKey.arrowDown, control: true): () {
+          ref.read(playerVolumeProvider.notifier).stepDown();
+        },
+        const SingleActivator(LogicalKeyboardKey.keyM): () {
+          if (!_isEditableFocused()) {
+            ref.read(playerVolumeProvider.notifier).toggleMute();
+          }
+        },
+        const SingleActivator(LogicalKeyboardKey.keyL): () {
+          if (!_isEditableFocused()) {
+            final song = ref.read(activeSongProvider);
+            if (song != null) showLyricsSheet(context, song);
+          }
+        },
+        const SingleActivator(LogicalKeyboardKey.keyQ): () {
+          if (!_isEditableFocused()) {
+            showQueueSheet(context);
+          }
+        },
+        const SingleActivator(LogicalKeyboardKey.keyF): () {
+          if (!_isEditableFocused()) {
+            final song = ref.read(activeSongProvider);
+            if (song != null) {
+              Navigator.of(context, rootNavigator: true).push(buildPlayerRoute());
+            }
+          }
+        },
+        const SingleActivator(LogicalKeyboardKey.keyF, control: true): () {
+          _goBranch(1);
+        },
+        const SingleActivator(LogicalKeyboardKey.digit1, control: true): () {
+          _goBranch(0);
+        },
+        const SingleActivator(LogicalKeyboardKey.digit2, control: true): () {
+          _goBranch(1);
+        },
+        const SingleActivator(LogicalKeyboardKey.digit3, control: true): () {
+          _goBranch(2);
+        },
+        const SingleActivator(LogicalKeyboardKey.digit4, control: true): () {
+          _goBranch(3);
+        },
+      },
+      child: Focus(
+        autofocus: true,
+        child: Scaffold(
+          body: Column(
+            children: [
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _DesktopSidebar(
+                      selectedIndex: navigationShell.currentIndex,
+                      onSelected: _goBranch,
+                    ),
+                    Expanded(child: ClipRect(child: navigationShell)),
+                  ],
                 ),
-                Expanded(child: ClipRect(child: navigationShell)),
-              ],
-            ),
-          ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(color: context.eu.divider, width: 1.5),
               ),
-            ),
-            child: const MiniPlayer(),
+              const DesktopPlayerBar(),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -363,7 +448,7 @@ class _GlassBrutalNavBar extends ConsumerWidget {
 // Desktop sidebar — glass panel + brutalist right border
 // ---------------------------------------------------------------------------
 
-class _DesktopSidebar extends StatelessWidget {
+class _DesktopSidebar extends ConsumerWidget {
   const _DesktopSidebar({
     required this.selectedIndex,
     required this.onSelected,
@@ -373,7 +458,7 @@ class _DesktopSidebar extends StatelessWidget {
   final ValueChanged<int> onSelected;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -381,7 +466,7 @@ class _DesktopSidebar extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
         child: Container(
-          width: 232,
+          width: 236,
           decoration: BoxDecoration(
             // Glass fill
             color: isDark
@@ -404,19 +489,113 @@ class _DesktopSidebar extends StatelessWidget {
                 for (var i = 0; i < _destinations.length; i++)
                   _SidebarItem(
                     dest: _destinations[i],
+                    shortcut: 'Ctrl+${i + 1}',
                     selected: i == selectedIndex,
                     onTap: () => onSelected(i),
                   ),
+
+                // ── Divider & Collection Header ──────────────────────────────
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 1.5,
+                          color: context.eu.divider.withValues(alpha: 0.7),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(
+                          'YOUR MUSIC',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 1.2,
+                            color: context.eu.ink.withValues(alpha: 0.45),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          height: 1.5,
+                          color: context.eu.divider.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ── Quick Collection Links ───────────────────────────────────
+                _QuickCollectionItem(
+                  icon: Icons.favorite_rounded,
+                  iconColor: EuBrutal.alert,
+                  label: 'Liked Songs',
+                  onTap: () {
+                    ref.read(librarySelectedTabProvider.notifier).selectTab(0);
+                    onSelected(2);
+                  },
+                ),
+                _QuickCollectionItem(
+                  icon: Icons.download_done_rounded,
+                  iconColor: EuBrutal.accent,
+                  label: 'Downloads',
+                  onTap: () {
+                    ref.read(librarySelectedTabProvider.notifier).selectTab(1);
+                    onSelected(2);
+                  },
+                ),
+                _QuickCollectionItem(
+                  icon: Icons.queue_music_rounded,
+                  iconColor: isDark ? Colors.amberAccent : Colors.orange,
+                  label: 'Playlists',
+                  onTap: () {
+                    ref.read(librarySelectedTabProvider.notifier).selectTab(2);
+                    onSelected(2);
+                  },
+                ),
+                _QuickCollectionItem(
+                  icon: Icons.history_rounded,
+                  iconColor: context.eu.ink.withValues(alpha: 0.7),
+                  label: 'History',
+                  onTap: () {
+                    ref.read(librarySelectedTabProvider.notifier).selectTab(4);
+                    onSelected(2);
+                  },
+                ),
+
                 const Spacer(),
                 Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    'Euphony',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: context.eu.ink.withValues(alpha: 0.35),
-                    ),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Euphony Desktop',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: context.eu.ink.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      const Spacer(),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: EuBrutal.accent.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: EuBrutal.accent, width: 1),
+                        ),
+                        child: const Text(
+                          'v1.0.1',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                            color: EuBrutal.accent,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -431,11 +610,13 @@ class _DesktopSidebar extends StatelessWidget {
 class _SidebarItem extends StatelessWidget {
   const _SidebarItem({
     required this.dest,
+    required this.shortcut,
     required this.selected,
     required this.onTap,
   });
 
   final _Dest dest;
+  final String shortcut;
   final bool selected;
   final VoidCallback onTap;
 
@@ -444,37 +625,114 @@ class _SidebarItem extends StatelessWidget {
     final fg = selected ? EuBrutal.onAccent : context.eu.ink;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        child: InkWell(
+      child: Tooltip(
+        message: '${dest.label} ($shortcut)',
+        waitDuration: const Duration(milliseconds: 500),
+        child: Material(
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          onTap: onTap,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeInOut,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                // Accent fill for selected — brutalist solid colour
+                color: selected ? EuBrutal.accent : Colors.transparent,
+                borderRadius: BorderRadius.circular(12),
+                // Hard shadow only when selected
+                boxShadow: selected ? EuBrutal.smHardShadow : null,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    selected ? dest.selectedIcon : dest.icon,
+                    color: fg,
+                    size: 22,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      dest.label,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+                        color: fg,
+                      ),
+                    ),
+                  ),
+                  if (selected)
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickCollectionItem extends StatefulWidget {
+  const _QuickCollectionItem({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  State<_QuickCollectionItem> createState() => _QuickCollectionItemState();
+}
+
+class _QuickCollectionItemState extends State<_QuickCollectionItem> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          onTap: widget.onTap,
           child: AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeInOut,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            duration: const Duration(milliseconds: 140),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              // Accent fill for selected — brutalist solid colour
-              color: selected ? EuBrutal.accent : Colors.transparent,
-              borderRadius: BorderRadius.circular(12),
-              // Hard shadow only when selected
-              boxShadow: selected ? EuBrutal.smHardShadow : null,
+              color: _hovered
+                  ? context.eu.ink.withValues(alpha: 0.08)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
-                Icon(
-                  selected ? dest.selectedIcon : dest.icon,
-                  color: fg,
-                  size: 22,
-                ),
-                const SizedBox(width: 14),
-                Text(
-                  dest.label,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-                    color: fg,
+                Icon(widget.icon, size: 18, color: widget.iconColor),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    widget.label,
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: context.eu.ink.withValues(alpha: 0.85),
+                    ),
                   ),
                 ),
               ],

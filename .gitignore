@@ -73,6 +73,7 @@ web_stdout*.txt
 
 # Scratch / temp
 scratch/
+build_artifacts/
 
 # Issues photos (local debugging only)
 Issues-photo/

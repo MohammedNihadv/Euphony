@@ -1,30 +1,109 @@
-import 'package:flutter/foundation.dart';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+
+import '../core/log.dart';
 import '../domain/song.dart';
 
-/// Hook point for desktop OS media controls (Windows SMTC, macOS Now Playing,
-/// Linux MPRIS).
+final _log = logFor('desktop_media_controls');
+
+/// Native desktop OS media controls (Windows hardware media keys, Bluetooth AVRCP,
+/// and background transport events).
 ///
-/// Currently a no-op: the available Windows SMTC package pulls a prebuilt native
-/// library at build time that does not bundle reliably, so shipping it would add
-/// a dependency that silently does nothing. The player already calls these
-/// methods, so a real implementation can be dropped in here later without
-/// touching playback code. Everything is a safe no-op today.
+/// Communicates with `windows/runner/flutter_window.cpp` via a platform method channel
+/// using native Win32 `WM_APPCOMMAND` and `RegisterHotKey` for zero-dependency,
+/// guaranteed bundling in production releases.
 class DesktopMediaControls {
-  static bool get isSupported => false;
+  static const MethodChannel _channel =
+      MethodChannel('com.mhdni.euphony/desktop_media');
+
+  static bool get isSupported => !kIsWeb && Platform.isWindows;
+
+  VoidCallback? _onPlay;
+  VoidCallback? _onPause;
+  VoidCallback? _onPlayPause;
+  VoidCallback? _onNext;
+  VoidCallback? _onPrevious;
+  VoidCallback? _onStop;
+  bool _isPlaying = false;
 
   void init({
     required VoidCallback onPlay,
     required VoidCallback onPause,
+    VoidCallback? onPlayPause,
     required VoidCallback onNext,
     required VoidCallback onPrevious,
-  }) {}
+    VoidCallback? onStop,
+  }) {
+    if (!isSupported) return;
 
-  void updateSong(Song song) {}
+    _onPlay = onPlay;
+    _onPause = onPause;
+    _onPlayPause = onPlayPause;
+    _onNext = onNext;
+    _onPrevious = onPrevious;
+    _onStop = onStop;
 
-  void setPlaying({required bool playing}) {}
+    _channel.setMethodCallHandler(_handleNativeMethod);
+    _log.info('Windows native desktop media controls initialized');
+  }
 
-  void setStopped() {}
+  Future<dynamic> _handleNativeMethod(MethodCall call) async {
+    switch (call.method) {
+      case 'playPause':
+        if (_onPlayPause != null) {
+          _onPlayPause!();
+        } else if (_isPlaying) {
+          _onPause?.call();
+        } else {
+          _onPlay?.call();
+        }
+      case 'play':
+        _onPlay?.call();
+      case 'pause':
+        _onPause?.call();
+      case 'next':
+        _onNext?.call();
+      case 'previous':
+        _onPrevious?.call();
+      case 'stop':
+        _onStop?.call();
+    }
+  }
 
-  void dispose() {}
+  void updateSong(Song song) {
+    if (!isSupported) return;
+    try {
+      _channel.invokeMethod('updateMetadata', {
+        'title': song.title,
+        'artist': song.artistNames,
+        'album': song.albumTitle,
+      });
+    } catch (_) {}
+  }
+
+  void setPlaying({required bool playing}) {
+    _isPlaying = playing;
+    if (!isSupported) return;
+    try {
+      _channel.invokeMethod('setPlaybackStatus', {'playing': playing});
+    } catch (_) {}
+  }
+
+  void setStopped() {
+    _isPlaying = false;
+    if (!isSupported) return;
+    try {
+      _channel.invokeMethod(
+        'setPlaybackStatus',
+        {'playing': false, 'stopped': true},
+      );
+    } catch (_) {}
+  }
+
+  void dispose() {
+    if (!isSupported) return;
+    _channel.setMethodCallHandler(null);
+  }
 }
