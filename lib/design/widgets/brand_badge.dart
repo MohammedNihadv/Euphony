@@ -67,22 +67,13 @@ class EuphonyBrandBadge extends StatelessWidget {
             children: [
               EuphonyLogoMark(size: fontSize * 1.35, radius: fontSize * 0.38),
               const SizedBox(width: 9),
-              ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
-                  colors: isDark
-                      ? const [Colors.white, Color(0xFFDDD6FE)]
-                      : const [Color(0xFF1E1035), EuBrutal.accent],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ).createShader(bounds),
-                child: Text(
-                  'Euphony',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
-                    fontSize: fontSize,
-                    letterSpacing: -0.6,
-                  ),
+              Text(
+                'Euphony',
+                style: TextStyle(
+                  color: isDark ? Colors.white : EuBrutal.accent,
+                  fontWeight: FontWeight.w900,
+                  fontSize: fontSize,
+                  letterSpacing: -0.6,
                 ),
               ),
             ],

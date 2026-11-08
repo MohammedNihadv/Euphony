@@ -75,28 +75,42 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
     // 1. Dedicated hardware / bluetooth / headset media keys always work anywhere.
     // Note: On Windows, VK_MEDIA_PLAY_PAUSE (0xB3) is mapped by Flutter's HID translation table
     // to LogicalKeyboardKey.mediaFastForward (HID usage 0x00B3 = Fast Forward).
-    // Therefore, mediaPlayPause, mediaPlay, mediaPause, mediaFastForward, and
-    // PhysicalKeyboardKey.mediaPlayPause all trigger togglePlayPause().
+    // SMTC on Windows handles these OS-level media keys directly (both foreground and background).
+    // If we also trigger playback actions here while the window is focused on Windows, the
+    // duplicate event fired within milliseconds causes play/pause to immediately invert itself.
+    // Therefore, on Windows we consume dedicated media keys here so SMTC handles them cleanly.
     if (key == LogicalKeyboardKey.mediaPlayPause ||
         key == LogicalKeyboardKey.mediaPlay ||
         key == LogicalKeyboardKey.mediaPause ||
         key == LogicalKeyboardKey.mediaFastForward ||
         event.physicalKey == PhysicalKeyboardKey.mediaPlayPause) {
+      if (!kIsWeb && Platform.isWindows) {
+        return true;
+      }
       controller.togglePlayPause();
       return true;
     }
     if (key == LogicalKeyboardKey.mediaStop) {
+      if (!kIsWeb && Platform.isWindows) {
+        return true;
+      }
       controller.stop();
       return true;
     }
     if (key == LogicalKeyboardKey.mediaTrackNext ||
         key == LogicalKeyboardKey.mediaSkip ||
         event.physicalKey == PhysicalKeyboardKey.mediaTrackNext) {
+      if (!kIsWeb && Platform.isWindows) {
+        return true;
+      }
       controller.skipNext();
       return true;
     }
     if (key == LogicalKeyboardKey.mediaTrackPrevious ||
         event.physicalKey == PhysicalKeyboardKey.mediaTrackPrevious) {
+      if (!kIsWeb && Platform.isWindows) {
+        return true;
+      }
       controller.skipPrevious();
       return true;
     }

@@ -852,8 +852,8 @@ class _SectionBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          color: isDark ? Colors.white : Colors.black,
+        style: const TextStyle(
+          color: Colors.white,
           fontWeight: FontWeight.w900,
           fontSize: 10,
           letterSpacing: 0.8,

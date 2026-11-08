@@ -109,7 +109,7 @@ class _DesktopPlayerBarState extends ConsumerState<DesktopPlayerBar> {
 
               // ── Right: Volume, Queue, Lyrics, Fullscreen ────────────
               SizedBox(
-                width: 290,
+                width: 310,
                 child: _RightUtilitySection(
                   song: song,
                   volume: volume,
@@ -615,7 +615,9 @@ class _RightUtilitySection extends ConsumerWidget {
         // Lyrics toggle
         IconButton(
           icon: const Icon(Icons.lyrics_outlined),
-          iconSize: 20,
+          iconSize: 19,
+          padding: const EdgeInsets.all(6),
+          constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
           color: hasSong
               ? context.eu.ink.withValues(alpha: 0.75)
               : context.eu.ink.withValues(alpha: 0.25),
@@ -626,7 +628,9 @@ class _RightUtilitySection extends ConsumerWidget {
         // Queue toggle (always active!)
         IconButton(
           icon: const Icon(Icons.queue_music_rounded),
-          iconSize: 20,
+          iconSize: 19,
+          padding: const EdgeInsets.all(6),
+          constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
           color: context.eu.ink.withValues(alpha: 0.75),
           tooltip: 'Queue (Q)',
           onPressed: () => showQueueSheet(context),
@@ -636,6 +640,8 @@ class _RightUtilitySection extends ConsumerWidget {
         IconButton(
           icon: const Icon(Icons.open_in_full_rounded),
           iconSize: 18,
+          padding: const EdgeInsets.all(6),
+          constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
           color: hasSong
               ? context.eu.ink.withValues(alpha: 0.75)
               : context.eu.ink.withValues(alpha: 0.25),
@@ -651,12 +657,14 @@ class _RightUtilitySection extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.picture_in_picture_alt_rounded),
             iconSize: 18,
+            padding: const EdgeInsets.all(6),
+            constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
             color: context.eu.ink.withValues(alpha: 0.75),
             tooltip: 'Mini Player (Ctrl+M)',
             onPressed: () => DesktopMediaControls().toggleMiniPlayer(),
           ),
 
-        const SizedBox(width: 6),
+        const SizedBox(width: 4),
 
         // Volume controller with Mouse Wheel support (always active!)
         Listener(
@@ -674,13 +682,15 @@ class _RightUtilitySection extends ConsumerWidget {
             children: [
               IconButton(
                 icon: Icon(volumeIcon),
-                iconSize: 20,
+                iconSize: 19,
+                padding: const EdgeInsets.all(6),
+                constraints: const BoxConstraints(minWidth: 34, minHeight: 34),
                 color: context.eu.ink.withValues(alpha: 0.8),
                 tooltip: volume <= 0 ? 'Unmute (M)' : 'Mute (M)',
                 onPressed: volumeNotifier.toggleMute,
               ),
               SizedBox(
-                width: 95,
+                width: 80,
                 child: SliderTheme(
                   data: SliderTheme.of(context).copyWith(
                     trackHeight: 3.5,

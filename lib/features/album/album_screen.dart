@@ -9,6 +9,8 @@ import '../../domain/song.dart';
 import '../../playback/local_playlist_provider.dart';
 import '../../playback/player_provider.dart';
 import '../common/song_options_sheet.dart';
+import '../player/desktop_player_bar.dart';
+import '../player/mini_player.dart';
 
 class AlbumScreen extends ConsumerStatefulWidget {
   const AlbumScreen({required this.id, this.isPlaylist = false, super.key});
@@ -369,14 +371,18 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                               ),
                               const SizedBox(height: EuSpace.md),
                               Text(
-                                'No songs in this playlist yet',
+                                widget.isPlaylist
+                                    ? 'No songs in this playlist yet'
+                                    : 'No tracks found for this album',
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
                               const SizedBox(height: EuSpace.xs),
                               Text(
-                                'Tap "Add to Playlist" on any song to add tracks here.',
+                                widget.isPlaylist
+                                    ? 'Tap "Add to Playlist" on any song to add tracks here.'
+                                    : 'Check your internet connection or try searching for this album.',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurface.withValues(
                                     alpha: 0.7,
@@ -637,6 +643,23 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                   ),
                 ),
               ),
+      ),
+      bottomNavigationBar: Consumer(
+        builder: (context, ref, _) {
+          final activeSong = ref.watch(activeSongProvider);
+          if (activeSong == null) return const SizedBox.shrink();
+          final isDesktop = MediaQuery.sizeOf(context).width >= 900;
+          if (isDesktop) {
+            return const DesktopPlayerBar();
+          }
+          return const SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 10),
+              child: MiniPlayer(),
+            ),
+          );
+        },
       ),
     );
   }

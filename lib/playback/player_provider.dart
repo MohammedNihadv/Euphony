@@ -1053,7 +1053,20 @@ class PlayerController {
     return null;
   }
 
+  DateTime? _lastActionTime;
+
+  bool _isDebounced([int milliseconds = 300]) {
+    final now = DateTime.now();
+    if (_lastActionTime != null &&
+        now.difference(_lastActionTime!).inMilliseconds < milliseconds) {
+      return true;
+    }
+    _lastActionTime = now;
+    return false;
+  }
+
   Future<void> togglePlayPause() async {
+    if (_isDebounced()) return;
     if (_player.playing) {
       await _player.pause();
     } else if (_player.processingState == ProcessingState.completed ||
@@ -1068,11 +1081,14 @@ class PlayerController {
   /// toggle — a "play" command while already playing has to stay playing.
   Future<void> play() async {
     if (_player.playing) return;
+    if (_isDebounced()) return;
     await togglePlayPause();
   }
 
   Future<void> pause() async {
-    if (_player.playing) await _player.pause();
+    if (!_player.playing) return;
+    if (_isDebounced()) return;
+    await _player.pause();
   }
 
   Future<void> seek(Duration position) async {
@@ -1080,6 +1096,7 @@ class PlayerController {
   }
 
   Future<void> skipNext() async {
+    if (_isDebounced(250)) return;
     // An explicit skip wraps whenever repeat is on; repeat-one applies to
     // tracks running out, not to the user asking for the next one.
     final next = _queue.nextIndex(wrap: _repeatMode() != LoopMode.off);
@@ -1089,6 +1106,7 @@ class PlayerController {
   }
 
   Future<void> skipPrevious() async {
+    if (_isDebounced(250)) return;
     final previous = _queue.previousIndex(wrap: _repeatMode() != LoopMode.off);
     if (previous == null) {
       await _player.seek(Duration.zero);

@@ -9,6 +9,9 @@ import '../../domain/album.dart';
 import '../../domain/artist.dart';
 import '../../domain/playlist.dart';
 import '../../playback/player_provider.dart';
+import '../player/desktop_player_bar.dart';
+import '../player/mini_player.dart';
+import 'artist_discography_screen.dart';
 
 class ArtistScreen extends ConsumerStatefulWidget {
   const ArtistScreen({required this.browseId, super.key});
@@ -159,10 +162,23 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                                 fontWeight: FontWeight.w900,
                               ),
                             ),
-                            if (section.browseId != null)
+                            if (section.browseId != null ||
+                                section.albums.length > 5 ||
+                                section.songs.length > 5)
                               TextButton(
                                 onPressed: () {
-                                  context.push('/album/${section.browseId}');
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => ArtistDiscographyScreen(
+                                        artistName: _artist!.name,
+                                        sectionTitle: section.title,
+                                        initialAlbums: section.albums,
+                                        initialSongs: section.songs,
+                                        initialPlaylists: section.playlists,
+                                        browseId: section.browseId,
+                                      ),
+                                    ),
+                                  );
                                 },
                                 child: const Text(
                                   'More',
@@ -277,6 +293,23 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                   ),
                 ),
               ),
+      ),
+      bottomNavigationBar: Consumer(
+        builder: (context, ref, _) {
+          final activeSong = ref.watch(activeSongProvider);
+          if (activeSong == null) return const SizedBox.shrink();
+          final isDesktop = MediaQuery.sizeOf(context).width >= 900;
+          if (isDesktop) {
+            return const DesktopPlayerBar();
+          }
+          return const SafeArea(
+            top: false,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 10),
+              child: MiniPlayer(),
+            ),
+          );
+        },
       ),
     );
   }
