@@ -303,21 +303,53 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
     );
   }
 
-  // ── Desktop: glass sidebar + content + full-width desktop player bar ────
+  // ── Desktop: floating sidebar rail + rounded content panel + desktop player bar ────
   Widget _buildDesktop(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF0C0C10) : const Color(0xFFF1F3F7),
       body: Column(
         children: [
           Expanded(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _DesktopSidebar(
-                  selectedIndex: navigationShell.currentIndex,
-                  onSelected: _goBranch,
-                ),
-                Expanded(child: ClipRect(child: navigationShell)),
-              ],
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _DesktopSidebar(
+                    selectedIndex: navigationShell.currentIndex,
+                    onSelected: _goBranch,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : Colors.black.withValues(alpha: 0.06),
+                          width: 1.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+                            blurRadius: 18,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: navigationShell,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const DesktopPlayerBar(),
@@ -493,10 +525,10 @@ class _GlassBrutalNavBar extends ConsumerWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Desktop sidebar — glass panel + brutalist right border
+// Desktop sidebar — collapsible rail (Spotify / SimpMusic style)
 // ---------------------------------------------------------------------------
 
-class _DesktopSidebar extends ConsumerWidget {
+class _DesktopSidebar extends ConsumerStatefulWidget {
   const _DesktopSidebar({
     required this.selectedIndex,
     required this.onSelected,
@@ -506,147 +538,419 @@ class _DesktopSidebar extends ConsumerWidget {
   final ValueChanged<int> onSelected;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_DesktopSidebar> createState() => _DesktopSidebarState();
+}
+
+class _DesktopSidebarState extends ConsumerState<_DesktopSidebar> {
+  bool _collapsed = true;
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final width = _collapsed ? 72.0 : 240.0;
 
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          width: 236,
-          decoration: BoxDecoration(
-            // Glass fill
-            color: isDark
-                ? theme.colorScheme.surface.withValues(alpha: 0.75)
-                : Colors.white.withValues(alpha: 0.7),
-            // Brutalist right border
-            border: Border(
-              right: BorderSide(color: context.eu.ink, width: 1.5),
-            ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeInOutCubic,
+      width: width,
+      decoration: BoxDecoration(
+        color: isDark
+            ? const Color(0xFF13131A).withValues(alpha: 0.95)
+            : Colors.white.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.06),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 4),
           ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
           child: SafeArea(
             right: false,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 24, 20, 20),
-                  child: EuphonyBrandBadge(fontSize: 22),
-                ),
-                for (var i = 0; i < _destinations.length; i++)
-                  _SidebarItem(
-                    dest: _destinations[i],
-                    shortcut: 'Ctrl+${i + 1}',
-                    selected: i == selectedIndex,
-                    onTap: () => onSelected(i),
-                  ),
+            child: _collapsed
+                ? _buildCollapsed(context, isDark)
+                : _buildExpanded(context, isDark),
+          ),
+        ),
+      ),
+    );
+  }
 
-                // ── Divider & Collection Header ──────────────────────────────
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 1.5,
-                          color: context.eu.divider.withValues(alpha: 0.7),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          'YOUR MUSIC',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.2,
-                            color: context.eu.ink.withValues(alpha: 0.45),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Container(
-                          height: 1.5,
-                          color: context.eu.divider.withValues(alpha: 0.7),
-                        ),
-                      ),
-                    ],
+  Widget _buildCollapsed(BuildContext context, bool isDark) {
+    return Column(
+      children: [
+        const SizedBox(height: 16),
+        // Home
+        _RailIconButton(
+          icon: widget.selectedIndex == 0
+              ? Icons.home_rounded
+              : Icons.home_outlined,
+          tooltip: 'Home (Ctrl+1)',
+          selected: widget.selectedIndex == 0,
+          onTap: () => widget.onSelected(0),
+        ),
+        const SizedBox(height: 10),
+        // Search
+        _RailIconButton(
+          icon: widget.selectedIndex == 1
+              ? Icons.search_rounded
+              : Icons.search_outlined,
+          tooltip: 'Search (Ctrl+2)',
+          selected: widget.selectedIndex == 1,
+          onTap: () => widget.onSelected(1),
+        ),
+        const SizedBox(height: 12),
+        // Divider
+        Container(
+          width: 32,
+          height: 1.2,
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.12)
+              : Colors.black.withValues(alpha: 0.08),
+        ),
+        const SizedBox(height: 12),
+        // Expand/Collapse Toggle Button
+        _RailIconButton(
+          icon: Icons.start_rounded,
+          tooltip: 'Expand sidebar',
+          selected: false,
+          onTap: () => setState(() => _collapsed = false),
+        ),
+        const SizedBox(height: 12),
+        // Liked Songs Squircle (Red Heart)
+        _RailSquircleButton(
+          icon: Icons.favorite_rounded,
+          iconColor: const Color(0xFFEF4444),
+          tooltip: 'Liked Songs',
+          isDark: isDark,
+          onTap: () {
+            ref.read(librarySelectedTabProvider.notifier).selectTab(0);
+            widget.onSelected(2);
+          },
+        ),
+        const SizedBox(height: 10),
+        // Downloads Squircle (Cyan Download)
+        _RailSquircleButton(
+          icon: Icons.download_for_offline_rounded,
+          iconColor: const Color(0xFF06B6D4),
+          tooltip: 'Downloads',
+          isDark: isDark,
+          onTap: () {
+            ref.read(librarySelectedTabProvider.notifier).selectTab(1);
+            widget.onSelected(2);
+          },
+        ),
+        const SizedBox(height: 10),
+        // Trending Squircle (Sky Blue Trending Arrow)
+        _RailSquircleButton(
+          icon: Icons.trending_up_rounded,
+          iconColor: const Color(0xFF38BDF8),
+          tooltip: 'Trending Charts',
+          isDark: isDark,
+          onTap: () {
+            widget.onSelected(1);
+          },
+        ),
+        const Spacer(),
+        // Settings
+        _RailIconButton(
+          icon: widget.selectedIndex == 3
+              ? Icons.settings_rounded
+              : Icons.settings_outlined,
+          tooltip: 'Settings (Ctrl+4)',
+          selected: widget.selectedIndex == 3,
+          onTap: () => widget.onSelected(3),
+        ),
+        const SizedBox(height: 14),
+      ],
+    );
+  }
+
+  Widget _buildExpanded(BuildContext context, bool isDark) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 10, 14),
+          child: Row(
+            children: [
+              const Expanded(child: EuphonyBrandBadge(fontSize: 18)),
+              IconButton(
+                iconSize: 20,
+                padding: const EdgeInsets.all(4),
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                icon: Icon(
+                  Icons.keyboard_double_arrow_left_rounded,
+                  color: isDark ? Colors.white60 : Colors.black54,
+                ),
+                tooltip: 'Collapse sidebar',
+                onPressed: () => setState(() => _collapsed = true),
+              ),
+            ],
+          ),
+        ),
+        for (var i = 0; i < _destinations.length; i++)
+          _SidebarItem(
+            dest: _destinations[i],
+            shortcut: 'Ctrl+${i + 1}',
+            selected: i == widget.selectedIndex,
+            onTap: () => widget.onSelected(i),
+          ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: 1.2,
+                  color: context.eu.divider.withValues(alpha: 0.6),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  'YOUR MUSIC',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.2,
+                    color: context.eu.ink.withValues(alpha: 0.45),
                   ),
                 ),
-
-                // ── Quick Collection Links ───────────────────────────────────
-                _QuickCollectionItem(
-                  icon: Icons.favorite_rounded,
-                  iconColor: EuBrutal.alert,
-                  label: 'Liked Songs',
-                  onTap: () {
-                    ref.read(librarySelectedTabProvider.notifier).selectTab(0);
-                    onSelected(2);
-                  },
+              ),
+              Expanded(
+                child: Container(
+                  height: 1.2,
+                  color: context.eu.divider.withValues(alpha: 0.6),
                 ),
-                _QuickCollectionItem(
-                  icon: Icons.download_done_rounded,
-                  iconColor: EuBrutal.accent,
-                  label: 'Downloads',
-                  onTap: () {
-                    ref.read(librarySelectedTabProvider.notifier).selectTab(1);
-                    onSelected(2);
-                  },
+              ),
+            ],
+          ),
+        ),
+        _QuickCollectionItem(
+          icon: Icons.favorite_rounded,
+          iconColor: const Color(0xFFEF4444),
+          label: 'Liked Songs',
+          onTap: () {
+            ref.read(librarySelectedTabProvider.notifier).selectTab(0);
+            widget.onSelected(2);
+          },
+        ),
+        _QuickCollectionItem(
+          icon: Icons.download_for_offline_rounded,
+          iconColor: const Color(0xFF06B6D4),
+          label: 'Downloads',
+          onTap: () {
+            ref.read(librarySelectedTabProvider.notifier).selectTab(1);
+            widget.onSelected(2);
+          },
+        ),
+        _QuickCollectionItem(
+          icon: Icons.trending_up_rounded,
+          iconColor: const Color(0xFF38BDF8),
+          label: 'Trending Charts',
+          onTap: () {
+            widget.onSelected(1);
+          },
+        ),
+        _QuickCollectionItem(
+          icon: Icons.queue_music_rounded,
+          iconColor: isDark ? Colors.amberAccent : Colors.orange,
+          label: 'Playlists',
+          onTap: () {
+            ref.read(librarySelectedTabProvider.notifier).selectTab(2);
+            widget.onSelected(2);
+          },
+        ),
+        const Spacer(),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+          child: Row(
+            children: [
+              Text(
+                'Euphony Desktop',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: context.eu.ink.withValues(alpha: 0.4),
                 ),
-                _QuickCollectionItem(
-                  icon: Icons.queue_music_rounded,
-                  iconColor: isDark ? Colors.amberAccent : Colors.orange,
-                  label: 'Playlists',
-                  onTap: () {
-                    ref.read(librarySelectedTabProvider.notifier).selectTab(2);
-                    onSelected(2);
-                  },
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: EuBrutal.accent.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: EuBrutal.accent, width: 1),
                 ),
-                _QuickCollectionItem(
-                  icon: Icons.history_rounded,
-                  iconColor: context.eu.ink.withValues(alpha: 0.7),
-                  label: 'History',
-                  onTap: () {
-                    ref.read(librarySelectedTabProvider.notifier).selectTab(4);
-                    onSelected(2);
-                  },
-                ),
-
-                const Spacer(),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Euphony Desktop',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: context.eu.ink.withValues(alpha: 0.4),
-                        ),
-                      ),
-                      const Spacer(),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: EuBrutal.accent.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: EuBrutal.accent, width: 1),
-                        ),
-                        child: const Text(
-                          'v1.0.1',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            color: EuBrutal.accent,
-                          ),
-                        ),
-                      ),
-                    ],
+                child: const Text(
+                  'v1.0.1',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: EuBrutal.accent,
                   ),
                 ),
-              ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RailSquircleButton extends StatefulWidget {
+  const _RailSquircleButton({
+    required this.icon,
+    required this.iconColor,
+    required this.tooltip,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String tooltip;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  @override
+  State<_RailSquircleButton> createState() => _RailSquircleButtonState();
+}
+
+class _RailSquircleButtonState extends State<_RailSquircleButton> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: widget.tooltip,
+      waitDuration: const Duration(milliseconds: 400),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            widget.onTap();
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 140),
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: widget.isDark
+                  ? (_hovered ? const Color(0xFF323642) : const Color(0xFF242730))
+                  : (_hovered ? const Color(0xFFDFE1E8) : const Color(0xFFE8EAF0)),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: widget.isDark
+                    ? Colors.white.withValues(alpha: _hovered ? 0.20 : 0.08)
+                    : Colors.black.withValues(alpha: _hovered ? 0.14 : 0.06),
+                width: 1,
+              ),
+              boxShadow: _hovered
+                  ? [
+                      BoxShadow(
+                        color: widget.iconColor.withValues(alpha: 0.30),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Center(
+              child: Icon(
+                widget.icon,
+                color: widget.iconColor,
+                size: 24,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RailIconButton extends StatefulWidget {
+  const _RailIconButton({
+    required this.icon,
+    required this.tooltip,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  State<_RailIconButton> createState() => _RailIconButtonState();
+}
+
+class _RailIconButtonState extends State<_RailIconButton> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Tooltip(
+      message: widget.tooltip,
+      waitDuration: const Duration(milliseconds: 400),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          onTap: () {
+            HapticFeedback.lightImpact();
+            widget.onTap();
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 140),
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: widget.selected
+                  ? EuBrutal.accent.withValues(alpha: isDark ? 0.25 : 0.15)
+                  : (_hovered
+                        ? (isDark
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : Colors.black.withValues(alpha: 0.05))
+                        : Colors.transparent),
+              borderRadius: BorderRadius.circular(14),
+              border: widget.selected
+                  ? Border.all(
+                      color: EuBrutal.accent.withValues(alpha: 0.6),
+                      width: 1.2,
+                    )
+                  : null,
+            ),
+            child: Center(
+              child: Icon(
+                widget.icon,
+                color: widget.selected
+                    ? EuBrutal.accent
+                    : (isDark ? Colors.white70 : Colors.black87),
+                size: 24,
+              ),
             ),
           ),
         ),
