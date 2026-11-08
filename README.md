@@ -55,8 +55,8 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
   <a href="https://github.com/sponsors/MohammedNihadv">
     <img src="https://img.shields.io/badge/Sponsor-GITHUB%20SPONSORS-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=EA4AAA&labelColor=18181b" alt="Sponsor on GitHub"/>
   </a>
-  <a href="https://www.buymeacoffee.com/mhdnihadv">
-    <img src="https://img.shields.io/badge/Buy_Me_A_Coffee-DONATE-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=FFDD00&labelColor=18181b" alt="Buy Me A Coffee"/>
+  <a href="https://supertipz.in/pay/mhdnihadv">
+    <img src="https://img.shields.io/badge/Supertipz-SUPPORT%20(UPI)-6366F1?style=for-the-badge&logo=upi&logoColor=6366F1&labelColor=18181b" alt="Support via Supertipz"/>
   </a>
 </p>
 
@@ -119,13 +119,16 @@ Euphony is built with love and maintained independently without ads, tracking, o
 
 <p align="center">
   <a href="https://github.com/sponsors/MohammedNihadv">
-    <img src="https://img.shields.io/badge/GitHub%20Sponsors-SPONSOR-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white&labelColor=18181b" alt="Sponsor on GitHub"/>
+    <img src="https://img.shields.io/badge/GitHub%20Sponsors-SPONSOR%20(INTERNATIONAL)-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white&labelColor=18181b" alt="Sponsor on GitHub"/>
   </a>
   &nbsp;&nbsp;
-  <a href="https://www.buymeacoffee.com/mhdnihadv">
-    <img src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-SUPPORT%20DEV-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black&labelColor=18181b" alt="Buy Me A Coffee"/>
+  <a href="https://supertipz.in/pay/mhdnihadv">
+    <img src="https://img.shields.io/badge/Supertipz-SUPPORT%20VIA%20UPI%20(INDIA)-6366F1?style=for-the-badge&logo=googlepay&logoColor=white&labelColor=18181b" alt="Support via Supertipz"/>
   </a>
 </p>
+
+- 🌐 **International Supporters**: Sponsor via [**GitHub Sponsors**](https://github.com/sponsors/MohammedNihadv) (Credit/Debit Cards, PayPal).
+- 🇮🇳 **Indian Supporters**: Tip via [**Supertipz**](https://supertipz.in/pay/mhdnihadv) (Instant UPI — Google Pay, PhonePe, Paytm, BHIM & NetBanking).
 
 ---
 
