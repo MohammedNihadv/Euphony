@@ -32,6 +32,12 @@ SearchHistoryDao searchHistoryDao(Ref ref) =>
 LikedSongsDao likedSongsDao(Ref ref) =>
     LikedSongsDao(ref.watch(databaseProvider));
 
+final isSongLikedProvider =
+    riverpod.StreamProvider.family<bool, String>((ref, id) {
+  final dao = ref.watch(likedSongsDaoProvider);
+  return dao.watchIsLiked(id);
+});
+
 @Riverpod(keepAlive: true)
 SavedAlbumsDao savedAlbumsDao(Ref ref) =>
     SavedAlbumsDao(ref.watch(databaseProvider));

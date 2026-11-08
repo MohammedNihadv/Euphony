@@ -688,7 +688,7 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: 14),
                   Flexible(
                     child: FutureBuilder<List<DetectedBackup>>(
-                      future: BackupService.detectBackups(),
+                      future: BackupService.detectBackups(db),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return const Padding(

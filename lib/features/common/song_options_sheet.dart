@@ -209,10 +209,10 @@ class _SongOptionsSheetBody extends ConsumerWidget {
               ).showSnackBar(const SnackBar(content: Text('Added to queue')));
             },
           ),
-          StreamBuilder<bool>(
-            stream: dao.watchIsLiked(song.id),
-            builder: (context, snapshot) {
-              final isLiked = snapshot.data ?? false;
+          Consumer(
+            builder: (context, ref, _) {
+              final isLikedAsync = ref.watch(isSongLikedProvider(song.id));
+              final isLiked = isLikedAsync.value ?? false;
               return ListTile(
                 leading: Icon(
                   isLiked
@@ -230,20 +230,24 @@ class _SongOptionsSheetBody extends ConsumerWidget {
                     fontSize: 14,
                   ),
                 ),
-                onTap: () {
-                  if (isLiked) {
-                    dao.unlike(song.id);
-                  } else {
-                    dao.like(
-                      id: song.id,
-                      title: song.title,
-                      artists: song.artistNames,
-                      albumTitle: song.albumTitle,
-                      artworkUrl: song.artworkUrl,
-                      durationSeconds: song.duration?.inSeconds,
-                    );
+                onTap: () async {
+                  try {
+                    if (isLiked) {
+                      await dao.unlike(song.id);
+                    } else {
+                      await dao.like(
+                        id: song.id,
+                        title: song.title,
+                        artists: song.artistNames,
+                        albumTitle: song.albumTitle,
+                        artworkUrl: song.artworkUrl,
+                        durationSeconds: song.duration?.inSeconds,
+                      );
+                    }
+                  } catch (_) {}
+                  if (context.mounted) {
+                    Navigator.pop(context);
                   }
-                  Navigator.pop(context);
                 },
               );
             },

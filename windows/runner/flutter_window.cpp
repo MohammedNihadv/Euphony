@@ -7,11 +7,6 @@
 #include "resource.h"
 
 namespace {
-constexpr int kHotkeyMediaPlayPause = 1001;
-constexpr int kHotkeyMediaNext = 1002;
-constexpr int kHotkeyMediaPrev = 1003;
-constexpr int kHotkeyMediaStop = 1004;
-
 constexpr UINT kWM_TrayIcon = WM_USER + 101;
 constexpr UINT kTrayIconId = 1;
 
@@ -150,16 +145,6 @@ bool FlutterWindow::OnCreate() {
         }
       });
 
-  // Register global hotkeys for media controls so media keys work even when
-  // Euphony is minimized or running in the background.
-  HWND hwnd = GetHandle();
-  if (hwnd) {
-    RegisterHotKey(hwnd, kHotkeyMediaPlayPause, 0, VK_MEDIA_PLAY_PAUSE);
-    RegisterHotKey(hwnd, kHotkeyMediaNext, 0, VK_MEDIA_NEXT_TRACK);
-    RegisterHotKey(hwnd, kHotkeyMediaPrev, 0, VK_MEDIA_PREV_TRACK);
-    RegisterHotKey(hwnd, kHotkeyMediaStop, 0, VK_MEDIA_STOP);
-  }
-
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
     this->Show();
   });
@@ -171,14 +156,6 @@ bool FlutterWindow::OnCreate() {
 
 void FlutterWindow::OnDestroy() {
   HideTrayIcon();
-
-  HWND hwnd = GetHandle();
-  if (hwnd) {
-    UnregisterHotKey(hwnd, kHotkeyMediaPlayPause);
-    UnregisterHotKey(hwnd, kHotkeyMediaNext);
-    UnregisterHotKey(hwnd, kHotkeyMediaPrev);
-    UnregisterHotKey(hwnd, kHotkeyMediaStop);
-  }
   media_channel_ = nullptr;
 
   if (flutter_controller_) {
@@ -256,25 +233,6 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
           DestroyWindow(hwnd);
         }
         return 0;
-      }
-      break;
-    }
-    case WM_HOTKEY: {
-      if (media_channel_) {
-        switch (wparam) {
-          case kHotkeyMediaPlayPause:
-            media_channel_->InvokeMethod("playPause", nullptr);
-            return 0;
-          case kHotkeyMediaNext:
-            media_channel_->InvokeMethod("next", nullptr);
-            return 0;
-          case kHotkeyMediaPrev:
-            media_channel_->InvokeMethod("previous", nullptr);
-            return 0;
-          case kHotkeyMediaStop:
-            media_channel_->InvokeMethod("stop", nullptr);
-            return 0;
-        }
       }
       break;
     }

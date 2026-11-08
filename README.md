@@ -101,18 +101,6 @@ Grab the [**latest release**](https://github.com/MohammedNihadv/Euphony/releases
 
 ---
 
-## Architecture & Tech Stack
-
-| Technology | Role | Description |
-| :--- | :--- | :--- |
-| **[Flutter](https://flutter.dev)** | Core Framework | High-performance cross-platform UI engine |
-| **[Riverpod](https://riverpod.dev)** | State Management | Type-safe, testable state & dependency injection |
-| **[Drift](https://drift.simonbinder.eu)** + **SQLite** | Persistence Layer | Reactive local database for library and playlists |
-| **just_audio** + **audio_service** | Audio Playback | Background audio playback with native OS media integration |
-| **go_router** | Navigation | Declarative URL-based app routing |
-
----
-
 ## ❤️ Support & Sponsor the Project
 
 Euphony is built with love and maintained independently without ads, tracking, or corporate funding. If you enjoy using Euphony and want to help keep development active, consider supporting the project:
@@ -127,8 +115,8 @@ Euphony is built with love and maintained independently without ads, tracking, o
   </a>
 </p>
 
-- 🌐 **International Supporters**: Sponsor via [**GitHub Sponsors**](https://github.com/sponsors/MohammedNihadv) (Credit/Debit Cards, PayPal).
-- 🇮🇳 **Indian Supporters**: Tip via [**Supertipz**](https://supertipz.in/pay/mhdnihadv) (Instant UPI — Google Pay, PhonePe, Paytm, BHIM & NetBanking).
+- **International Supporters**: Sponsor via [**GitHub Sponsors**](https://github.com/sponsors/MohammedNihadv) (Credit/Debit Cards, PayPal).
+- **Indian Supporters**: Tip via [**Supertipz**](https://supertipz.in/pay/mhdnihadv) (Instant UPI — Google Pay, PhonePe, Paytm, BHIM & NetBanking).
 
 ---
 

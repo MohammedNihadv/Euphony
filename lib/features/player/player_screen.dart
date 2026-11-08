@@ -604,31 +604,29 @@ class _LikeButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dao = ref.watch(likedSongsDaoProvider);
+    final isLikedAsync = ref.watch(isSongLikedProvider(song.id));
+    final isLiked = isLikedAsync.value ?? false;
 
-    return StreamBuilder<bool>(
-      stream: dao.watchIsLiked(song.id),
-      builder: (context, snapshot) {
-        final isLiked = snapshot.data ?? false;
-        return _AnimatedIconButton(
-          icon: isLiked
-              ? Icons.favorite_rounded
-              : Icons.favorite_border_rounded,
-          color: isLiked ? EuBrutal.alert : null,
-          onPressed: () {
-            if (isLiked) {
-              dao.unlike(song.id);
-            } else {
-              dao.like(
-                id: song.id,
-                title: song.title,
-                artists: song.artistNames,
-                albumTitle: song.albumTitle,
-                artworkUrl: song.artworkUrl,
-                durationSeconds: song.duration?.inSeconds,
-              );
-            }
-          },
-        );
+    return _AnimatedIconButton(
+      icon: isLiked
+          ? Icons.favorite_rounded
+          : Icons.favorite_border_rounded,
+      color: isLiked ? EuBrutal.alert : null,
+      onPressed: () async {
+        try {
+          if (isLiked) {
+            await dao.unlike(song.id);
+          } else {
+            await dao.like(
+              id: song.id,
+              title: song.title,
+              artists: song.artistNames,
+              albumTitle: song.albumTitle,
+              artworkUrl: song.artworkUrl,
+              durationSeconds: song.duration?.inSeconds,
+            );
+          }
+        } catch (_) {}
       },
     );
   }

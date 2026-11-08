@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter/foundation.dart';
@@ -46,5 +48,10 @@ QueryExecutor _openConnection() {
   if (kIsWeb) {
     return driftDatabase(name: 'euphony');
   }
-  return driftDatabase(name: 'euphony', native: const DriftNativeOptions());
+  return driftDatabase(
+    name: 'euphony',
+    native: DriftNativeOptions(
+      tempDirectoryPath: (!kIsWeb && Platform.isWindows) ? () async => null : null,
+    ),
+  );
 }

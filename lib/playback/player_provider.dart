@@ -584,6 +584,8 @@ class PlayerController {
   bool _advancing = false;
 
   StreamSubscription<PlayerState>? _stateSub;
+  StreamSubscription<Duration>? _positionSub;
+  StreamSubscription<Duration?>? _durationSub;
   bool _disposed = false;
 
   /// Resolved stream URLs, keyed by video id, reused until they expire.
@@ -646,11 +648,23 @@ class PlayerController {
         unawaited(_onTrackCompleted());
       }
     });
+
+    _positionSub = _player.positionStream.listen((position) {
+      if (_disposed) return;
+      _mediaControls.updatePosition(position);
+    });
+
+    _durationSub = _player.durationStream.listen((duration) {
+      if (_disposed || duration == null) return;
+      _mediaControls.updateDuration(duration);
+    });
   }
 
   void dispose() {
     _disposed = true;
     unawaited(_stateSub?.cancel());
+    unawaited(_positionSub?.cancel());
+    unawaited(_durationSub?.cancel());
     _mediaControls.dispose();
     _discordRpc.dispose();
   }

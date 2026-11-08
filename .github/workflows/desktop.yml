@@ -25,6 +25,15 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
+      - name: Pre-download smtc_windows binary bundle
+        shell: pwsh
+        run: |
+          $smtcDir = Get-ChildItem -Path "$env:PUB_CACHE\hosted\pub.dev" -Filter "smtc_windows-*" | Select-Object -First 1
+          if ($smtcDir) {
+            $dest = Join-Path $smtcDir.FullName "windows\smtc_windows-v0.1.3.tar.gz"
+            Write-Host "Pre-downloading smtc_windows bundle to $dest"
+            curl.exe -L --retry 5 --retry-delay 2 "https://github.com/KRTirtho/frb_plugins/releases/download/smtc_windows-v0.1.3/windows.tar.gz" -o $dest
+          }
       - name: Pre-download mpv audio bundle for media_kit
         shell: pwsh
         run: |

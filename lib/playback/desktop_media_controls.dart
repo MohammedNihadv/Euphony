@@ -1,19 +1,17 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:smtc_windows/smtc_windows.dart';
 
 import '../core/log.dart';
 import '../domain/song.dart';
 
 final _log = logFor('desktop_media_controls');
 
-/// Native desktop OS media controls (Windows hardware media keys, Bluetooth AVRCP,
-/// and background transport events).
-///
-/// Communicates with `windows/runner/flutter_window.cpp` via a platform method channel
-/// using native Win32 `WM_APPCOMMAND` and `RegisterHotKey` for zero-dependency,
-/// guaranteed bundling in production releases.
+/// Native desktop OS media controls (Windows SystemMediaTransportControls (SMTC),
+/// lock screen integration, hardware media keys, Bluetooth AVRCP, and taskbar tray).
 class DesktopMediaControls {
   static const MethodChannel _channel =
       MethodChannel('com.mhdni.euphony/desktop_media');
@@ -22,6 +20,9 @@ class DesktopMediaControls {
 
   static final ValueNotifier<bool> isMiniPlayer = ValueNotifier<bool>(false);
 
+  SMTCWindows? _smtc;
+  StreamSubscription<PressedButton>? _smtcSub;
+
   VoidCallback? _onPlay;
   VoidCallback? _onPause;
   VoidCallback? _onPlayPause;
@@ -29,6 +30,7 @@ class DesktopMediaControls {
   VoidCallback? _onPrevious;
   VoidCallback? _onStop;
   bool _isPlaying = false;
+  int? _lastPositionSec;
 
   void toggleMiniPlayer() {
     if (!isSupported) return;
@@ -94,7 +96,49 @@ class DesktopMediaControls {
     _onStop = onStop;
 
     _channel.setMethodCallHandler(_handleNativeMethod);
+    _initSmtc();
     _log.info('Windows native desktop media controls initialized');
+  }
+
+  void _initSmtc() {
+    try {
+      _smtc = SMTCWindows(
+        enabled: false,
+        config: const SMTCConfig(
+          playEnabled: true,
+          pauseEnabled: true,
+          nextEnabled: true,
+          prevEnabled: true,
+          stopEnabled: true,
+          fastForwardEnabled: false,
+          rewindEnabled: false,
+        ),
+      );
+
+      _smtcSub = _smtc!.buttonPressStream.listen((event) {
+        _log.fine('SMTC event received: $event');
+        switch (event) {
+          case PressedButton.play:
+            _onPlay?.call();
+            _smtc?.setPlaybackStatus(PlaybackStatus.Playing);
+          case PressedButton.pause:
+            _onPause?.call();
+            _smtc?.setPlaybackStatus(PlaybackStatus.Paused);
+          case PressedButton.next:
+            _onNext?.call();
+          case PressedButton.previous:
+            _onPrevious?.call();
+          case PressedButton.stop:
+            _onStop?.call();
+            _smtc?.setPlaybackStatus(PlaybackStatus.Stopped);
+          default:
+            break;
+        }
+      });
+      _log.info('SMTC listener registered successfully');
+    } catch (e, st) {
+      _log.warning('Could not initialize SMTC: $e\n$st');
+    }
   }
 
   Future<dynamic> _handleNativeMethod(MethodCall call) async {
@@ -122,6 +166,8 @@ class DesktopMediaControls {
 
   void updateSong(Song song) {
     if (!isSupported) return;
+    _lastPositionSec = null;
+
     try {
       _channel.invokeMethod('updateMetadata', {
         'title': song.title,
@@ -129,6 +175,39 @@ class DesktopMediaControls {
         'album': song.albumTitle,
       });
     } catch (_) {}
+
+    try {
+      if (_smtc != null) {
+        if (!_smtc!.enabled) {
+          unawaited(_smtc!.enableSmtc());
+        }
+
+        String? validThumbnail;
+        if (song.artworkUrl != null && song.artworkUrl!.isNotEmpty) {
+          final uri = Uri.tryParse(song.artworkUrl!);
+          if (uri != null && uri.hasScheme) {
+            validThumbnail = song.artworkUrl;
+          }
+        }
+
+        unawaited(_smtc!.updateMetadata(
+          MusicMetadata(
+            title: song.title,
+            artist: song.artistNames,
+            album: song.albumTitle,
+            albumArtist: song.artistNames,
+            thumbnail: validThumbnail,
+          ),
+        ));
+
+        if (song.duration != null && song.duration! > Duration.zero) {
+          unawaited(_smtc!.setEndTime(song.duration!));
+          unawaited(_smtc!.setPosition(Duration.zero));
+        }
+      }
+    } catch (e) {
+      _log.warning('Failed to update SMTC song metadata: $e');
+    }
   }
 
   void setPlaying({required bool playing}) {
@@ -137,10 +216,19 @@ class DesktopMediaControls {
     try {
       _channel.invokeMethod('setPlaybackStatus', {'playing': playing});
     } catch (_) {}
+
+    try {
+      _smtc?.setPlaybackStatus(
+        playing ? PlaybackStatus.Playing : PlaybackStatus.Paused,
+      );
+    } catch (e) {
+      _log.warning('Failed to update SMTC playback status: $e');
+    }
   }
 
   void setStopped() {
     _isPlaying = false;
+    _lastPositionSec = null;
     if (!isSupported) return;
     try {
       _channel.invokeMethod(
@@ -148,10 +236,46 @@ class DesktopMediaControls {
         {'playing': false, 'stopped': true},
       );
     } catch (_) {}
+
+    try {
+      _smtc?.setPlaybackStatus(PlaybackStatus.Stopped);
+      _smtc?.clearMetadata();
+      _smtc?.disableSmtc();
+    } catch (e) {
+      _log.warning('Failed to stop SMTC: $e');
+    }
+  }
+
+  void updatePosition(Duration position) {
+    if (!isSupported || _smtc == null || !_smtc!.enabled) return;
+    if (position.inSeconds == _lastPositionSec) return;
+    _lastPositionSec = position.inSeconds;
+    try {
+      _smtc?.setPosition(position);
+    } catch (_) {}
+  }
+
+  void updateDuration(Duration duration) {
+    if (!isSupported || _smtc == null || !_smtc!.enabled) return;
+    try {
+      _smtc?.setEndTime(duration);
+    } catch (_) {}
   }
 
   void dispose() {
     if (!isSupported) return;
     _channel.setMethodCallHandler(null);
+    try {
+      unawaited(_smtcSub?.cancel());
+      _smtcSub = null;
+      if (_smtc != null) {
+        unawaited(_smtc!.clearMetadata());
+        unawaited(_smtc!.disableSmtc());
+        unawaited(_smtc!.dispose());
+        _smtc = null;
+      }
+    } catch (e) {
+      _log.warning('Failed to dispose SMTC: $e');
+    }
   }
 }

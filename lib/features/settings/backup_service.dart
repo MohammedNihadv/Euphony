@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqlite3/sqlite3.dart';
 
 import '../../core/log.dart';
 import '../../data/db/database.dart';
@@ -142,8 +141,25 @@ class BackupService {
     }
   }
 
+  /// Checks whether [file] starts with the standard SQLite 3 database header.
+  static bool _isSqliteHeader(File file) {
+    try {
+      if (file.lengthSync() < 100) return false;
+      final raf = file.openSync(mode: FileMode.read);
+      try {
+        final header = raf.readSync(16);
+        final magic = String.fromCharCodes(header.take(15));
+        return magic == 'SQLite format 3';
+      } finally {
+        raf.closeSync();
+      }
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Automatically scans common directories on the device for Euphony backup files.
-  static Future<List<DetectedBackup>> detectBackups() async {
+  static Future<List<DetectedBackup>> detectBackups([EuphonyDatabase? db]) async {
     final results = <DetectedBackup>[];
     final checkedPaths = <String>{};
     final candidateDirs = <Directory>[];
@@ -216,58 +232,53 @@ class BackupService {
               nameLower.startsWith('euphony');
 
           if (!isCandidate) continue;
+          if (!_isSqliteHeader(entry)) continue;
 
-          try {
-            final sqliteDb = sqlite3.open(entry.path, mode: OpenMode.readOnly);
-            int songs = 0;
-            int history = 0;
-            int playlists = 0;
-            bool valid = false;
+          int songs = 0;
+          int history = 0;
+          int playlists = 0;
 
+          if (db != null) {
+            final cleanPath = entry.path.replaceAll('\\', '/').replaceAll("'", "''");
             try {
-              final r = sqliteDb.select('SELECT COUNT(*) AS c FROM liked_songs');
-              if (r.isNotEmpty) {
-                songs = r.first['c'] as int;
-                valid = true;
-              }
+              await db.customStatement('DETACH DATABASE probe_db;');
             } catch (_) {}
 
             try {
-              final r = sqliteDb.select('SELECT COUNT(*) AS c FROM search_history');
-              if (r.isNotEmpty) {
-                history = r.first['c'] as int;
-                valid = true;
-              }
-            } catch (_) {}
-
-            try {
-              final r = sqliteDb.select('SELECT COUNT(*) AS c FROM saved_playlists');
-              if (r.isNotEmpty) {
-                playlists = r.first['c'] as int;
-                valid = true;
-              }
-            } catch (_) {}
-
-            sqliteDb.close();
-
-            if (valid) {
-              final stat = entry.statSync();
-              results.add(
-                DetectedBackup(
-                  file: entry,
-                  fileName: entry.uri.pathSegments.last,
-                  directoryPath: dir.path,
-                  likedSongsCount: songs,
-                  searchHistoryCount: history,
-                  savedPlaylistsCount: playlists,
-                  fileSizeBytes: stat.size,
-                  modifiedAt: stat.modified,
-                ),
-              );
+              await db.customStatement("ATTACH DATABASE '$cleanPath' AS probe_db;");
+              try {
+                final r = await db.customSelect('SELECT COUNT(*) AS c FROM probe_db.liked_songs;').getSingleOrNull();
+                songs = r?.read<int>('c') ?? 0;
+              } catch (_) {}
+              try {
+                final r = await db.customSelect('SELECT COUNT(*) AS c FROM probe_db.search_history;').getSingleOrNull();
+                history = r?.read<int>('c') ?? 0;
+              } catch (_) {}
+              try {
+                final r = await db.customSelect('SELECT COUNT(*) AS c FROM probe_db.saved_playlists;').getSingleOrNull();
+                playlists = r?.read<int>('c') ?? 0;
+              } catch (_) {}
+              await db.customStatement('DETACH DATABASE probe_db;');
+            } catch (_) {
+              try {
+                await db.customStatement('DETACH DATABASE probe_db;');
+              } catch (_) {}
             }
-          } catch (_) {
-            // Unparseable or unreadable
           }
+
+          final stat = entry.statSync();
+          results.add(
+            DetectedBackup(
+              file: entry,
+              fileName: entry.uri.pathSegments.last,
+              directoryPath: dir.path,
+              likedSongsCount: songs,
+              searchHistoryCount: history,
+              savedPlaylistsCount: playlists,
+              fileSizeBytes: stat.size,
+              modifiedAt: stat.modified,
+            ),
+          );
         }
       } catch (_) {}
     }
@@ -284,8 +295,12 @@ class BackupService {
     File backupFile,
     EuphonyDatabase db,
   ) async {
+    final cleanPath = backupFile.path.replaceAll('\\', '/').replaceAll("'", "''");
     try {
-      final cleanPath = backupFile.path.replaceAll('\\', '/');
+      try {
+        await db.customStatement('DETACH DATABASE backup_db;');
+      } catch (_) {}
+
       await db.customStatement("ATTACH DATABASE '$cleanPath' AS backup_db;");
 
       int songsRestored = 0;

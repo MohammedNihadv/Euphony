@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio/just_audio.dart';
 
+import '../../core/log.dart';
 import '../../data/providers.dart';
 import '../../design/tokens/brutal.dart';
 import '../../design/tokens/tokens.dart';
@@ -14,6 +15,8 @@ import '../../playback/player_provider.dart';
 import 'lyrics_sheet.dart';
 import 'player_screen.dart';
 import 'queue_sheet.dart';
+
+final _log = logFor('desktop_player_bar');
 
 /// A full-featured desktop player bar that spans the bottom of the window.
 ///
@@ -299,10 +302,10 @@ class _LeftTrackSectionState extends ConsumerState<_LeftTrackSection> {
         const SizedBox(width: 6),
 
         // Reactive Like Button
-        StreamBuilder<bool>(
-          stream: dao.watchIsLiked(song.id),
-          builder: (context, snapshot) {
-            final isLiked = snapshot.data ?? false;
+        Consumer(
+          builder: (context, ref, _) {
+            final isLikedAsync = ref.watch(isSongLikedProvider(song.id));
+            final isLiked = isLikedAsync.value ?? false;
             return IconButton(
               icon: Icon(
                 isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
@@ -310,18 +313,22 @@ class _LeftTrackSectionState extends ConsumerState<_LeftTrackSection> {
               ),
               color: isLiked ? EuBrutal.alert : context.eu.ink.withValues(alpha: 0.7),
               tooltip: isLiked ? 'Unlike' : 'Like',
-              onPressed: () {
-                if (isLiked) {
-                  dao.unlike(song.id);
-                } else {
-                  dao.like(
-                    id: song.id,
-                    title: song.title,
-                    artists: song.artistNames,
-                    albumTitle: song.albumTitle,
-                    artworkUrl: song.artworkUrl,
-                    durationSeconds: song.duration?.inSeconds,
-                  );
+              onPressed: () async {
+                try {
+                  if (isLiked) {
+                    await dao.unlike(song.id);
+                  } else {
+                    await dao.like(
+                      id: song.id,
+                      title: song.title,
+                      artists: song.artistNames,
+                      albumTitle: song.albumTitle,
+                      artworkUrl: song.artworkUrl,
+                      durationSeconds: song.duration?.inSeconds,
+                    );
+                  }
+                } catch (e, st) {
+                  _log.severe('Error toggling like for ${song.id}: $e', e, st);
                 }
               },
             );
