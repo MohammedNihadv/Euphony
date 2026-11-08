@@ -2,6 +2,7 @@ name: Desktop builds
 
 on:
   push:
+    branches: [main]
     tags: ['v*-desktop']
   workflow_dispatch:
 
@@ -28,7 +29,8 @@ jobs:
       - name: Pre-download and extract smtc_windows binary bundle
         shell: pwsh
         run: |
-          $smtcDir = Get-ChildItem -Path "$env:PUB_CACHE\hosted\pub.dev" -Filter "smtc_windows-*" | Select-Object -First 1
+          $pubCache = if ($env:PUB_CACHE) { $env:PUB_CACHE } else { "$env:LOCALAPPDATA\Pub\Cache" }
+          $smtcDir = Get-ChildItem -Path "$pubCache\hosted\pub.dev" -Filter "smtc_windows-*" | Select-Object -First 1
           if ($smtcDir) {
             $winDir = Join-Path $smtcDir.FullName "windows"
             $dest = Join-Path $winDir "smtc_windows-v0.1.3.tar.gz"
@@ -38,14 +40,15 @@ jobs:
             New-Item -ItemType Directory -Force -Path $targetDir
             tar.exe -xzf $dest -C $targetDir
             $cmakeFile = Join-Path $winDir "CMakeLists.txt"
-            Set-Content -Path $cmakeFile -Value @"
-cmake_minimum_required(VERSION 3.14)
-project("smtc_windows" LANGUAGES CXX)
-set(smtc_windows_bundled_libraries
-  "`${CMAKE_CURRENT_SOURCE_DIR}/smtc_windows-v0.1.3/`${FLUTTER_TARGET_PLATFORM}/smtc_windows.dll"
-  PARENT_SCOPE
-)
-"@
+            $lines = @(
+              'cmake_minimum_required(VERSION 3.14)'
+              'project("smtc_windows" LANGUAGES CXX)'
+              'set(smtc_windows_bundled_libraries'
+              '  "${CMAKE_CURRENT_SOURCE_DIR}/smtc_windows-v0.1.3/${FLUTTER_TARGET_PLATFORM}/smtc_windows.dll"'
+              '  PARENT_SCOPE'
+              ')'
+            )
+            Set-Content -Path $cmakeFile -Value $lines
             Write-Host "Configured $cmakeFile with pre-extracted binaries."
           }
       - name: Pre-download mpv audio bundle for media_kit
