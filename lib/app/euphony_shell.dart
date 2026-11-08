@@ -107,13 +107,33 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
       return true;
     }
 
-    // 2. Guard: if user is typing into any text input field (e.g. search bar),
+    // 2. Guard: if user is typing into any text input field (e.g. search bar, dialogs),
     // NEVER intercept bare letters (m, l, q, f) or bare space!
     final focus = FocusManager.instance.primaryFocus;
     final ctx = focus?.context;
-    final isEditing = ctx != null &&
-        (ctx.widget is EditableText ||
-            ctx.findAncestorWidgetOfExactType<EditableText>() != null);
+    bool isEditing = false;
+    if (ctx != null) {
+      if (ctx.widget is EditableText ||
+          ctx.findAncestorWidgetOfExactType<EditableText>() != null ||
+          ctx.findAncestorWidgetOfExactType<TextField>() != null ||
+          ctx.findAncestorWidgetOfExactType<TextFormField>() != null ||
+          ctx.findAncestorWidgetOfExactType<SearchBar>() != null ||
+          ctx.findAncestorWidgetOfExactType<SearchAnchor>() != null) {
+        isEditing = true;
+      } else {
+        // Deep search the focused element's subtree for text editing widgets
+        void checkElement(Element el) {
+          if (isEditing) return;
+          if (el.widget is EditableText || el.widget is TextField) {
+            isEditing = true;
+            return;
+          }
+          el.visitChildren(checkElement);
+        }
+
+        (ctx as Element).visitChildren(checkElement);
+      }
+    }
 
     if (isEditing) {
       // While typing in an input field, only allow Ctrl-modified playback shortcuts:
@@ -135,7 +155,7 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
           return true;
         }
       }
-      // Return false so the key event passes directly to the focused EditableText!
+      // Return false so the key event passes directly to the focused input field!
       return false;
     }
 

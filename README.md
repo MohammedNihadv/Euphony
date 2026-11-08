@@ -22,6 +22,9 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
   <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/app-arm64-v8a-release.apk">
     <img src="https://img.shields.io/badge/Android-DOWNLOAD_APK-3DDC84?style=for-the-badge&logo=android&logoColor=3DDC84&labelColor=18181b" alt="Download for Android"/>
   </a>
+  <a href="https://f-droid.org/packages/com.mhdni.euphony/">
+    <img src="https://img.shields.io/badge/F--Droid-GET_IT_ON-1976D2?style=for-the-badge&logo=f-droid&logoColor=1976D2&labelColor=18181b" alt="Get it on F-Droid"/>
+  </a>
   <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-ios.ipa">
     <img src="https://img.shields.io/badge/iOS-SIDELOAD_IPA-FFFFFF?style=for-the-badge&logo=apple&logoColor=FFFFFF&labelColor=18181b" alt="Download iOS IPA"/>
   </a>
@@ -48,6 +51,12 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
   </a>
   <a href="https://github.com/MohammedNihadv/Euphony/releases/latest">
     <img src="https://img.shields.io/badge/All_Downloads-LATEST_RELEASE-2ea44f?style=for-the-badge&logo=github&logoColor=2ea44f&labelColor=18181b" alt="All downloads"/>
+  </a>
+  <a href="https://github.com/sponsors/MohammedNihadv">
+    <img src="https://img.shields.io/badge/Sponsor-GITHUB%20SPONSORS-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=EA4AAA&labelColor=18181b" alt="Sponsor on GitHub"/>
+  </a>
+  <a href="https://www.buymeacoffee.com/MohammedNihad">
+    <img src="https://img.shields.io/badge/Buy_Me_A_Coffee-DONATE-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=FFDD00&labelColor=18181b" alt="Buy Me A Coffee"/>
   </a>
 </p>
 
@@ -85,6 +94,7 @@ Grab the [**latest release**](https://github.com/MohammedNihadv/Euphony/releases
 | 🐧 **Linux** (Debian / Ubuntu / Mint) | `euphony-linux-amd64.deb` | Double-click or `sudo apt install ./euphony-linux-amd64.deb` (auto-installs all audio dependencies). |
 | 🐧 **Linux** (Universal) | `euphony-linux-x86_64.AppImage` | `chmod +x` the file and run it. |
 | 📱 **Android** | `app-arm64-v8a-release.apk` | ⭐ Best for 99% of phones (2017+). Tap to install. |
+| 📱 **Android (F-Droid)** | [F-Droid Repository](https://f-droid.org/packages/com.mhdni.euphony/) | Open-source app store with automatic background updates. |
 | 📱 Android (legacy) | `app-armeabi-v7a-release.apk` | Older 32-bit devices. |
 | 📱 Android (x86) | `app-x86_64-release.apk` | Emulators & Intel Chromebooks. |
 | 🍎 **iOS** | `euphony-ios.ipa` | Unsigned build — sideload with **AltStore**, **Sideloadly** or **TrollStore** (no App Store account needed). |
@@ -100,6 +110,22 @@ Grab the [**latest release**](https://github.com/MohammedNihadv/Euphony/releases
 | **[Drift](https://drift.simonbinder.eu)** + **SQLite** | Persistence Layer | Reactive local database for library and playlists |
 | **just_audio** + **audio_service** | Audio Playback | Background audio playback with native OS media integration |
 | **go_router** | Navigation | Declarative URL-based app routing |
+
+---
+
+## ❤️ Support & Sponsor the Project
+
+Euphony is built with love and maintained independently without ads, tracking, or corporate funding. If you enjoy using Euphony and want to help keep development active, consider supporting the project:
+
+<p align="center">
+  <a href="https://github.com/sponsors/MohammedNihadv">
+    <img src="https://img.shields.io/badge/GitHub%20Sponsors-SPONSOR-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white&labelColor=18181b" alt="Sponsor on GitHub"/>
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://www.buymeacoffee.com/MohammedNihad">
+    <img src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-SUPPORT%20DEV-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black&labelColor=18181b" alt="Buy Me A Coffee"/>
+  </a>
+</p>
 
 ---
 

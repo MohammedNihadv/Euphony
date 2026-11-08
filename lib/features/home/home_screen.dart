@@ -158,51 +158,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ),
                   ),
 
-                  SliverToBoxAdapter(
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 400),
-                      switchInCurve: Curves.easeOut,
-                      switchOutCurve: Curves.easeIn,
-                      transitionBuilder: (child, anim) =>
-                          FadeTransition(opacity: anim, child: child),
-                      child: _loading
-                          ? const SizedBox(key: ValueKey('loading'))
-                          : _error != null
-                          ? Padding(
-                              key: const ValueKey('error'),
-                              padding: const EdgeInsets.all(EuSpace.xl),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const SizedBox(height: 40),
-                                  const Icon(
-                                    Icons.error_outline,
-                                    size: 48,
-                                    color: EuBrutal.alert,
-                                  ),
-                                  const SizedBox(height: EuSpace.md),
-                                  Text(
-                                    _error!,
-                                    style: theme.textTheme.titleMedium,
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: EuSpace.md),
-                                  FilledButton.icon(
-                                    onPressed: _loadHomeFeed,
-                                    icon: const Icon(Icons.refresh),
-                                    label: const Text('Try Again'),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : const SizedBox(key: ValueKey('content')),
+                  if (_error != null)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(EuSpace.xl),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: 40),
+                            const Icon(
+                              Icons.error_outline,
+                              size: 48,
+                              color: EuBrutal.alert,
+                            ),
+                            const SizedBox(height: EuSpace.md),
+                            Text(
+                              _error!,
+                              style: theme.textTheme.titleMedium,
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: EuSpace.md),
+                            FilledButton.icon(
+                              onPressed: _loadHomeFeed,
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Try Again'),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
 
                   if (_loading)
                     const _HomeSkeletonFeed()
-                  else if (_error != null)
-                    const SliverToBoxAdapter(child: SizedBox.shrink())
                   else if (_feed != null) ...[
                     // Featured & Top Charts Carousel (Demus / Billboard style)
                     if (_selectedCategory == 'All' ||
@@ -1223,7 +1210,7 @@ class _FeaturedChartsCarouselState extends State<_FeaturedChartsCarousel> {
       title: 'Global Billboard Hits',
       subtitle: 'The 50 most-streamed tracks worldwide right now',
       tagline: 'Tap to explore charts',
-      gradient: [Color(0xFF6366F1), Color(0xFF4338CA)],
+      gradient: [Color(0xFF7C3AED), Color(0xFF2563EB)],
       icon: Icons.trending_up_rounded,
       query: 'Billboard Hot 100',
     ),
@@ -1293,9 +1280,9 @@ class _FeaturedChartsCarouselState extends State<_FeaturedChartsCarousel> {
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 EuSpace.screenGutter,
-                EuSpace.sm,
-                EuSpace.screenGutter,
                 EuSpace.xs,
+                EuSpace.screenGutter,
+                EuSpace.xxs,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
