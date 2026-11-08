@@ -198,7 +198,8 @@ class _NarrowLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final maxArtSize = (viewportHeight * 0.36).clamp(160.0, 340.0);
+    final foldHeight = viewportHeight < 520.0 ? 520.0 : viewportHeight;
+    final maxArtSize = (foldHeight * 0.35).clamp(160.0, 320.0);
     return SingleChildScrollView(
       controller: scrollController,
       padding: const EdgeInsets.symmetric(horizontal: EuSpace.xl),
@@ -209,8 +210,8 @@ class _NarrowLayout extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // FOLD 1: Full-viewport Now Playing view
-              ConstrainedBox(
-                constraints: BoxConstraints(minHeight: viewportHeight),
+              SizedBox(
+                height: foldHeight,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -277,7 +278,8 @@ class _WideLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final artSize = (viewportHeight * 0.48).clamp(280.0, 420.0).toDouble();
+    final foldHeight = viewportHeight < 560.0 ? 560.0 : viewportHeight;
+    final artSize = (foldHeight * 0.44).clamp(260.0, 400.0).toDouble();
 
     return SingleChildScrollView(
       controller: scrollController,
@@ -289,8 +291,8 @@ class _WideLayout extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // FOLD 1: Full-viewport Now Playing view on Desktop
-              ConstrainedBox(
-                constraints: BoxConstraints(minHeight: viewportHeight),
+              SizedBox(
+                height: foldHeight,
                 child: Column(
                   children: [
                     const Spacer(),
