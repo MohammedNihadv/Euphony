@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../design/tokens/brutal.dart';
-import '../design/widgets/brand_badge.dart';
 import '../domain/song.dart';
 import '../features/library/library_screen.dart';
 import '../features/player/desktop_mini_player_hud.dart';
@@ -525,7 +524,8 @@ class _GlassBrutalNavBar extends ConsumerWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Desktop sidebar — collapsible rail (Spotify / SimpMusic style)
+// Desktop sidebar — unified collapsible rail & drawer
+// Strictly adheres to Euphony design tokens & color codes
 // ---------------------------------------------------------------------------
 
 class _DesktopSidebar extends ConsumerStatefulWidget {
@@ -548,7 +548,7 @@ class _DesktopSidebarState extends ConsumerState<_DesktopSidebar> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final width = _collapsed ? 72.0 : 240.0;
+    final width = _collapsed ? 72.0 : 236.0;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 240),
@@ -579,515 +579,380 @@ class _DesktopSidebarState extends ConsumerState<_DesktopSidebar> {
           filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
           child: SafeArea(
             right: false,
-            child: _collapsed
-                ? _buildCollapsed(context, isDark)
-                : _buildExpanded(context, isDark),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isCompactHeight = constraints.maxHeight < 560;
+                final isExpanded = constraints.maxWidth > 150;
+                final content = _buildSidebarContent(
+                  context,
+                  isDark,
+                  isCompactHeight,
+                  isExpanded,
+                );
+                return isCompactHeight
+                    ? SingleChildScrollView(
+                        physics: const ClampingScrollPhysics(),
+                        child: content,
+                      )
+                    : content;
+              },
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildCollapsed(BuildContext context, bool isDark) {
-    return Column(
-      children: [
-        const SizedBox(height: 16),
-        // Home
-        _RailIconButton(
-          icon: widget.selectedIndex == 0
-              ? Icons.home_rounded
-              : Icons.home_outlined,
-          tooltip: 'Home (Ctrl+1)',
-          selected: widget.selectedIndex == 0,
-          onTap: () => widget.onSelected(0),
-        ),
-        const SizedBox(height: 10),
-        // Search
-        _RailIconButton(
-          icon: widget.selectedIndex == 1
-              ? Icons.search_rounded
-              : Icons.search_outlined,
-          tooltip: 'Search (Ctrl+2)',
-          selected: widget.selectedIndex == 1,
-          onTap: () => widget.onSelected(1),
-        ),
-        const SizedBox(height: 12),
-        // Divider
-        Container(
-          width: 32,
-          height: 1.2,
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.12)
-              : Colors.black.withValues(alpha: 0.08),
-        ),
-        const SizedBox(height: 12),
-        // Expand/Collapse Toggle Button
-        _RailIconButton(
-          icon: Icons.start_rounded,
-          tooltip: 'Expand sidebar',
-          selected: false,
-          onTap: () => setState(() => _collapsed = false),
-        ),
-        const SizedBox(height: 12),
-        // Liked Songs Squircle (Red Heart)
-        _RailSquircleButton(
-          icon: Icons.favorite_rounded,
-          iconColor: const Color(0xFFEF4444),
-          tooltip: 'Liked Songs',
-          isDark: isDark,
-          onTap: () {
-            ref.read(librarySelectedTabProvider.notifier).selectTab(0);
-            widget.onSelected(2);
-          },
-        ),
-        const SizedBox(height: 10),
-        // Downloads Squircle (Cyan Download)
-        _RailSquircleButton(
-          icon: Icons.download_for_offline_rounded,
-          iconColor: const Color(0xFF06B6D4),
-          tooltip: 'Downloads',
-          isDark: isDark,
-          onTap: () {
-            ref.read(librarySelectedTabProvider.notifier).selectTab(1);
-            widget.onSelected(2);
-          },
-        ),
-        const SizedBox(height: 10),
-        // Trending Squircle (Sky Blue Trending Arrow)
-        _RailSquircleButton(
-          icon: Icons.trending_up_rounded,
-          iconColor: const Color(0xFF38BDF8),
-          tooltip: 'Trending Charts',
-          isDark: isDark,
-          onTap: () {
-            widget.onSelected(1);
-          },
-        ),
-        const Spacer(),
-        // Settings
-        _RailIconButton(
-          icon: widget.selectedIndex == 3
-              ? Icons.settings_rounded
-              : Icons.settings_outlined,
-          tooltip: 'Settings (Ctrl+4)',
-          selected: widget.selectedIndex == 3,
-          onTap: () => widget.onSelected(3),
-        ),
-        const SizedBox(height: 14),
-      ],
-    );
-  }
-
-  Widget _buildExpanded(BuildContext context, bool isDark) {
+  Widget _buildSidebarContent(
+    BuildContext context,
+    bool isDark,
+    bool isCompactHeight,
+    bool isExpanded,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 10, 14),
-          child: Row(
-            children: [
-              const Expanded(child: EuphonyBrandBadge(fontSize: 18)),
-              IconButton(
-                iconSize: 20,
-                padding: const EdgeInsets.all(4),
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                icon: Icon(
-                  Icons.keyboard_double_arrow_left_rounded,
-                  color: isDark ? Colors.white60 : Colors.black54,
-                ),
-                tooltip: 'Collapse sidebar',
-                onPressed: () => setState(() => _collapsed = true),
-              ),
-            ],
-          ),
-        ),
-        for (var i = 0; i < _destinations.length; i++)
-          _SidebarItem(
-            dest: _destinations[i],
-            shortcut: 'Ctrl+${i + 1}',
+        const SizedBox(height: 12),
+        // Top Brand Header
+        _buildBrandHeader(context, isDark, isExpanded),
+        const SizedBox(height: 10),
+
+        // Primary Navigation Destinations (Home, Search, Library, Settings)
+        for (int i = 0; i < _destinations.length; i++)
+          _DesktopSidebarItem(
+            icon: i == widget.selectedIndex
+                ? _destinations[i].selectedIcon
+                : _destinations[i].icon,
+            label: _destinations[i].label,
+            isExpanded: isExpanded,
             selected: i == widget.selectedIndex,
+            shortcut: 'Ctrl+${i + 1}',
             onTap: () => widget.onSelected(i),
           ),
+
+        // Thin sleek divider line
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 1.2,
-                  color: context.eu.divider.withValues(alpha: 0.6),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(
-                  'YOUR MUSIC',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
-                    color: context.eu.ink.withValues(alpha: 0.45),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  height: 1.2,
-                  color: context.eu.divider.withValues(alpha: 0.6),
-                ),
-              ),
-            ],
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Center(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 240),
+              curve: Curves.easeInOutCubic,
+              width: isExpanded ? 204.0 : 32.0,
+              height: 1.2,
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.12)
+                  : Colors.black.withValues(alpha: 0.08),
+            ),
           ),
         ),
-        _QuickCollectionItem(
+
+        // Quick Collection Items (YOUR MUSIC)
+        _DesktopSidebarItem(
           icon: Icons.favorite_rounded,
-          iconColor: const Color(0xFFEF4444),
+          iconColor: EuBrutal.alert,
           label: 'Liked Songs',
+          isExpanded: isExpanded,
+          selected: false,
           onTap: () {
             ref.read(librarySelectedTabProvider.notifier).selectTab(0);
             widget.onSelected(2);
           },
         ),
-        _QuickCollectionItem(
-          icon: Icons.download_for_offline_rounded,
-          iconColor: const Color(0xFF06B6D4),
+        _DesktopSidebarItem(
+          icon: Icons.download_done_rounded,
           label: 'Downloads',
+          isExpanded: isExpanded,
+          selected: false,
           onTap: () {
             ref.read(librarySelectedTabProvider.notifier).selectTab(1);
             widget.onSelected(2);
           },
         ),
-        _QuickCollectionItem(
+        _DesktopSidebarItem(
           icon: Icons.trending_up_rounded,
-          iconColor: const Color(0xFF38BDF8),
           label: 'Trending Charts',
-          onTap: () {
-            widget.onSelected(1);
-          },
+          isExpanded: isExpanded,
+          selected: false,
+          onTap: () => widget.onSelected(1),
         ),
-        _QuickCollectionItem(
+        _DesktopSidebarItem(
           icon: Icons.queue_music_rounded,
-          iconColor: isDark ? Colors.amberAccent : Colors.orange,
           label: 'Playlists',
+          isExpanded: isExpanded,
+          selected: false,
           onTap: () {
             ref.read(librarySelectedTabProvider.notifier).selectTab(2);
             widget.onSelected(2);
           },
         ),
-        const Spacer(),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-          child: Row(
-            children: [
-              Text(
-                'Euphony Desktop',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: context.eu.ink.withValues(alpha: 0.4),
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: EuBrutal.accent.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: EuBrutal.accent, width: 1),
-                ),
-                child: const Text(
-                  'v1.0.1',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w800,
-                    color: EuBrutal.accent,
-                  ),
-                ),
-              ),
-            ],
-          ),
+
+        if (!isCompactHeight) const Spacer(),
+
+        // Bottom Expand / Collapse Toggle Button
+        _DesktopSidebarItem(
+          icon: _collapsed
+              ? Icons.keyboard_double_arrow_right_rounded
+              : Icons.keyboard_double_arrow_left_rounded,
+          label: 'Collapse',
+          isExpanded: isExpanded,
+          selected: false,
+          iconColor: isDark ? Colors.white60 : Colors.black54,
+          onTap: () => setState(() => _collapsed = !_collapsed),
         ),
-      ],
-    );
-  }
-}
 
-class _RailSquircleButton extends StatefulWidget {
-  const _RailSquircleButton({
-    required this.icon,
-    required this.iconColor,
-    required this.tooltip,
-    required this.isDark,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final Color iconColor;
-  final String tooltip;
-  final bool isDark;
-  final VoidCallback onTap;
-
-  @override
-  State<_RailSquircleButton> createState() => _RailSquircleButtonState();
-}
-
-class _RailSquircleButtonState extends State<_RailSquircleButton> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: widget.tooltip,
-      waitDuration: const Duration(milliseconds: 400),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            widget.onTap();
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 140),
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: widget.isDark
-                  ? (_hovered ? const Color(0xFF323642) : const Color(0xFF242730))
-                  : (_hovered ? const Color(0xFFDFE1E8) : const Color(0xFFE8EAF0)),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: widget.isDark
-                    ? Colors.white.withValues(alpha: _hovered ? 0.20 : 0.08)
-                    : Colors.black.withValues(alpha: _hovered ? 0.14 : 0.06),
-                width: 1,
-              ),
-              boxShadow: _hovered
-                  ? [
-                      BoxShadow(
-                        color: widget.iconColor.withValues(alpha: 0.30),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Center(
-              child: Icon(
-                widget.icon,
-                color: widget.iconColor,
-                size: 24,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RailIconButton extends StatefulWidget {
-  const _RailIconButton({
-    required this.icon,
-    required this.tooltip,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  State<_RailIconButton> createState() => _RailIconButtonState();
-}
-
-class _RailIconButtonState extends State<_RailIconButton> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Tooltip(
-      message: widget.tooltip,
-      waitDuration: const Duration(milliseconds: 400),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: () {
-            HapticFeedback.lightImpact();
-            widget.onTap();
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 140),
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: widget.selected
-                  ? EuBrutal.accent.withValues(alpha: isDark ? 0.25 : 0.15)
-                  : (_hovered
-                        ? (isDark
-                              ? Colors.white.withValues(alpha: 0.08)
-                              : Colors.black.withValues(alpha: 0.05))
-                        : Colors.transparent),
-              borderRadius: BorderRadius.circular(14),
-              border: widget.selected
-                  ? Border.all(
-                      color: EuBrutal.accent.withValues(alpha: 0.6),
-                      width: 1.2,
-                    )
-                  : null,
-            ),
-            child: Center(
-              child: Icon(
-                widget.icon,
-                color: widget.selected
-                    ? EuBrutal.accent
-                    : (isDark ? Colors.white70 : Colors.black87),
-                size: 24,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SidebarItem extends StatelessWidget {
-  const _SidebarItem({
-    required this.dest,
-    required this.shortcut,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final _Dest dest;
-  final String shortcut;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final fg = selected ? EuBrutal.onAccent : context.eu.ink;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 3),
-      child: Tooltip(
-        message: '${dest.label} ($shortcut)',
-        waitDuration: const Duration(milliseconds: 500),
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: onTap,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeInOut,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                // Accent fill for selected — brutalist solid colour
-                color: selected ? EuBrutal.accent : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-                // Hard shadow only when selected
-                boxShadow: selected ? EuBrutal.smHardShadow : null,
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    selected ? dest.selectedIcon : dest.icon,
-                    color: fg,
-                    size: 22,
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Text(
-                      dest.label,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-                        color: fg,
-                      ),
-                    ),
-                  ),
-                  if (selected)
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _QuickCollectionItem extends StatefulWidget {
-  const _QuickCollectionItem({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final Color iconColor;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  State<_QuickCollectionItem> createState() => _QuickCollectionItemState();
-}
-
-class _QuickCollectionItemState extends State<_QuickCollectionItem> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 140),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: _hovered
-                  ? context.eu.ink.withValues(alpha: 0.08)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(8),
-            ),
+        // Version badge when open
+        if (isExpanded)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 6),
             child: Row(
               children: [
-                Icon(widget.icon, size: 18, color: widget.iconColor),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    widget.label,
+                Text(
+                  'Euphony Desktop',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: context.eu.ink.withValues(alpha: 0.4),
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: EuBrutal.accent.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: EuBrutal.accent, width: 1),
+                  ),
+                  child: const Text(
+                    'v1.0.1',
                     style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: context.eu.ink.withValues(alpha: 0.85),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: EuBrutal.accent,
                     ),
                   ),
                 ),
               ],
+            ),
+          ),
+        const SizedBox(height: 10),
+      ],
+    );
+  }
+
+  Widget _buildBrandHeader(
+    BuildContext context,
+    bool isDark,
+    bool isExpanded,
+  ) {
+    return SizedBox(
+      height: 48,
+      child: Tooltip(
+        message: _collapsed ? 'Expand sidebar' : 'Euphony',
+        waitDuration: const Duration(milliseconds: 350),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            if (_collapsed) {
+              setState(() => _collapsed = false);
+            }
+          },
+          child: Row(
+            children: [
+              // Purple brand square icon — centered at x = 36.0 (15 + 42/2 = 36)
+              Container(
+                margin: const EdgeInsets.only(left: 15.0),
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  color: EuBrutal.accent,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: EuBrutal.accent.withValues(alpha: 0.4),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Center(
+                  child: Icon(
+                    Icons.graphic_eq_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
+              if (isExpanded) ...[
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Euphony',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  iconSize: 20,
+                  padding: const EdgeInsets.all(4),
+                  constraints: const BoxConstraints(
+                    minWidth: 32,
+                    minHeight: 32,
+                  ),
+                  icon: Icon(
+                    Icons.keyboard_double_arrow_left_rounded,
+                    color: isDark ? Colors.white60 : Colors.black54,
+                  ),
+                  tooltip: 'Collapse sidebar',
+                  onPressed: () => setState(() => _collapsed = true),
+                ),
+                const SizedBox(width: 6),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DesktopSidebarItem extends StatefulWidget {
+  const _DesktopSidebarItem({
+    required this.icon,
+    required this.label,
+    required this.isExpanded,
+    required this.selected,
+    required this.onTap,
+    this.iconColor,
+    this.shortcut,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool isExpanded;
+  final bool selected;
+  final VoidCallback onTap;
+  final Color? iconColor;
+  final String? shortcut;
+
+  @override
+  State<_DesktopSidebarItem> createState() => _DesktopSidebarItemState();
+}
+
+class _DesktopSidebarItemState extends State<_DesktopSidebarItem> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final effectiveIconColor = widget.selected
+        ? EuBrutal.onAccent
+        : (widget.iconColor ??
+            (_hovered
+                ? (isDark ? Colors.white : Colors.black)
+                : (isDark ? Colors.white70 : Colors.black87)));
+
+    final effectiveTextColor = widget.selected
+        ? EuBrutal.onAccent
+        : context.eu.ink;
+
+    final tooltipMessage = widget.shortcut != null
+        ? '${widget.label} (${widget.shortcut})'
+        : widget.label;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2.5),
+      child: Tooltip(
+        message: !widget.isExpanded ? tooltipMessage : (widget.shortcut ?? ''),
+        waitDuration: const Duration(milliseconds: 350),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hovered = true),
+          onExit: (_) => setState(() => _hovered = false),
+          child: GestureDetector(
+            onTap: () {
+              HapticFeedback.lightImpact();
+              widget.onTap();
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 240),
+              curve: Curves.easeInOutCubic,
+              margin: const EdgeInsets.symmetric(horizontal: 12),
+              height: 46,
+              decoration: BoxDecoration(
+                color: widget.selected
+                    ? EuBrutal.accent
+                    : (_hovered
+                        ? (isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : Colors.black.withValues(alpha: 0.05))
+                        : Colors.transparent),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: widget.selected
+                    ? [
+                        BoxShadow(
+                          color: EuBrutal.accent.withValues(alpha: 0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 48,
+                    height: 46,
+                    child: Center(
+                      child: Icon(
+                        widget.icon,
+                        size: 22,
+                        color: effectiveIconColor,
+                      ),
+                    ),
+                  ),
+                  if (widget.isExpanded) ...[
+                    Expanded(
+                      child: ClipRect(
+                        child: Text(
+                          widget.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: false,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: widget.selected
+                                ? FontWeight.w900
+                                : FontWeight.w700,
+                            color: effectiveTextColor,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (widget.selected)
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
+                        ),
+                      )
+                    else
+                      const SizedBox(width: 8),
+                  ],
+                ],
+              ),
             ),
           ),
         ),
