@@ -70,13 +70,18 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
 
     final key = event.logicalKey;
     final controller = ref.read(playerControllerProvider);
-    final player = ref.read(audioPlayerProvider);
     final volumeNotifier = ref.read(playerVolumeProvider.notifier);
 
     // 1. Dedicated hardware / bluetooth / headset media keys always work anywhere.
+    // Note: On Windows, VK_MEDIA_PLAY_PAUSE (0xB3) is mapped by Flutter's HID translation table
+    // to LogicalKeyboardKey.mediaFastForward (HID usage 0x00B3 = Fast Forward).
+    // Therefore, mediaPlayPause, mediaPlay, mediaPause, mediaFastForward, and
+    // PhysicalKeyboardKey.mediaPlayPause all trigger togglePlayPause().
     if (key == LogicalKeyboardKey.mediaPlayPause ||
         key == LogicalKeyboardKey.mediaPlay ||
-        key == LogicalKeyboardKey.mediaPause) {
+        key == LogicalKeyboardKey.mediaPause ||
+        key == LogicalKeyboardKey.mediaFastForward ||
+        event.physicalKey == PhysicalKeyboardKey.mediaPlayPause) {
       controller.togglePlayPause();
       return true;
     }
@@ -85,25 +90,14 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
       return true;
     }
     if (key == LogicalKeyboardKey.mediaTrackNext ||
-        key == LogicalKeyboardKey.mediaSkip) {
+        key == LogicalKeyboardKey.mediaSkip ||
+        event.physicalKey == PhysicalKeyboardKey.mediaTrackNext) {
       controller.skipNext();
       return true;
     }
-    if (key == LogicalKeyboardKey.mediaTrackPrevious) {
+    if (key == LogicalKeyboardKey.mediaTrackPrevious ||
+        event.physicalKey == PhysicalKeyboardKey.mediaTrackPrevious) {
       controller.skipPrevious();
-      return true;
-    }
-    if (key == LogicalKeyboardKey.mediaFastForward) {
-      final pos = player.position;
-      final total = player.duration ?? Duration.zero;
-      final target = pos + const Duration(seconds: 10);
-      controller.seek(target > total ? total : target);
-      return true;
-    }
-    if (key == LogicalKeyboardKey.mediaRewind) {
-      final pos = player.position;
-      final target = pos - const Duration(seconds: 10);
-      controller.seek(target < Duration.zero ? Duration.zero : target);
       return true;
     }
 
