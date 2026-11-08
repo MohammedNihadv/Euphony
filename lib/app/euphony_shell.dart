@@ -116,22 +116,8 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
       if (ctx.widget is EditableText ||
           ctx.findAncestorWidgetOfExactType<EditableText>() != null ||
           ctx.findAncestorWidgetOfExactType<TextField>() != null ||
-          ctx.findAncestorWidgetOfExactType<TextFormField>() != null ||
-          ctx.findAncestorWidgetOfExactType<SearchBar>() != null ||
-          ctx.findAncestorWidgetOfExactType<SearchAnchor>() != null) {
+          ctx.findAncestorWidgetOfExactType<TextFormField>() != null) {
         isEditing = true;
-      } else {
-        // Deep search the focused element's subtree for text editing widgets
-        void checkElement(Element el) {
-          if (isEditing) return;
-          if (el.widget is EditableText || el.widget is TextField) {
-            isEditing = true;
-            return;
-          }
-          el.visitChildren(checkElement);
-        }
-
-        (ctx as Element).visitChildren(checkElement);
       }
     }
 

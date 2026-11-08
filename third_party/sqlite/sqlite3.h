@@ -72,7 +72,11 @@ extern "C" {
 # define SQLITE_EXTERN extern
 #endif
 #ifndef SQLITE_API
-# define SQLITE_API
+# if defined(_WIN32)
+#   define SQLITE_API __declspec(dllexport)
+# else
+#   define SQLITE_API
+# endif
 #endif
 #ifndef SQLITE_CDECL
 # define SQLITE_CDECL

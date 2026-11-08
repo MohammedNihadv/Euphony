@@ -1,0 +1,16 @@
+{
+  "name": "euphony",
+  "version": "1.0.1",
+  "private": true,
+  "description": "Euphony Music Player",
+  "scripts": {
+    "dev": "flutter run -d windows",
+    "dev:chrome": "flutter run -d chrome",
+    "dev:android": "flutter run -d android",
+    "build:windows": "flutter build windows --release",
+    "build:apk": "flutter build apk --split-per-abi",
+    "analyze": "flutter analyze",
+    "test": "flutter test"
+  }
+}
+
