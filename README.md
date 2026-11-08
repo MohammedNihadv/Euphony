@@ -55,7 +55,7 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
   <a href="https://github.com/sponsors/MohammedNihadv">
     <img src="https://img.shields.io/badge/Sponsor-GITHUB%20SPONSORS-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=EA4AAA&labelColor=18181b" alt="Sponsor on GitHub"/>
   </a>
-  <a href="https://www.buymeacoffee.com/MohammedNihad">
+  <a href="https://www.buymeacoffee.com/mhdnihadv">
     <img src="https://img.shields.io/badge/Buy_Me_A_Coffee-DONATE-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=FFDD00&labelColor=18181b" alt="Buy Me A Coffee"/>
   </a>
 </p>
@@ -122,7 +122,7 @@ Euphony is built with love and maintained independently without ads, tracking, o
     <img src="https://img.shields.io/badge/GitHub%20Sponsors-SPONSOR-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white&labelColor=18181b" alt="Sponsor on GitHub"/>
   </a>
   &nbsp;&nbsp;
-  <a href="https://www.buymeacoffee.com/MohammedNihad">
+  <a href="https://www.buymeacoffee.com/mhdnihadv">
     <img src="https://img.shields.io/badge/Buy%20Me%20A%20Coffee-SUPPORT%20DEV-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black&labelColor=18181b" alt="Buy Me A Coffee"/>
   </a>
 </p>
