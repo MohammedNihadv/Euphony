@@ -2,6 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../domain/song.dart';
+import '../domain/song_details.dart';
+import '../features/player/lyrics_service.dart';
 import '../features/settings/settings_provider.dart';
 import 'db/dao/liked_songs_dao.dart';
 import 'db/dao/saved_albums_dao.dart';
@@ -9,6 +12,7 @@ import 'db/dao/saved_playlists_dao.dart';
 import 'db/dao/search_history_dao.dart';
 import 'db/database.dart';
 import 'remote/innertube/innertube_client.dart';
+import 'remote/song_details_service.dart';
 import 'repository/home_repository.dart';
 import 'repository/music_detail_repository.dart';
 import 'repository/search_repository.dart';
@@ -79,3 +83,15 @@ final homeRepositoryProvider = riverpod.Provider<HomeRepository>(
 final musicDetailRepositoryProvider = riverpod.Provider<MusicDetailRepository>(
   (ref) => MusicDetailRepository(ref.watch(innertubeClientProvider)),
 );
+
+final songLyricsProvider =
+    riverpod.FutureProvider.family<SongLyrics?, Song>((ref, song) {
+  return LyricsService.instance.getLyrics(song);
+});
+
+final songDetailsProvider =
+    riverpod.FutureProvider.family<SongDetails?, Song>((ref, song) {
+  final repo = ref.watch(musicDetailRepositoryProvider);
+  return SongDetailsService.instance.getSongDetails(song, musicDetailRepo: repo);
+});
+

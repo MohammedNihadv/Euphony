@@ -630,110 +630,6 @@ class _SavedPlaylistsTab extends ConsumerWidget {
               ),
             ),
 
-            // Import Online Playlist Action Tile
-            Container(
-              margin: const EdgeInsets.only(bottom: EuSpace.md),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isDark
-                      ? [
-                          const Color(0xFF3B82F6).withValues(alpha: 0.22),
-                          const Color(0x60161626),
-                        ]
-                      : [
-                          const Color(0xFF3B82F6).withValues(alpha: 0.12),
-                          Colors.white.withValues(alpha: 0.9),
-                        ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: const Color(0xFF3B82F6).withValues(
-                    alpha: isDark ? 0.38 : 0.28,
-                  ),
-                  width: 1.2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF3B82F6).withValues(
-                      alpha: isDark ? 0.18 : 0.08,
-                    ),
-                    blurRadius: 14,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Material(
-                type: MaterialType.transparency,
-                borderRadius: BorderRadius.circular(16),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  onTap: () => _showImportPlaylistDialog(context, ref),
-                  leading: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF3B82F6).withValues(alpha: 0.4),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.cloud_download_rounded,
-                      color: Colors.white,
-                      size: 26,
-                    ),
-                  ),
-                  title: Text(
-                    'Import Online Playlist',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 15,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
-                  ),
-                  subtitle: Text(
-                    'Paste YouTube or YouTube Music playlist link',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                      color: isDark ? Colors.white60 : Colors.black54,
-                    ),
-                  ),
-                  trailing: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white10
-                          : Colors.black.withValues(alpha: 0.05),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 14,
-                      color: isDark ? Colors.white70 : Colors.black54,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
             if (entries.isEmpty)
               Padding(
                 padding: const EdgeInsets.all(EuSpace.xl),
@@ -960,6 +856,24 @@ class _SavedPlaylistsTab extends ConsumerWidget {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 12),
+              Center(
+                child: TextButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _showImportPlaylistDialog(context, ref);
+                  },
+                  icon: const Icon(Icons.link_rounded, size: 18),
+                  label: const Text('Import from YouTube link instead'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF38BDF8),
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
