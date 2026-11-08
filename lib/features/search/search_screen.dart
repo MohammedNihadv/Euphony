@@ -91,6 +91,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         _results = null;
         _failure = null;
         _activeFilter = null;
+        _searching = false;
       });
       return;
     }
@@ -105,36 +106,52 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       _focusNode.unfocus();
     });
 
-    final searchDao = ref.read(searchHistoryDaoProvider);
-    final repository = ref.read(searchRepositoryProvider);
+    try {
+      final searchDao = ref.read(searchHistoryDaoProvider);
+      final repository = ref.read(searchRepositoryProvider);
 
-    await searchDao.record(query);
-    final effectiveFilter =
-        _filterForLabel(filterLabel) ??
-        (_catalogSource == CatalogSource.community
-            ? SearchFilter.videos
-            : null);
+      try {
+        await searchDao.record(query);
+      } catch (_) {
+        // Failing to record history must never break search execution.
+      }
 
-    final result = await repository.search(
-      query,
-      filter: effectiveFilter,
-      params: params,
-    );
+      final effectiveFilter =
+          _filterForLabel(filterLabel) ??
+          (_catalogSource == CatalogSource.community
+              ? SearchFilter.videos
+              : null);
 
-    if (!mounted) return;
-    result.fold(
-      (results) {
+      final result = await repository.search(
+        query,
+        filter: effectiveFilter,
+        params: params,
+      );
+
+      if (!mounted) return;
+      result.fold(
+        (results) {
+          setState(() {
+            _results = results;
+          });
+          _applyArtwork(results);
+        },
+        (failure) => setState(() {
+          _failure = failure;
+        }),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _failure = Failure.network(cause: e);
+      });
+    } finally {
+      if (mounted) {
         setState(() {
-          _results = results;
           _searching = false;
         });
-        _applyArtwork(results);
-      },
-      (failure) => setState(() {
-        _failure = failure;
-        _searching = false;
-      }),
-    );
+      }
+    }
   }
 
   void _queueSuggestions(String query) {
@@ -151,20 +168,32 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     setState(() => _loadingSuggestions = true);
     _suggestionDebounce = Timer(const Duration(milliseconds: 240), () async {
       if (!mounted) return;
-      final repository = ref.read(searchRepositoryProvider);
-      final request = ++_suggestionRequest;
-      final result = await repository.suggestions(trimmed);
-      if (!mounted || request != _suggestionRequest) return;
-      result.fold(
-        (suggestions) => setState(() {
-          _suggestions = suggestions.take(6).toList();
-          _loadingSuggestions = false;
-        }),
-        (_) => setState(() {
-          _suggestions = const [];
-          _loadingSuggestions = false;
-        }),
-      );
+      try {
+        final repository = ref.read(searchRepositoryProvider);
+        final request = ++_suggestionRequest;
+        final result = await repository.suggestions(trimmed);
+        if (!mounted || request != _suggestionRequest) return;
+        result.fold(
+          (suggestions) => setState(() {
+            _suggestions = suggestions.take(6).toList();
+          }),
+          (_) => setState(() {
+            _suggestions = const [];
+          }),
+        );
+      } catch (_) {
+        if (mounted) {
+          setState(() {
+            _suggestions = const [];
+          });
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _loadingSuggestions = false;
+          });
+        }
+      }
     });
   }
 

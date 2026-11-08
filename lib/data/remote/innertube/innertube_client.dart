@@ -58,7 +58,14 @@ class InnertubeClient {
     DateTime Function()? clock,
     this._language = 'en',
     this._region = 'US',
-  }) : _dio = dio ?? Dio(),
+  }) : _dio = dio ??
+            Dio(
+              BaseOptions(
+                connectTimeout: const Duration(seconds: 10),
+                receiveTimeout: const Duration(seconds: 15),
+                sendTimeout: const Duration(seconds: 10),
+              ),
+            ),
        _visitorIds = visitorIdStore ?? MemoryVisitorIdStore(),
        _now = clock ?? DateTime.now;
 
@@ -162,7 +169,12 @@ class InnertubeClient {
     return guard(() async {
       final response = await _dio.get<String>(
         Innertube.requestBase,
-        options: Options(headers: _headers, responseType: ResponseType.plain),
+        options: Options(
+          headers: _headers,
+          responseType: ResponseType.plain,
+          sendTimeout: const Duration(seconds: 8),
+          receiveTimeout: const Duration(seconds: 8),
+        ),
       );
       final match = RegExp(
         r'ytcfg\.set\s*\(\s*({.+?})\s*\)\s*;',
@@ -236,6 +248,8 @@ class InnertubeClient {
       return Err(
         ParseFailure('response', message: 'malformed JSON', cause: error),
       );
+    } catch (error) {
+      return Err(Failure.network(message: error.toString(), cause: error));
     }
   }
 

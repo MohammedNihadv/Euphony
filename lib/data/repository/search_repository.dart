@@ -1,9 +1,13 @@
+import '../../core/failure.dart';
+import '../../core/log.dart';
 import '../../core/result.dart';
 import '../../domain/search_results.dart';
 import '../remote/innertube/innertube_client.dart';
 import '../remote/innertube/innertube_constants.dart';
 import '../remote/innertube/innertube_utils.dart';
 import '../remote/innertube/parsers/search_parser.dart';
+
+final _log = logFor('search_repository');
 
 /// A cached search result entry with a creation timestamp for TTL checks.
 class _CacheEntry<T> {
@@ -54,15 +58,20 @@ class SearchRepository {
     });
 
     return response.flatMap((json) {
-      final result = parseSearch(json, query: trimmed, filter: filter);
-      if (result case Ok(:final value)) {
-        // Evict oldest entry when at capacity.
-        if (_searchCache.length >= _maxSearchCacheSize) {
-          _searchCache.remove(_searchCache.keys.first);
+      try {
+        final result = parseSearch(json, query: trimmed, filter: filter);
+        if (result case Ok(:final value)) {
+          // Evict oldest entry when at capacity.
+          if (_searchCache.length >= _maxSearchCacheSize) {
+            _searchCache.remove(_searchCache.keys.first);
+          }
+          _searchCache[cacheKey] = _CacheEntry(value);
         }
-        _searchCache[cacheKey] = _CacheEntry(value);
+        return result;
+      } catch (e, st) {
+        _log.warning('Failed to parse search results for "$trimmed": $e', e, st);
+        return Err(ParseFailure('search', message: e.toString(), cause: e));
       }
-      return result;
     });
   }
 
@@ -83,14 +92,19 @@ class SearchRepository {
     });
 
     return response.flatMap((json) {
-      final result = parseSearchSuggestions(json);
-      if (result case Ok(:final value)) {
-        if (_suggestionCache.length >= _maxSuggestionCacheSize) {
-          _suggestionCache.remove(_suggestionCache.keys.first);
+      try {
+        final result = parseSearchSuggestions(json);
+        if (result case Ok(:final value)) {
+          if (_suggestionCache.length >= _maxSuggestionCacheSize) {
+            _suggestionCache.remove(_suggestionCache.keys.first);
+          }
+          _suggestionCache[trimmed] = _CacheEntry(value);
         }
-        _suggestionCache[trimmed] = _CacheEntry(value);
+        return result;
+      } catch (e, st) {
+        _log.warning('Failed to parse suggestions for "$trimmed": $e', e, st);
+        return const Ok([]);
       }
-      return result;
     });
   }
 }

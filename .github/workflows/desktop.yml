@@ -25,6 +25,15 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
+      - name: Pre-download mpv audio bundle for media_kit
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path build/windows/x64
+          curl.exe -L --retry 5 --retry-delay 2 --retry-all-errors "https://github.com/media-kit/libmpv-win32-audio-build/releases/download/2023-09-24/mpv-dev-x86_64-20230924-git-652a1dd.7z" -o "build/windows/x64/mpv-dev-x86_64-20230924-git-652a1dd.7z"
+          $md5 = (Get-FileHash -Algorithm MD5 "build/windows/x64/mpv-dev-x86_64-20230924-git-652a1dd.7z").Hash.ToLower()
+          if ($md5 -ne "cd738e16e2a19626d7cfa48801524f8c") {
+            Write-Error "MD5 mismatch for mpv bundle: $md5"
+          }
       - run: flutter build windows --release
       - name: Build Inno Setup Installer
         shell: pwsh
