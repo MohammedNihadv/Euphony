@@ -25,14 +25,28 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
-      - name: Pre-download smtc_windows binary bundle
+      - name: Pre-download and extract smtc_windows binary bundle
         shell: pwsh
         run: |
           $smtcDir = Get-ChildItem -Path "$env:PUB_CACHE\hosted\pub.dev" -Filter "smtc_windows-*" | Select-Object -First 1
           if ($smtcDir) {
-            $dest = Join-Path $smtcDir.FullName "windows\smtc_windows-v0.1.3.tar.gz"
+            $winDir = Join-Path $smtcDir.FullName "windows"
+            $dest = Join-Path $winDir "smtc_windows-v0.1.3.tar.gz"
+            $targetDir = Join-Path $winDir "smtc_windows-v0.1.3"
             Write-Host "Pre-downloading smtc_windows bundle to $dest"
             curl.exe -L --retry 5 --retry-delay 2 "https://github.com/KRTirtho/frb_plugins/releases/download/smtc_windows-v0.1.3/windows.tar.gz" -o $dest
+            New-Item -ItemType Directory -Force -Path $targetDir
+            tar.exe -xzf $dest -C $targetDir
+            $cmakeFile = Join-Path $winDir "CMakeLists.txt"
+            Set-Content -Path $cmakeFile -Value @"
+cmake_minimum_required(VERSION 3.14)
+project("smtc_windows" LANGUAGES CXX)
+set(smtc_windows_bundled_libraries
+  "`${CMAKE_CURRENT_SOURCE_DIR}/smtc_windows-v0.1.3/`${FLUTTER_TARGET_PLATFORM}/smtc_windows.dll"
+  PARENT_SCOPE
+)
+"@
+            Write-Host "Configured $cmakeFile with pre-extracted binaries."
           }
       - name: Pre-download mpv audio bundle for media_kit
         shell: pwsh
