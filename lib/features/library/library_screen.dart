@@ -549,7 +549,6 @@ class _SavedPlaylistsTab extends ConsumerWidget {
               ),
               child: Material(
                 color: isDark ? const Color(0xFF161626) : Colors.white,
-                borderRadius: BorderRadius.circular(16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: BorderSide(
@@ -564,9 +563,6 @@ class _SavedPlaylistsTab extends ConsumerWidget {
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 8,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
                   ),
                   onTap: () => _showCreatePlaylistDialog(context, ref),
                   leading: Container(
@@ -1245,7 +1241,6 @@ class _LibraryTile extends StatelessWidget {
       ),
       child: Material(
         color: tileColor,
-        borderRadius: BorderRadius.circular(14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
           side: BorderSide(
@@ -1259,9 +1254,6 @@ class _LibraryTile extends StatelessWidget {
         child: ListTile(
           onTap: onTap,
           onLongPress: onLongPress,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-          ),
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 4,

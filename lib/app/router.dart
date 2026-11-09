@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/error_widget.dart';
 import '../design/tokens/motion.dart';
 import '../features/album/album_screen.dart';
 import '../features/artist/artist_screen.dart';
@@ -81,6 +82,10 @@ final routerProvider = GoRouter(
       ),
     ),
   ],
+  errorBuilder: (context, state) => EuphonyErrorScreen(
+    error: state.error,
+    uri: state.uri,
+  ),
 );
 
 CustomTransitionPage<void> _buildSmoothPage(LocalKey key, Widget child) {

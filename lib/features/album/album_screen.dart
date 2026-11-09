@@ -431,7 +431,6 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                                   color: isCurrentSong
                                       ? EuBrutal.accent.withValues(alpha: 0.12)
                                       : theme.colorScheme.surfaceContainerLow,
-                                  borderRadius: BorderRadius.circular(14),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
                                     side: BorderSide(

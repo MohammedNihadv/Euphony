@@ -9,6 +9,7 @@ import 'package:just_audio_media_kit/just_audio_media_kit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/euphony_app.dart';
+import 'core/error_widget.dart';
 import 'core/log.dart';
 import 'data/providers.dart';
 
@@ -24,6 +25,12 @@ bool get _isDesktop =>
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   initLogging();
+
+  // Replace Flutter's default red-box ErrorWidget with Euphony's polished
+  // Neo-Brutalist error view featuring error codes, technical logs & recovery.
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return EuphonyErrorWidget(details: details);
+  };
 
   // On Windows and Linux just_audio ships no native player, so route it through
   // media_kit (libmpv). Android, iOS and macOS keep their built-in backend.
