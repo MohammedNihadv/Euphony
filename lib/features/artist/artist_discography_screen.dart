@@ -8,6 +8,7 @@ import '../../data/remote/innertube/json_nav.dart';
 import '../../data/remote/innertube/parsers/item_parser.dart';
 import '../../design/tokens/brutal.dart';
 import '../../design/tokens/tokens.dart';
+import '../../design/widgets/brand_badge.dart';
 import '../../domain/album.dart';
 import '../../domain/music_item.dart';
 import '../../domain/playlist.dart';
@@ -168,33 +169,10 @@ class _ArtistDiscographyScreenState
     final hasPlaylists = _playlists.isNotEmpty;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          tooltip: 'Back',
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              widget.sectionTitle,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.2,
-              ),
-            ),
-            Text(
-              widget.artistName,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
-              ),
-            ),
-          ],
-        ),
+      appBar: EuphonySubpageAppBar(
+        categoryLabel: widget.sectionTitle,
+        icon: Icons.library_music_rounded,
+        title: widget.artistName,
       ),
       body: SafeArea(
         child: hasAlbums

@@ -701,6 +701,7 @@ class _HomeItemCard extends ConsumerWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () {
+            HapticFeedback.lightImpact();
             switch (item) {
               case SongItem(:final song):
                 if (sectionItems != null) {

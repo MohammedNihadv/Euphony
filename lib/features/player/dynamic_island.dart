@@ -564,8 +564,10 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isDark ? Colors.white24 : context.eu.ink,
-                      width: 1.5,
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.15)
+                          : Colors.black.withValues(alpha: 0.08),
+                      width: 1.0,
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -706,8 +708,10 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                     color: EuBrutal.accent,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isDark ? Colors.white24 : context.eu.ink,
-                      width: 1.5,
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.15)
+                          : Colors.black.withValues(alpha: 0.08),
+                      width: 1.0,
                     ),
                     boxShadow: [
                       BoxShadow(

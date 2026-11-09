@@ -1132,7 +1132,12 @@ class _DesktopItemCardState extends ConsumerState<_DesktopItemCard> {
                       decoration: BoxDecoration(
                         shape: isArtist ? BoxShape.circle : BoxShape.rectangle,
                         borderRadius: isArtist ? null : BorderRadius.circular(10),
-                        border: Border.all(color: context.eu.ink, width: 1.2),
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.12)
+                              : Colors.black.withValues(alpha: 0.08),
+                          width: 1.0,
+                        ),
                       ),
                       child: ClipRRect(
                         borderRadius: isArtist

@@ -107,7 +107,7 @@ void FlutterWindow::SetMiniMode(bool enable) {
     }
     double scale = static_cast<double>(dpi) / 96.0;
     int mini_w = static_cast<int>(400 * scale);
-    int mini_h = static_cast<int>(70 * scale);
+    int mini_h = static_cast<int>(74 * scale);
     int x = work_area.right - mini_w - static_cast<int>(24 * scale);
     int y = work_area.bottom - mini_h - static_cast<int>(24 * scale);
 

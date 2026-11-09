@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/error_widget.dart';
-import '../design/tokens/motion.dart';
 import '../features/album/album_screen.dart';
 import '../features/artist/artist_screen.dart';
 import '../features/home/home_screen.dart';
@@ -92,19 +91,23 @@ CustomTransitionPage<void> _buildSmoothPage(LocalKey key, Widget child) {
   return CustomTransitionPage<void>(
     key: key,
     child: child,
-    transitionDuration: EuMotion.standard,
-    reverseTransitionDuration: EuMotion.quick,
+    transitionDuration: const Duration(milliseconds: 260),
+    reverseTransitionDuration: const Duration(milliseconds: 200),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       final curved = CurvedAnimation(
         parent: animation,
-        curve: EuMotion.emphasized,
-        reverseCurve: EuMotion.emphasizedIn,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
+      );
+      final fade = CurvedAnimation(
+        parent: animation,
+        curve: const Interval(0.0, 0.85, curve: Curves.easeOut),
       );
       return FadeTransition(
-        opacity: curved,
+        opacity: fade,
         child: SlideTransition(
           position: Tween<Offset>(
-            begin: const Offset(0, 0.08),
+            begin: const Offset(0.04, 0),
             end: Offset.zero,
           ).animate(curved),
           child: child,

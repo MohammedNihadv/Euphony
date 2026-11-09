@@ -143,6 +143,7 @@ class _LeftTrackSectionState extends ConsumerState<_LeftTrackSection> {
   Widget build(BuildContext context) {
     final song = widget.song;
     final dao = ref.watch(likedSongsDaoProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (song == null) {
       return Row(
@@ -225,7 +226,12 @@ class _LeftTrackSectionState extends ConsumerState<_LeftTrackSection> {
                 height: 54,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: context.eu.ink, width: 1.5),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.12)
+                        : Colors.black.withValues(alpha: 0.08),
+                    width: 1.0,
+                  ),
                   boxShadow: _isHovered ? EuBrutal.smHardShadow : null,
                   color: Colors.black12,
                 ),

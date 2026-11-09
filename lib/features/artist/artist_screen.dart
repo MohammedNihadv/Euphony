@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../data/providers.dart';
 import '../../design/tokens/brutal.dart';
 import '../../design/tokens/tokens.dart';
+import '../../design/widgets/brand_badge.dart';
 import '../../domain/album.dart';
 import '../../domain/artist.dart';
 import '../../domain/playlist.dart';
@@ -57,24 +58,10 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          tooltip: 'Back',
-          onPressed: () {
-            if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
-            } else {
-              context.go('/');
-            }
-          },
-        ),
-        title: Text(
-          _artist?.name ?? 'Artist',
-          style: theme.textTheme.screenTitle?.copyWith(
-            fontWeight: FontWeight.w900,
-          ),
-        ),
+      appBar: EuphonySubpageAppBar(
+        categoryLabel: 'Artist',
+        icon: Icons.mic_external_on_rounded,
+        title: _artist?.name,
       ),
       body: SafeArea(
         child: _loading
@@ -91,26 +78,50 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                   child: ListView(
                     padding: const EdgeInsets.all(EuSpace.screenGutter),
                     children: [
-                      // Artist Header Card
+                      // Artist Header Card (Borderless, luxury surface)
                       Container(
-                        padding: const EdgeInsets.all(EuSpace.lg),
-                        decoration: EuBrutal.boxDecoration(
-                          color: theme.colorScheme.surfaceContainerLow,
-                          borderRadius: BorderRadius.circular(16),
-                          shadows: EuBrutal.hardShadow,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: EuSpace.xl,
+                          vertical: EuSpace.lg + 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF13131F)
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(
+                                alpha: isDark ? 0.35 : 0.05,
+                              ),
+                              blurRadius: 20,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
                         ),
                         child: Row(
                           children: [
                             Container(
-                              width: 80,
-                              height: 80,
+                              width: 84,
+                              height: 84,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: context.eu.ink,
-                                  width: 2.5,
-                                ),
                                 color: EuBrutal.highlight,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(
+                                      alpha: isDark ? 0.40 : 0.12,
+                                    ),
+                                    blurRadius: 14,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                                border: Border.all(
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.12)
+                                      : Colors.black.withValues(alpha: 0.06),
+                                  width: 1.0,
+                                ),
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: _artist!.artworkUrl != null
@@ -119,32 +130,73 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                                       fit: BoxFit.cover,
                                     )
                                   : const Icon(
-                                      Icons.person,
-                                      size: 40,
+                                      Icons.person_rounded,
+                                      size: 42,
                                       color: EuBrutal.onHighlight,
                                     ),
                             ),
-                            const SizedBox(width: EuSpace.lg),
+                            const SizedBox(width: EuSpace.xl),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text(
                                     _artist!.name,
-                                    style: theme.textTheme.headlineSmall
-                                        ?.copyWith(fontWeight: FontWeight.w900),
+                                    style: theme.textTheme.headlineMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w900,
+                                          letterSpacing: -0.4,
+                                        ),
                                   ),
-                                  if (_artist!.subscribers != null)
-                                    Text(
-                                      _artist!.subscribers!,
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w600,
-                                            color: context.eu.ink.withValues(
-                                              alpha: 0.7,
+                                  if (_artist!.subscribers != null &&
+                                      _artist!.subscribers!.isNotEmpty) ...[
+                                    const SizedBox(height: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 10,
+                                        vertical: 3.5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? Colors.white.withValues(alpha: 0.08)
+                                            : Colors.black.withValues(alpha: 0.05),
+                                        borderRadius: BorderRadius.circular(10),
+                                        border: Border.all(
+                                          color: isDark
+                                              ? Colors.white.withValues(alpha: 0.10)
+                                              : Colors.black.withValues(alpha: 0.06),
+                                          width: 1.0,
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.people_alt_rounded,
+                                            size: 13,
+                                            color: isDark
+                                                ? Colors.white70
+                                                : Colors.black54,
+                                          ),
+                                          const SizedBox(width: 5),
+                                          Text(
+                                            _artist!.subscribers!.toLowerCase().contains('subscriber')
+                                                ? _artist!.subscribers!
+                                                : '${_artist!.subscribers!} subscribers',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                              color: isDark
+                                                  ? Colors.white70
+                                                  : Colors.black87,
+                                              letterSpacing: 0.1,
                                             ),
                                           ),
+                                        ],
+                                      ),
                                     ),
+                                  ],
                                 ],
                               ),
                             ),

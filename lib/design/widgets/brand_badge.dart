@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 
 import '../tokens/brutal.dart';
 
@@ -162,3 +164,118 @@ class EuphonyPageCapsule extends StatelessWidget {
     );
   }
 }
+
+/// A premium, unified AppBar for subpages (Album, Artist, Discography) that
+/// matches the homepage and library capsule aesthetic, with a dedicated
+/// glassmorphic back button, breadcrumb capsule, and smooth tap feedback.
+class EuphonySubpageAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const EuphonySubpageAppBar({
+    super.key,
+    required this.categoryLabel,
+    required this.icon,
+    this.title,
+    this.actions,
+    this.onBackPressed,
+  });
+
+  final String categoryLabel;
+  final IconData icon;
+  final String? title;
+  final List<Widget>? actions;
+  final VoidCallback? onBackPressed;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 4);
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    void handleBack() {
+      HapticFeedback.lightImpact();
+      if (onBackPressed != null) {
+        onBackPressed!();
+      } else if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      } else {
+        context.go('/');
+      }
+    }
+
+    return AppBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      surfaceTintColor: Colors.transparent,
+      centerTitle: false,
+      titleSpacing: 8,
+      leadingWidth: 54,
+      leading: Padding(
+        padding: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.black.withValues(alpha: 0.06),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.12)
+                  : Colors.black.withValues(alpha: 0.08),
+              width: 1.0,
+            ),
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: handleBack,
+              child: Center(
+                child: Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 15,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          EuphonyPageCapsule(
+            label: categoryLabel,
+            icon: icon,
+          ),
+          if (title != null && title!.isNotEmpty) ...[
+            const SizedBox(width: 10),
+            Flexible(
+              child: Text(
+                title!,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+      actions: actions != null
+          ? [
+              Padding(
+                padding: const EdgeInsets.only(right: 12),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: actions!,
+                ),
+              ),
+            ]
+          : null,
+    );
+  }
+}
+

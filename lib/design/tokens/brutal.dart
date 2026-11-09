@@ -96,14 +96,14 @@ abstract final class EuBrutal {
   static const BorderSide side = BorderSide(color: ink, width: 2);
   static const BorderSide thinSide = BorderSide(color: ink, width: 1.5);
 
-  /// A slab: flat fill, light frame, hard shadow.
+  /// A slab: flat fill, optional subtle frame, hard or diffused shadow.
   static BoxDecoration boxDecoration({
     required Color color,
     BorderRadiusGeometry borderRadius = const BorderRadius.all(
       Radius.circular(14),
     ),
     List<BoxShadow> shadows = hardShadow,
-    Border border = border,
+    Border? border,
   }) => BoxDecoration(
     color: color,
     borderRadius: borderRadius,

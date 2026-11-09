@@ -78,7 +78,7 @@ class DesktopMiniPlayerHud extends ConsumerWidget {
                 Align(
                   alignment: Alignment.center,
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    padding: const EdgeInsets.only(left: 10, right: 10, top: 2, bottom: 4),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -86,8 +86,8 @@ class DesktopMiniPlayerHud extends ConsumerWidget {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: SizedBox(
-                            width: 38,
-                            height: 38,
+                            width: 36,
+                            height: 36,
                             child: (song?.artworkUrl != null && song!.artworkUrl!.isNotEmpty)
                                 ? Image.network(
                                     song.artworkUrl!,
@@ -129,7 +129,7 @@ class DesktopMiniPlayerHud extends ConsumerWidget {
                                   fontWeight: FontWeight.w700,
                                   color: Colors.white,
                                   letterSpacing: -0.2,
-                                  height: 1.15,
+                                  height: 1.1,
                                 ),
                               ),
                               const SizedBox(height: 1),
@@ -138,10 +138,10 @@ class DesktopMiniPlayerHud extends ConsumerWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 9.5,
                                   fontWeight: FontWeight.w500,
                                   color: Colors.white.withValues(alpha: 0.65),
-                                  height: 1.15,
+                                  height: 1.1,
                                 ),
                               ),
                             ],

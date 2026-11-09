@@ -228,10 +228,15 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
 
   StatefulNavigationShell get navigationShell => widget.navigationShell;
 
-  void _goBranch(int index) => navigationShell.goBranch(
-    index,
-    initialLocation: index == navigationShell.currentIndex,
-  );
+  void _goBranch(int index) {
+    if (index != navigationShell.currentIndex) {
+      HapticFeedback.selectionClick();
+    }
+    navigationShell.goBranch(
+      index,
+      initialLocation: index == navigationShell.currentIndex,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
