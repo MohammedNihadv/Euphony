@@ -60,7 +60,13 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
   </a>
 </p>
 
-<sub>📱 Android · 🍎 iOS (sideload) · 🪟 Windows · 🍏 macOS · 🐧 Linux</sub>
+<p align="center">
+  <img src="https://img.shields.io/badge/-Android-18181b?logo=android&logoColor=3DDC84&style=flat-square" alt="Android"/>&nbsp;
+  <img src="https://img.shields.io/badge/-Windows-18181b?logo=windows&logoColor=0078D6&style=flat-square" alt="Windows"/>&nbsp;
+  <img src="https://img.shields.io/badge/-macOS-18181b?logo=apple&logoColor=EA005E&style=flat-square" alt="macOS"/>&nbsp;
+  <img src="https://img.shields.io/badge/-Linux-18181b?logo=linux&logoColor=FCC624&style=flat-square" alt="Linux"/>&nbsp;
+  <img src="https://img.shields.io/badge/-iOS-18181b?logo=apple&logoColor=white&style=flat-square" alt="iOS"/>
+</p>
 
 </div>
 
@@ -68,16 +74,16 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
 
 ## Why Euphony?
 
-- 🚫 **Zero Ads & Zero Tracking** — Music without interruptions or telemetry.
-- 🎨 **Neo-Brutalist & Material 3 Design** — High-contrast slab borders, hard shadows, and expressive typography in both **Light** and **Dark** modes.
-- ⚡ **Lightweight & Blazing Fast** — Engineered with Flutter & Riverpod for fluid 120Hz performance.
-- ❤️ **100% Open Source** — Built by the community, for the community under the **GPL-3.0 License**.
+- <img src="https://img.shields.io/badge/Privacy-Zero_Ads_%26_Tracking-3DDC84?style=flat-square" alt="Privacy"/> &nbsp; **Zero Ads & Zero Tracking** — Pure music streaming without interruptions, data harvesting, or telemetry.
+- <img src="https://img.shields.io/badge/Design-Neo--Brutalist_Glass-6A4BE8?style=flat-square" alt="Design"/> &nbsp; **Neo-Brutalist Glass Aesthetic** — High-contrast slab borders, hard shadows, ambient glow, and expressive typography in Light & Dark modes.
+- <img src="https://img.shields.io/badge/Engine-Flutter_%26_Riverpod-02569B?logo=flutter&logoColor=white&style=flat-square" alt="Engine"/> &nbsp; **Lightweight & Blazing Fast** — Engineered with Flutter & Riverpod for fluid, stutter-free 120Hz performance.
+- <img src="https://img.shields.io/badge/License-GPL--3.0-3DA639?style=flat-square" alt="License"/> &nbsp; **100% Free & Open Source** — Built by the community, for the community under the GNU General Public License v3.0.
 
 ---
 
 ## Core Features
 
-| 🎧 Playback & Discovery | 📚 Library & Offline Storage |
+| <img src="https://img.shields.io/badge/Audio-Playback_%26_Discovery-6A4BE8?style=flat-square" alt="Audio"/> | <img src="https://img.shields.io/badge/Storage-Library_%26_Offline-10B981?style=flat-square" alt="Storage"/> |
 | :--- | :--- |
 | **• Universal Music Search** across tracks, albums, artists & playlists<br>**• Queue Management** with seamless shuffle, repeat-all, and repeat-one<br>**• Precision Speed Controls** (0.75x to 2.0x playback speed)<br>**• Smart Sleep Timer** with automatic fade-out<br>**• Native Media Controls** on lock screen, notification panel & wearables | **• Offline Downloads** for 100% offline local playback<br>**• Persistent Playlists** with instant SQLite storage<br>**• Adaptive Audio Quality** (High 256kbps AAC & Standard modes)<br>**• One-Tap Backup & Restore** of playlists and downloads<br>**• AMOLED Black Theme** for true OLED power saving |
 
@@ -87,21 +93,21 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
 
 Grab the [**latest release**](https://github.com/MohammedNihadv/Euphony/releases/latest) and pick your platform:
 
-| Platform | File | How to install |
+| Platform | Package | Installation Guide |
 | :--- | :--- | :--- |
-| 🪟 **Windows** 10/11 | `euphony-windows-setup.exe` | Run the installer — no admin needed, adds Start-menu & desktop shortcuts. |
-| 🍏 **macOS** | `euphony-macos.dmg` | Open the disk image and drag **Euphony** to Applications. |
-| 🐧 **Linux** (Debian / Ubuntu / Mint) | `euphony-linux-amd64.deb` | Double-click or `sudo apt install ./euphony-linux-amd64.deb` (auto-installs all audio dependencies). |
-| 🐧 **Linux** (Universal) | `euphony-linux-x86_64.AppImage` | `chmod +x` the file and run it. |
-| 📱 **Android** | `app-arm64-v8a-release.apk` | ⭐ Best for 99% of phones (2017+). Tap to install. |
-| 📱 **Android (F-Droid)** | [F-Droid Repository](https://f-droid.org/en/packages/com.mhdni.euphony/) | Open-source app store with automatic background updates. |
-| 📱 Android (legacy) | `app-armeabi-v7a-release.apk` | Older 32-bit devices. |
-| 📱 Android (x86) | `app-x86_64-release.apk` | Emulators & Intel Chromebooks. |
-| 🍎 **iOS** | `euphony-ios.ipa` | Unsigned build — sideload with **AltStore**, **Sideloadly** or **TrollStore** (no App Store account needed). |
+| <img src="https://img.shields.io/badge/-Windows-0078D6?logo=windows&logoColor=white&style=flat-square" alt="Windows"/> **Windows 10/11** | `euphony-windows-setup.exe` | Run the installer — no admin needed, adds Start-menu & desktop shortcuts. |
+| <img src="https://img.shields.io/badge/-macOS-EA005E?logo=apple&logoColor=white&style=flat-square" alt="macOS"/> **macOS** | `euphony-macos.dmg` | Open the disk image and drag **Euphony** to Applications. |
+| <img src="https://img.shields.io/badge/-Linux-E95420?logo=ubuntu&logoColor=white&style=flat-square" alt="Linux DEB"/> **Linux (Debian / Ubuntu / Mint)** | `euphony-linux-amd64.deb` | Double-click or `sudo apt install ./euphony-linux-amd64.deb` (auto-installs all audio dependencies). |
+| <img src="https://img.shields.io/badge/-Linux-FCC624?logo=linux&logoColor=black&style=flat-square" alt="Linux AppImage"/> **Linux (Universal)** | `euphony-linux-x86_64.AppImage` | `chmod +x` the file and run it. |
+| <img src="https://img.shields.io/badge/-Android-3DDC84?logo=android&logoColor=white&style=flat-square" alt="Android"/> **Android (Standard)** | `app-arm64-v8a-release.apk` | <img src="https://img.shields.io/badge/-Recommended-6A4BE8?style=flat-square" alt="Recommended"/> Best for 99% of phones (2017+). Tap to install. |
+| <img src="https://img.shields.io/badge/-F--Droid-1976D2?logo=f-droid&logoColor=white&style=flat-square" alt="F-Droid"/> **Android (F-Droid)** | [F-Droid Repository](https://f-droid.org/en/packages/com.mhdni.euphony/) | Open-source app store with automatic background updates. |
+| <img src="https://img.shields.io/badge/-Android-888888?logo=android&logoColor=white&style=flat-square" alt="Android 32-bit"/> **Android (Legacy 32-bit)** | `app-armeabi-v7a-release.apk` | Older 32-bit devices. |
+| <img src="https://img.shields.io/badge/-Android-888888?logo=android&logoColor=white&style=flat-square" alt="Android x86"/> **Android (x86_64)** | `app-x86_64-release.apk` | Emulators & Intel Chromebooks. |
+| <img src="https://img.shields.io/badge/-iOS-000000?logo=apple&logoColor=white&style=flat-square" alt="iOS"/> **iOS** | `euphony-ios.ipa` | Unsigned build — sideload with **AltStore**, **Sideloadly** or **TrollStore** (no App Store account needed). |
 
 ---
 
-## ❤️ Support & Sponsor the Project
+## Support & Sponsor the Project
 
 Euphony is built with love and maintained independently without ads, tracking, or corporate funding. If you enjoy using Euphony and want to help keep development active, consider supporting the project:
 
