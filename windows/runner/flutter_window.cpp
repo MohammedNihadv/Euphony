@@ -1,5 +1,6 @@
 #include "flutter_window.h"
 
+#include <cmath>
 #include <optional>
 #include <string>
 
@@ -69,13 +70,16 @@ void FlutterWindow::SetMiniMode(bool enable) {
   if (!hwnd) return;
 
   if (enable && !is_mini_mode_) {
+    if (IsZoomed(hwnd)) {
+      ShowWindow(hwnd, SW_RESTORE);
+    }
     GetWindowRect(hwnd, &normal_rect_);
     normal_style_ = GetWindowLongPtr(hwnd, GWL_STYLE);
     normal_ex_style_ = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
     is_mini_mode_ = true;
 
     // Remove window frame, caption, system menu and buttons for seamless in-built floating HUD
-    LONG_PTR mini_style = (normal_style_ & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU)) | WS_POPUP;
+    LONG_PTR mini_style = (normal_style_ & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU | WS_MAXIMIZE)) | WS_POPUP;
     LONG_PTR mini_ex_style = (normal_ex_style_ & ~WS_EX_APPWINDOW) | WS_EX_TOOLWINDOW;
     SetWindowLongPtr(hwnd, GWL_STYLE, mini_style);
     SetWindowLongPtr(hwnd, GWL_EXSTYLE, mini_ex_style);
@@ -163,8 +167,58 @@ bool FlutterWindow::OnCreate() {
           SetMiniMode(false);
           result->Success();
         } else if (method == "startDragging") {
-          ReleaseCapture();
-          SendMessage(GetHandle(), WM_NCLBUTTONDOWN, HTCAPTION, 0);
+          HWND hwnd = GetHandle();
+          if (hwnd) {
+            ReleaseCapture();
+            POINT pt;
+            GetCursorPos(&pt);
+            SendMessage(hwnd, WM_SYSCOMMAND, 0xF012, MAKELPARAM(pt.x, pt.y));
+          }
+          result->Success();
+        } else if (method == "moveBy") {
+          HWND hwnd = GetHandle();
+          if (hwnd) {
+            const auto* args = std::get_if<flutter::EncodableMap>(call.arguments());
+            if (args) {
+              auto it_dx = args->find(flutter::EncodableValue("dx"));
+              auto it_dy = args->find(flutter::EncodableValue("dy"));
+              if (it_dx != args->end() && it_dy != args->end()) {
+                double dx = 0.0;
+                double dy = 0.0;
+                if (std::holds_alternative<double>(it_dx->second)) {
+                  dx = std::get<double>(it_dx->second);
+                } else if (std::holds_alternative<int32_t>(it_dx->second)) {
+                  dx = static_cast<double>(std::get<int32_t>(it_dx->second));
+                } else if (std::holds_alternative<int64_t>(it_dx->second)) {
+                  dx = static_cast<double>(std::get<int64_t>(it_dx->second));
+                }
+                if (std::holds_alternative<double>(it_dy->second)) {
+                  dy = std::get<double>(it_dy->second);
+                } else if (std::holds_alternative<int32_t>(it_dy->second)) {
+                  dy = static_cast<double>(std::get<int32_t>(it_dy->second));
+                } else if (std::holds_alternative<int64_t>(it_dy->second)) {
+                  dy = static_cast<double>(std::get<int64_t>(it_dy->second));
+                }
+                RECT r;
+                if (GetWindowRect(hwnd, &r)) {
+                  UINT dpi = 96;
+                  HMODULE user32 = GetModuleHandleA("user32.dll");
+                  if (user32) {
+                    typedef UINT(WINAPI * GetDpiForWindowFn)(HWND);
+                    auto get_dpi = reinterpret_cast<GetDpiForWindowFn>(GetProcAddress(user32, "GetDpiForWindow"));
+                    if (get_dpi) {
+                      dpi = get_dpi(hwnd);
+                    }
+                  }
+                  double scale = static_cast<double>(dpi) / 96.0;
+                  int pdx = static_cast<int>(std::round(dx * scale));
+                  int pdy = static_cast<int>(std::round(dy * scale));
+                  SetWindowPos(hwnd, nullptr, r.left + pdx, r.top + pdy, 0, 0,
+                               SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+                }
+              }
+            }
+          }
           result->Success();
         } else if (method == "closeMiniPlayer") {
           if (close_to_tray_) {
@@ -248,13 +302,55 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     case WM_GETMINMAXINFO: {
       MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lparam);
       if (is_mini_mode_) {
-        info->ptMinTrackSize.x = 280;
-        info->ptMinTrackSize.y = 50;
+        UINT dpi = 96;
+        HMODULE user32 = GetModuleHandleA("user32.dll");
+        if (user32) {
+          typedef UINT(WINAPI * GetDpiForWindowFn)(HWND);
+          auto get_dpi = reinterpret_cast<GetDpiForWindowFn>(GetProcAddress(user32, "GetDpiForWindow"));
+          if (get_dpi) {
+            dpi = get_dpi(hwnd);
+          }
+        }
+        double scale = static_cast<double>(dpi) / 96.0;
+        int mini_w = static_cast<int>(400 * scale);
+        int mini_h = static_cast<int>(74 * scale);
+        info->ptMinTrackSize.x = mini_w;
+        info->ptMinTrackSize.y = mini_h;
+        info->ptMaxTrackSize.x = mini_w;
+        info->ptMaxTrackSize.y = mini_h;
+        info->ptMaxSize.x = mini_w;
+        info->ptMaxSize.y = mini_h;
       } else {
         info->ptMinTrackSize.x = 900;
         info->ptMinTrackSize.y = 600;
       }
       return 0;
+    }
+    case WM_WINDOWPOSCHANGING: {
+      if (is_mini_mode_) {
+        WINDOWPOS* pos = reinterpret_cast<WINDOWPOS*>(lparam);
+        if (!(pos->flags & SWP_NOSIZE)) {
+          UINT dpi = 96;
+          HMODULE user32 = GetModuleHandleA("user32.dll");
+          if (user32) {
+            typedef UINT(WINAPI * GetDpiForWindowFn)(HWND);
+            auto get_dpi = reinterpret_cast<GetDpiForWindowFn>(GetProcAddress(user32, "GetDpiForWindow"));
+            if (get_dpi) {
+              dpi = get_dpi(hwnd);
+            }
+          }
+          double scale = static_cast<double>(dpi) / 96.0;
+          pos->cx = static_cast<int>(400 * scale);
+          pos->cy = static_cast<int>(74 * scale);
+        }
+      }
+      break;
+    }
+    case WM_SYSCOMMAND: {
+      if (is_mini_mode_ && ((wparam & 0xFFF0) == SC_MAXIMIZE)) {
+        return 0;
+      }
+      break;
     }
     case kWM_TrayIcon: {
       if (lparam == WM_LBUTTONUP || lparam == WM_LBUTTONDBLCLK) {

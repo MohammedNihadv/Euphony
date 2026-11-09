@@ -54,25 +54,26 @@ class DesktopMiniPlayerHud extends ConsumerWidget {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onPanStart: (_) => DesktopMediaControls().startDragging(),
+          onPanUpdate: (details) {
+            DesktopMediaControls().moveBy(details.delta.dx, details.delta.dy);
+          },
           onDoubleTap: () => DesktopMediaControls().exitMiniPlayer(),
-          child: Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF111118),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.14),
-                width: 1.0,
+          child: MouseRegion(
+            cursor: SystemMouseCursors.move,
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF111118),
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.70),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.70),
-                  blurRadius: 20,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: Stack(
+              clipBehavior: Clip.antiAlias,
+              child: Stack(
               children: [
                 // Main Transport & Info Bar
                 Align(
@@ -325,6 +326,7 @@ class DesktopMiniPlayerHud extends ConsumerWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }

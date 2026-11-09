@@ -64,6 +64,11 @@ class DesktopMediaControls {
     _channel.invokeMethod('startDragging').ignore();
   }
 
+  void moveBy(double dx, double dy) {
+    if (!isSupported) return;
+    _channel.invokeMethod('moveBy', {'dx': dx, 'dy': dy}).ignore();
+  }
+
   void minimizeToTray() {
     if (!isSupported) return;
     _channel.invokeMethod('minimizeToTray').ignore();
