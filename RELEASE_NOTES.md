@@ -11,15 +11,15 @@
 
 | Platform | Package | Installation Guide |
 | :--- | :--- | :--- |
-| **Android (Standard)** | `app-arm64-v8a-release.apk` | Best for 99% of phones (2017+). Tap to install. |
-| **Android (F-Droid)** | [F-Droid Repository](https://f-droid.org/en/packages/com.mhdni.euphony/) | Open-source app store with automatic background updates. |
-| **Android (Legacy 32-bit)** | `app-armeabi-v7a-release.apk` | Older 32-bit devices. |
-| **Android (x86_64)** | `app-x86_64-release.apk` | Emulators and Intel Chromebooks. |
-| **Windows 10/11** | `euphony-windows-setup.exe` | Run installer — no admin needed, adds Start-menu & desktop shortcuts. |
-| **macOS** | `euphony-macos.dmg` | Open the disk image and drag Euphony to Applications. |
-| **Linux (Universal)** | `euphony-linux-x86_64.AppImage` | `chmod +x` the file and run it. |
-| **Linux (Debian / Ubuntu / Mint)** | `euphony-linux-amd64.deb` | Double-click or `sudo apt install ./euphony-linux-amd64.deb` |
-| **iOS** | `euphony-ios.ipa` | Unsigned build — sideload with AltStore, Sideloadly or TrollStore. |
+| <img src="https://raw.githubusercontent.com/MohammedNihadv/Euphony/main/assets/images/readme/android.svg" width="18" height="18" align="absmiddle"/> **Android (Standard)** | `app-arm64-v8a-release.apk` | Best for 99% of phones (2017+). Tap to install. |
+| <img src="https://raw.githubusercontent.com/MohammedNihadv/Euphony/main/assets/images/readme/fdroid.svg" width="18" height="18" align="absmiddle"/> **Android (F-Droid)** | [F-Droid Repository](https://f-droid.org/en/packages/com.mhdni.euphony/) | Open-source app store with automatic background updates. |
+| <img src="https://raw.githubusercontent.com/MohammedNihadv/Euphony/main/assets/images/readme/android.svg" width="18" height="18" align="absmiddle"/> Android (Legacy 32-bit) | `app-armeabi-v7a-release.apk` | Older 32-bit devices. |
+| <img src="https://raw.githubusercontent.com/MohammedNihadv/Euphony/main/assets/images/readme/android.svg" width="18" height="18" align="absmiddle"/> Android (x86_64) | `app-x86_64-release.apk` | Emulators and Intel Chromebooks. |
+| <img src="https://raw.githubusercontent.com/MohammedNihadv/Euphony/main/assets/images/readme/windows.svg" width="18" height="18" align="absmiddle"/> **Windows 10/11** | `euphony-windows-setup.exe` | Run installer — no admin needed, adds Start-menu & desktop shortcuts. |
+| <img src="https://raw.githubusercontent.com/MohammedNihadv/Euphony/main/assets/images/readme/apple.svg" width="18" height="18" align="absmiddle"/> **macOS** | `euphony-macos.dmg` | Open the disk image and drag Euphony to Applications. |
+| <img src="https://raw.githubusercontent.com/MohammedNihadv/Euphony/main/assets/images/readme/linux.svg" width="18" height="18" align="absmiddle"/> **Linux (Universal)** | `euphony-linux-x86_64.AppImage` | `chmod +x` the file and run it. |
+| <img src="https://raw.githubusercontent.com/MohammedNihadv/Euphony/main/assets/images/readme/ubuntu.svg" width="18" height="18" align="absmiddle"/> **Linux (Debian / Ubuntu / Mint)** | `euphony-linux-amd64.deb` | Double-click or `sudo apt install ./euphony-linux-amd64.deb` |
+| <img src="https://raw.githubusercontent.com/MohammedNihadv/Euphony/main/assets/images/readme/apple.svg" width="18" height="18" align="absmiddle"/> **iOS** | `euphony-ios.ipa` | Unsigned build — sideload with AltStore, Sideloadly or TrollStore. |
 
 ---
 
