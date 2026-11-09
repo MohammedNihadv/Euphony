@@ -17,7 +17,12 @@ class AppUpdater {
         uri,
         mode: LaunchMode.externalApplication,
       );
-      return launched ? null : 'Could not open the browser.';
+      if (launched) return null;
+      final fallback = await launchUrl(
+        uri,
+        mode: LaunchMode.platformDefault,
+      );
+      return fallback ? null : 'Could not open the browser.';
     } catch (e) {
       return 'Could not open the browser: $e';
     }

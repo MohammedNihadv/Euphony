@@ -1978,15 +1978,23 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
       _info = info;
     });
 
-    if (info != null && !info.hasUpdate) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'You are on the latest version (v${info.currentVersion}).',
+    if (info != null) {
+      if (info.hasUpdate) {
+        unawaited(showUpdateDialog(context, info));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'You are on the latest version (v${info.currentVersion}).',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+        );
+      }
     }
   }
 
@@ -1997,6 +2005,7 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
     final updateAsync = ref.watch(updateCheckFutureProvider);
     final info = _info ?? updateAsync.asData?.value;
     final isDark = themeData.brightness == Brightness.dark;
+    final hasUpdate = info != null && info.hasUpdate;
 
     return Container(
       decoration: BoxDecoration(
@@ -2032,26 +2041,64 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
-                    width: 36,
-                    height: 36,
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF10B981).withValues(alpha: 0.14),
-                      shape: BoxShape.circle,
+                      gradient: hasUpdate
+                          ? const LinearGradient(
+                              colors: [Color(0xFF7C3AED), Color(0xFF4F46E5)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : null,
+                      color: hasUpdate
+                          ? null
+                          : const Color(0xFF10B981).withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: hasUpdate
+                          ? [
+                              BoxShadow(
+                                color: const Color(0xFF6366F1).withValues(alpha: 0.35),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ]
+                          : null,
                     ),
-                    child: const Icon(
-                      Icons.system_update_rounded,
-                      color: Color(0xFF10B981),
+                    child: Icon(
+                      hasUpdate
+                          ? Icons.system_update_rounded
+                          : Icons.check_circle_rounded,
+                      color: hasUpdate ? Colors.white : const Color(0xFF10B981),
                       size: 20,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      'Software Updates',
-                      style: themeData.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.2,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Software Updates',
+                          style: themeData.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 1),
+                        Text(
+                          hasUpdate
+                              ? 'A new release is ready to install'
+                              : 'System patches & playback engine up to date',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: hasUpdate
+                                ? EuBrutal.accent
+                                : (isDark ? Colors.white54 : const Color(0xFF64748B)),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -2065,25 +2112,29 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Current Build: v${info?.currentVersion ?? ref.watch(appVersionProvider).asData?.value ?? '0.3.0'}',
-                          style: const TextStyle(fontWeight: FontWeight.w800),
+                          'Current Build: v${info?.currentVersion ?? ref.watch(appVersionProvider).asData?.value ?? '1.0.1'}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13,
+                          ),
                         ),
                         const SizedBox(height: 2),
-                        if (info != null && info.hasUpdate)
+                        if (hasUpdate)
                           Text(
                             'Update Available: v${info.latestVersion}',
                             style: const TextStyle(
                               fontWeight: FontWeight.w900,
+                              fontSize: 12,
                               color: EuBrutal.accent,
                             ),
                           )
                         else
-                          const Text(
-                            'All system patches & components are up to date',
+                          Text(
+                            'Latest build verified',
                             style: TextStyle(
                               fontSize: 11.5,
                               fontWeight: FontWeight.w600,
-                              color: Colors.grey,
+                              color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
                             ),
                           ),
                       ],
@@ -2092,24 +2143,28 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
                   const SizedBox(width: 12),
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: (info != null && info.hasUpdate)
+                      backgroundColor: hasUpdate
                           ? EuBrutal.accent
                           : (isDark
                                 ? const Color(0x1F252538)
                                 : const Color(0xFFF1F5F9)),
-                      foregroundColor: (info != null && info.hasUpdate)
+                      foregroundColor: hasUpdate
                           ? EuBrutal.onAccent
                           : context.eu.ink,
                       side: BorderSide(
-                        color: (info != null && info.hasUpdate)
+                        color: hasUpdate
                             ? EuBrutal.accent
                             : (isDark
                                   ? Colors.white.withValues(alpha: 0.14)
                                   : Colors.black.withValues(alpha: 0.1)),
                         width: 1.2,
                       ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       elevation: 0,
                       shadowColor: Colors.transparent,
@@ -2119,7 +2174,7 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
                         : () async {
                             await HapticFeedback.lightImpact();
                             if (!context.mounted) return;
-                            if (info != null && info.hasUpdate) {
+                            if (hasUpdate) {
                               unawaited(showUpdateDialog(context, info));
                             } else {
                               await _checkUpdate();
@@ -2132,18 +2187,22 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : Icon(
-                            (info != null && info.hasUpdate)
-                                ? Icons.file_download
+                            hasUpdate
+                                ? Icons.file_download_rounded
                                 : Icons.refresh_rounded,
-                            size: 18,
+                            size: 17,
                           ),
                     label: Text(
                       _checking
                           ? 'Checking...'
-                          : (info != null && info.hasUpdate)
+                          : hasUpdate
                           ? 'UPDATE'
                           : 'CHECK',
-                      style: const TextStyle(fontWeight: FontWeight.w900),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 12.5,
+                        letterSpacing: 0.3,
+                      ),
                     ),
                   ),
                 ],

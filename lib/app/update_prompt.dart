@@ -1,31 +1,27 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../data/remote/app_updater.dart';
 import '../data/remote/update_checker.dart';
 import '../design/tokens/brutal.dart';
 
-/// Shows a "new version available" dialog when the user manually triggers an
-/// update check from Settings.
+/// Shows a "new version available" dialog when the user triggers an update
+/// check or when an update is detected.
 ///
-/// Automatic on-launch checking is intentionally removed: on F-Droid the
-/// client manages updates; on GitHub users can tap "Check for updates" in
-/// Settings at any time.
+/// Automatic on-launch checking is intentionally removed: on F-Droid the client
+/// manages updates; on GitHub users can tap "Check for updates" in Settings.
 class UpdatePrompt {
   UpdatePrompt._();
-
-  // no-op: kept so call-sites that still reference this compile cleanly.
-  // Will be removed after callers are cleaned up.
 }
 
-/// The shared "update available" dialog.  The primary action opens the release
-/// page (or ABI-matched APK) in the system browser; no APK is downloaded
-/// inside the app.
+/// The shared "update available" dialog. The primary action opens the release
+/// page in the system browser so the user can review notes and download the APK.
 Future<void> showUpdateDialog(BuildContext context, UpdateInfo info) {
   return showDialog<void>(
     context: context,
-    barrierDismissible: false,
+    barrierDismissible: true,
     builder: (context) => _UpdateDialog(info: info),
   );
 }
@@ -66,107 +62,107 @@ class _UpdateDialogState extends State<_UpdateDialog> {
   Widget build(BuildContext context) {
     final info = widget.info;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bullets = _extractBullets(info.releaseNotes);
 
     return BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+      filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
       child: Dialog(
         backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
         child: Container(
-          padding: const EdgeInsets.all(22),
+          constraints: const BoxConstraints(maxWidth: 420),
           decoration: BoxDecoration(
-            color: isDark
-                ? const Color(0xF5141424)
-                : Colors.white.withValues(alpha: 0.96),
-            borderRadius: BorderRadius.circular(24),
+            color: isDark ? const Color(0xFF141422) : Colors.white,
+            borderRadius: BorderRadius.circular(26),
             border: Border.all(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.14)
+                  ? Colors.white.withValues(alpha: 0.12)
                   : Colors.black.withValues(alpha: 0.08),
               width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.50 : 0.15),
-                blurRadius: 32,
-                offset: const Offset(0, 10),
+                color: isDark
+                    ? Colors.black.withValues(alpha: 0.65)
+                    : const Color(0xFF64748B).withValues(alpha: 0.20),
+                blurRadius: 36,
+                offset: const Offset(0, 12),
+              ),
+              BoxShadow(
+                color: EuBrutal.accent.withValues(alpha: isDark ? 0.18 : 0.08),
+                blurRadius: 28,
+                spreadRadius: 2,
               ),
             ],
           ),
+          padding: const EdgeInsets.all(22),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
+              // Header Row
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    width: 46,
+                    height: 46,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [EuBrutal.accent, Color(0xFF9060FA)],
+                        colors: [Color(0xFF7C3AED), Color(0xFF4F46E5)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(15),
                       boxShadow: [
                         BoxShadow(
-                          color: EuBrutal.accent.withValues(alpha: 0.35),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+                          color: const Color(0xFF6366F1).withValues(alpha: 0.38),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
                     child: const Icon(
                       Icons.system_update_rounded,
                       color: Colors.white,
-                      size: 22,
+                      size: 23,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Text(
-                              'UPDATE AVAILABLE',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 13.5,
-                                letterSpacing: 0.8,
-                                color: isDark ? Colors.white : Colors.black87,
-                              ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: EuBrutal.accent.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Text(
+                            'NEW UPDATE READY',
+                            style: TextStyle(
+                              color: EuBrutal.accent,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.8,
                             ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 7,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: EuBrutal.accent.withValues(alpha: 0.18),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text(
-                                'v${info.latestVersion}',
-                                style: const TextStyle(
-                                  color: EuBrutal.accent,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 4),
                         Text(
-                          'A fresh release of Euphony is ready',
+                          'Euphony v${info.latestVersion}',
                           style: TextStyle(
-                            fontSize: 11.5,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white60 : Colors.black54,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 18,
+                            letterSpacing: -0.3,
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
                           ),
                         ),
                       ],
@@ -174,62 +170,200 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
 
-              // Description
-              Text(
-                'Upgrading preserves all your liked songs, playlists, downloads, and app settings.',
-                style: TextStyle(
-                  fontSize: 12.5,
-                  fontWeight: FontWeight.w600,
-                  height: 1.45,
-                  color: isDark ? Colors.white70 : Colors.black87,
+              // Version Comparison Bento
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.04)
+                      : const Color(0xFFF8FAFC),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : const Color(0xFFE2E8F0),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'INSTALLED',
+                            style: TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.6,
+                              color: isDark
+                                  ? Colors.white38
+                                  : const Color(0xFF94A3B8),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'v${info.currentVersion}',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: isDark
+                                  ? Colors.white70
+                                  : const Color(0xFF334155),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: EuBrutal.accent.withValues(alpha: 0.14),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.arrow_forward_rounded,
+                        size: 14,
+                        color: EuBrutal.accent,
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text(
+                            'LATEST BUILD',
+                            style: TextStyle(
+                              fontSize: 9.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.6,
+                              color: EuBrutal.accent,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'v${info.latestVersion}',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w900,
+                              color: EuBrutal.accent,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              const SizedBox(height: 14),
 
-              // Release notes if available
-              if (_cleanNotes(info.releaseNotes).isNotEmpty) ...[
+              // Highlights / What's New Box
+              Text(
+                'HIGHLIGHTS',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.8,
+                  color: isDark ? Colors.white38 : const Color(0xFF94A3B8),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Container(
+                constraints: const BoxConstraints(maxHeight: 125),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.black.withValues(alpha: 0.30)
+                      : const Color(0xFFF1F5F9).withValues(alpha: 0.70),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.06)
+                        : const Color(0xFFE2E8F0),
+                    width: 1,
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: bullets.map((bullet) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(top: 5, right: 8),
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: EuBrutal.accent,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                bullet,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.35,
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.82)
+                                      : const Color(0xFF334155),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+
+              // Preservation Reassurance
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.verified_user_outlined,
+                    size: 16,
+                    color: Color(0xFF10B981),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'All playlists, favorites, downloads & settings remain intact.',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white54 : const Color(0xFF64748B),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              if (_error != null) ...[
                 const SizedBox(height: 12),
                 Container(
-                  constraints: const BoxConstraints(maxHeight: 90),
+                  width: double.infinity,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.04)
-                        : Colors.black.withValues(alpha: 0.03),
+                    color: EuBrutal.alert.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: isDark ? Colors.white10 : Colors.black12,
+                      color: EuBrutal.alert.withValues(alpha: 0.3),
                       width: 1,
                     ),
-                  ),
-                  child: SingleChildScrollView(
-                    child: Text(
-                      _cleanNotes(info.releaseNotes),
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                        height: 1.4,
-                        color: isDark ? Colors.white60 : Colors.black54,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-
-              if (_error != null) ...[
-                const SizedBox(height: 14),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: EuBrutal.alert.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     _error!,
@@ -244,52 +378,75 @@ class _UpdateDialogState extends State<_UpdateDialog> {
 
               const SizedBox(height: 20),
 
-              // Action buttons
+              // Action Buttons
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  TextButton(
-                    onPressed: _opening ? null : () => Navigator.pop(context),
-                    style: TextButton.styleFrom(
-                      foregroundColor: isDark ? Colors.white60 : Colors.black54,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
+                  Expanded(
+                    flex: 2,
+                    child: OutlinedButton(
+                      onPressed: _opening ? null : () => Navigator.pop(context),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        side: BorderSide(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.14)
+                              : Colors.black.withValues(alpha: 0.12),
+                          width: 1.2,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
-                    ),
-                    child: const Text(
-                      'Later',
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                      child: Text(
+                        'Later',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                          color: isDark
+                              ? Colors.white70
+                              : const Color(0xFF475569),
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: EuBrutal.accent,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 11,
+                  const SizedBox(width: 10),
+                  Expanded(
+                    flex: 3,
+                    child: ElevatedButton.icon(
+                      onPressed: _opening
+                          ? null
+                          : () async {
+                              await HapticFeedback.mediumImpact();
+                              await _openRelease();
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: EuBrutal.accent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 13),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 0,
+                        shadowColor: Colors.transparent,
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      icon: _opening
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.open_in_browser_rounded, size: 18),
+                      label: Text(
+                        _error != null ? 'Retry' : 'Get Update',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 13.5,
+                          letterSpacing: 0.2,
+                        ),
                       ),
-                      elevation: 0,
-                    ),
-                    onPressed: _opening ? null : _openRelease,
-                    icon: _opening
-                        ? const SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(Icons.open_in_browser_rounded, size: 16),
-                    label: Text(
-                      _error != null ? 'Retry' : 'View release',
-                      style: const TextStyle(fontWeight: FontWeight.w900),
                     ),
                   ),
                 ],
@@ -302,16 +459,46 @@ class _UpdateDialogState extends State<_UpdateDialog> {
   }
 }
 
-String _cleanNotes(String? raw) {
-  if (raw == null || raw.trim().isEmpty) return '';
+List<String> _extractBullets(String? raw) {
+  if (raw == null || raw.trim().isEmpty) {
+    return const [
+      'Refreshed features & audio playback improvements',
+      'Refined interface alignments and smooth animations',
+      'Bug fixes and system reliability updates',
+    ];
+  }
+
   final lines = raw
       .split('\n')
       .map((l) => l.trim())
-      .where((l) => l.isNotEmpty && !l.startsWith('##') && !l.startsWith('#'))
+      .where((l) => l.isNotEmpty && !l.startsWith('#'))
       .toList();
-  final bullets = lines
-      .where((l) => l.startsWith('-') || l.startsWith('*'))
-      .toList();
-  final listToUse = bullets.isNotEmpty ? bullets : lines;
-  return listToUse.take(3).join('\n');
+
+  final bullets = <String>[];
+  for (final line in lines) {
+    var cleaned = line;
+    if (cleaned.startsWith('- ') || cleaned.startsWith('* ')) {
+      cleaned = cleaned.substring(2).trim();
+    }
+    // Remove markdown links like [Text](url) -> Text
+    cleaned = cleaned.replaceAllMapped(
+      RegExp(r'\[([^\]]+)\]\([^\)]+\)'),
+      (match) => match.group(1) ?? '',
+    );
+    // Remove "by @user" suffix
+    cleaned = cleaned.replaceAll(RegExp(r'\s+by\s+@[\w-]+.*$'), '');
+    if (cleaned.isNotEmpty && !cleaned.toLowerCase().startsWith('full changelog')) {
+      bullets.add(cleaned);
+    }
+  }
+
+  if (bullets.isEmpty) {
+    return const [
+      'Performance optimizations and playback enhancements',
+      'Visual polish and responsive layout fixes',
+      'Stability updates and memory improvements',
+    ];
+  }
+
+  return bullets.take(4).toList();
 }
