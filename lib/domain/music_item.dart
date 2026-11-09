@@ -8,6 +8,14 @@ import 'song.dart';
 @immutable
 sealed class MusicItem {
   const MusicItem();
+
+  String get id => switch (this) {
+    SongItem(:final song) => song.id,
+    AlbumItem(:final album) => album.browseId,
+    ArtistItem(:final artist) => artist.browseId,
+    PlaylistItem(:final playlist) => playlist.id,
+    StationItem(:final playlistId) => playlistId,
+  };
 }
 
 final class SongItem extends MusicItem {

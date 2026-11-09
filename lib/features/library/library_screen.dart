@@ -69,6 +69,13 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        toolbarHeight: 64,
+        titleSpacing: 20,
+        backgroundColor: theme.colorScheme.surface,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         title: const EuphonyPageCapsule(
           label: 'Library',
           icon: Icons.my_library_music_rounded,
@@ -79,15 +86,15 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           tabAlignment: TabAlignment.start,
           indicatorSize: TabBarIndicatorSize.tab,
           dividerColor: Colors.transparent,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          labelPadding: const EdgeInsets.symmetric(horizontal: 18),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          labelPadding: const EdgeInsets.symmetric(horizontal: 16),
           labelStyle: const TextStyle(
             fontWeight: FontWeight.w900,
-            fontSize: 13.5,
+            fontSize: 13,
           ),
           unselectedLabelStyle: const TextStyle(
             fontWeight: FontWeight.w700,
-            fontSize: 13.5,
+            fontSize: 13,
           ),
           indicator: BoxDecoration(
             color: EuBrutal.accent,
@@ -530,26 +537,6 @@ class _SavedPlaylistsTab extends ConsumerWidget {
             Container(
               margin: const EdgeInsets.only(bottom: EuSpace.md),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: isDark
-                      ? [
-                          EuBrutal.accent.withValues(alpha: 0.22),
-                          const Color(0x60161626),
-                        ]
-                      : [
-                          EuBrutal.accent.withValues(alpha: 0.12),
-                          Colors.white.withValues(alpha: 0.9),
-                        ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: EuBrutal.accent.withValues(
-                    alpha: isDark ? 0.38 : 0.28,
-                  ),
-                  width: 1.2,
-                ),
                 boxShadow: [
                   BoxShadow(
                     color: EuBrutal.accent.withValues(
@@ -561,8 +548,18 @@ class _SavedPlaylistsTab extends ConsumerWidget {
                 ],
               ),
               child: Material(
-                type: MaterialType.transparency,
+                color: isDark ? const Color(0xFF161626) : Colors.white,
                 borderRadius: BorderRadius.circular(16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  side: BorderSide(
+                    color: EuBrutal.accent.withValues(
+                      alpha: isDark ? 0.38 : 0.28,
+                    ),
+                    width: 1.2,
+                  ),
+                ),
+                clipBehavior: Clip.antiAlias,
                 child: ListTile(
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -1232,18 +1229,12 @@ class _LibraryTile extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    final tileColor = isDark
+        ? const Color(0xFF13131E)
+        : Colors.white;
+
     return Container(
       decoration: BoxDecoration(
-        color: isDark
-            ? const Color(0x60161626)
-            : Colors.black.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.10)
-              : Colors.black.withValues(alpha: 0.06),
-          width: 1.0,
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.04),
@@ -1253,8 +1244,18 @@ class _LibraryTile extends StatelessWidget {
         ],
       ),
       child: Material(
-        type: MaterialType.transparency,
+        color: tileColor,
         borderRadius: BorderRadius.circular(14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.10)
+                : Colors.black.withValues(alpha: 0.06),
+            width: 1.0,
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
         child: ListTile(
           onTap: onTap,
           onLongPress: onLongPress,

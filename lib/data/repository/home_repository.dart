@@ -37,12 +37,13 @@ class HomeRepository {
 
     final currentRegion = _client.region;
 
-    // Fetch home, new releases, regional sections, and regional quick picks in parallel.
+    // Fetch home, new releases, regional sections, regional quick picks, and extra release mixes in parallel.
     final futures = await Future.wait([
       _client.browse('FEmusic_home'),
       _client.browse('FEmusic_new_releases'),
       _fetchRegionalSections(currentRegion),
       _fetchRegionalQuickPicks(currentRegion),
+      _fetchNewReleaseMixes(),
     ]);
 
     final homeResult = (futures[0] as Result<Map<String, dynamic>>).flatMap(
@@ -53,6 +54,7 @@ class HomeRepository {
     );
     final regionalSections = futures[2] as List<HomeSection>;
     final regionalQuickPicks = futures[3] as List<Song>;
+    final extraNewReleases = futures[4] as List<MusicItem>;
 
     List<HomeSection> homeSections = const [];
     List<HomeSection> releasesSections = const [];
@@ -64,7 +66,32 @@ class HomeRepository {
       homeQuickPicks = value.quickPicks;
     }
     if (releasesResult case Ok(:final value)) {
-      releasesSections = value.sections;
+      releasesSections = value.sections.map((sec) {
+        if (sec.title.toLowerCase().contains('new release') ||
+            sec.title.toLowerCase().contains('mix')) {
+          final merged = <MusicItem>[...sec.items, ...extraNewReleases];
+          final seenItemIds = <String>{};
+          final dedupedItems = merged
+              .where((m) => seenItemIds.add(m.id))
+              .take(12)
+              .toList();
+          return HomeSection(title: sec.title, items: dedupedItems);
+        }
+        return sec;
+      }).toList();
+
+      if (!releasesSections.any(
+            (s) => s.title.toLowerCase().contains('new release'),
+          ) &&
+          extraNewReleases.isNotEmpty) {
+        releasesSections.insert(
+          0,
+          HomeSection(
+            title: 'New Release Mix',
+            items: extraNewReleases.take(12).toList(),
+          ),
+        );
+      }
       releasesQuickPicks = value.quickPicks;
     }
 
@@ -76,12 +103,25 @@ class HomeRepository {
       ...homeSections,
     ];
 
-    // Deduplicate sections by title (case-insensitive).
+    // Deduplicate sections by title (case-insensitive) and ensure any "new release"
+    // section with fewer than 6 items is fully populated.
     final seen = <String>{};
     final dedupedSections = <HomeSection>[];
     for (final s in allSections) {
       final key = s.title.toLowerCase();
-      if (seen.add(key)) dedupedSections.add(s);
+      if (seen.add(key)) {
+        if (key.contains('new release') && s.items.length < 6 && extraNewReleases.isNotEmpty) {
+          final merged = <MusicItem>[...s.items, ...extraNewReleases];
+          final seenItemIds = <String>{};
+          final dedupedItems = merged
+              .where((m) => seenItemIds.add(m.id))
+              .take(12)
+              .toList();
+          dedupedSections.add(HomeSection(title: s.title, items: dedupedItems));
+        } else {
+          dedupedSections.add(s);
+        }
+      }
     }
 
     // Combine quick picks: regional first (so user gets their chosen country's hits), fallback to releases.
@@ -112,6 +152,34 @@ class HomeRepository {
       return Err(failure);
     }
     return releasesResult.map((_) => const HomeFeed());
+  }
+
+  /// Fetches rich new release mixes/playlists so the "New Release Mix" section
+  /// has a full carousel (8-12 cards) instead of just 1 lone card.
+  Future<List<MusicItem>> _fetchNewReleaseMixes() async {
+    try {
+      final res = await _client.post(Innertube.search, {
+        ..._client.context,
+        'query': 'Latest Releases Mix',
+        'params':
+            searchParams(filter: SearchFilter.featuredPlaylists) ??
+            searchParams(filter: SearchFilter.playlists),
+      });
+      final parsed = res.flatMap(
+        (json) => parseSearch(
+          json,
+          query: 'Latest Releases Mix',
+          filter: SearchFilter.featuredPlaylists,
+        ),
+      );
+      if (parsed case Ok(:final value)) {
+        return [
+          if (value.topResult != null) value.topResult!,
+          for (final sec in value.sections) ...sec.items,
+        ];
+      }
+    } catch (_) {}
+    return const [];
   }
 
   /// Fetches curated regional sections based on country code.

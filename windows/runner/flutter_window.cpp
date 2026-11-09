@@ -70,26 +70,63 @@ void FlutterWindow::SetMiniMode(bool enable) {
 
   if (enable && !is_mini_mode_) {
     GetWindowRect(hwnd, &normal_rect_);
+    normal_style_ = GetWindowLongPtr(hwnd, GWL_STYLE);
+    normal_ex_style_ = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
     is_mini_mode_ = true;
+
+    // Remove window frame, caption, system menu and buttons for seamless in-built floating HUD
+    LONG_PTR mini_style = (normal_style_ & ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU)) | WS_POPUP;
+    LONG_PTR mini_ex_style = (normal_ex_style_ & ~WS_EX_APPWINDOW) | WS_EX_TOOLWINDOW;
+    SetWindowLongPtr(hwnd, GWL_STYLE, mini_style);
+    SetWindowLongPtr(hwnd, GWL_EXSTYLE, mini_ex_style);
+
+    // Apply Windows 11 rounded corners and dark border to mini player window
+#ifndef DWMWA_WINDOW_CORNER_PREFERENCE
+#define DWMWA_WINDOW_CORNER_PREFERENCE 33
+#endif
+#ifndef DWMWA_BORDER_COLOR
+#define DWMWA_BORDER_COLOR 34
+#endif
+    COLORREF border_color = RGB(40, 40, 55);
+    DwmSetWindowAttribute(hwnd, DWMWA_BORDER_COLOR, &border_color, sizeof(border_color));
+    DWORD corner = 2; // DWMWCP_ROUND
+    DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, &corner, sizeof(corner));
 
     // Position mini player in bottom right of desktop work area
     RECT work_area;
     SystemParametersInfo(SPI_GETWORKAREA, 0, &work_area, 0);
-    int mini_w = 380;
-    int mini_h = 135;
-    int x = work_area.right - mini_w - 24;
-    int y = work_area.bottom - mini_h - 24;
 
-    SetWindowPos(hwnd, HWND_TOPMOST, x, y, mini_w, mini_h, SWP_SHOWWINDOW);
+    UINT dpi = 96;
+    HMODULE user32 = GetModuleHandleA("user32.dll");
+    if (user32) {
+      typedef UINT(WINAPI * GetDpiForWindowFn)(HWND);
+      auto get_dpi = reinterpret_cast<GetDpiForWindowFn>(GetProcAddress(user32, "GetDpiForWindow"));
+      if (get_dpi) {
+        dpi = get_dpi(hwnd);
+      }
+    }
+    double scale = static_cast<double>(dpi) / 96.0;
+    int mini_w = static_cast<int>(400 * scale);
+    int mini_h = static_cast<int>(70 * scale);
+    int x = work_area.right - mini_w - static_cast<int>(24 * scale);
+    int y = work_area.bottom - mini_h - static_cast<int>(24 * scale);
+
+    SetWindowPos(hwnd, HWND_TOPMOST, x, y, mini_w, mini_h, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
   } else if (!enable && is_mini_mode_) {
     is_mini_mode_ = false;
+    SetWindowLongPtr(hwnd, GWL_STYLE, normal_style_ ? normal_style_ : WS_OVERLAPPEDWINDOW);
+    SetWindowLongPtr(hwnd, GWL_EXSTYLE, normal_ex_style_);
+
+    COLORREF default_border = 0xFFFFFFFF;
+    DwmSetWindowAttribute(hwnd, DWMWA_BORDER_COLOR, &default_border, sizeof(default_border));
+
     int w = normal_rect_.right - normal_rect_.left;
     int h = normal_rect_.bottom - normal_rect_.top;
     if (w < 900 || h < 600) {
       w = 1200;
       h = 760;
     }
-    SetWindowPos(hwnd, HWND_NOTOPMOST, normal_rect_.left, normal_rect_.top, w, h, SWP_SHOWWINDOW);
+    SetWindowPos(hwnd, HWND_NOTOPMOST, normal_rect_.left, normal_rect_.top, w, h, SWP_SHOWWINDOW | SWP_FRAMECHANGED);
   }
 }
 
@@ -125,6 +162,17 @@ bool FlutterWindow::OnCreate() {
         } else if (method == "exitMiniPlayer") {
           SetMiniMode(false);
           result->Success();
+        } else if (method == "startDragging") {
+          ReleaseCapture();
+          SendMessage(GetHandle(), WM_NCLBUTTONDOWN, HTCAPTION, 0);
+          result->Success();
+        } else if (method == "closeMiniPlayer") {
+          if (close_to_tray_) {
+            MinimizeToTray();
+          } else {
+            SetMiniMode(false);
+          }
+          result->Success();
         } else if (method == "minimizeToTray") {
           MinimizeToTray();
           result->Success();
@@ -139,6 +187,8 @@ bool FlutterWindow::OnCreate() {
               close_to_tray_ = std::get<bool>(it->second);
             }
           }
+          result->Success();
+        } else if (method == "setPlaybackStatus" || method == "updateMetadata" || method == "updatePosition") {
           result->Success();
         } else {
           result->NotImplemented();
@@ -179,6 +229,12 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
   }
 
   switch (message) {
+    case WM_NCCALCSIZE: {
+      if (is_mini_mode_ && wparam == TRUE) {
+        return 0;
+      }
+      break;
+    }
     case WM_CLOSE: {
       if (close_to_tray_) {
         MinimizeToTray();
@@ -192,8 +248,8 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     case WM_GETMINMAXINFO: {
       MINMAXINFO* info = reinterpret_cast<MINMAXINFO*>(lparam);
       if (is_mini_mode_) {
-        info->ptMinTrackSize.x = 300;
-        info->ptMinTrackSize.y = 100;
+        info->ptMinTrackSize.x = 280;
+        info->ptMinTrackSize.y = 50;
       } else {
         info->ptMinTrackSize.x = 900;
         info->ptMinTrackSize.y = 600;

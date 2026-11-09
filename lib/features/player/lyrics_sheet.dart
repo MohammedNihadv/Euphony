@@ -10,9 +10,28 @@ import '../../playback/player_provider.dart';
 import 'lyrics_service.dart';
 import 'romanizer.dart';
 
-/// Shows a Frosted Neo-Glassmorphic synchronized lyrics modal sheet for the given [song].
+/// Shows a Frosted Neo-Glassmorphic synchronized lyrics modal sheet or desktop dialog for the given [song].
 void showLyricsSheet(BuildContext context, Song song) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
+  final isDesktop = MediaQuery.sizeOf(context).width >= 700;
+
+  if (isDesktop) {
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: isDark ? 0.70 : 0.40),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 680, maxHeight: 720),
+          child: _LyricsSheet(song: song, isDialog: true),
+        ),
+      ),
+    );
+    return;
+  }
+
   showModalBottomSheet<void>(
     context: context,
     useRootNavigator: true,
@@ -25,9 +44,10 @@ void showLyricsSheet(BuildContext context, Song song) {
 }
 
 class _LyricsSheet extends ConsumerStatefulWidget {
-  const _LyricsSheet({required this.song});
+  const _LyricsSheet({required this.song, this.isDialog = false});
 
   final Song song;
+  final bool isDialog;
 
   @override
   ConsumerState<_LyricsSheet> createState() => _LyricsSheetState();
@@ -149,57 +169,48 @@ class _LyricsSheetState extends ConsumerState<_LyricsSheet> {
             ? MediaQuery.sizeOf(context).height * 0.82
             : MediaQuery.sizeOf(context).height * 0.88;
 
+        final surfaceColor = isDark ? const Color(0xFF10101A) : const Color(0xFFF8FAFD);
+        final borderRadius = widget.isDialog
+            ? BorderRadius.circular(24)
+            : const BorderRadius.vertical(top: Radius.circular(28));
+
         return Center(
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: isWide ? 780 : double.infinity,
+              maxWidth: widget.isDialog ? 680 : (isWide ? 780 : double.infinity),
               maxHeight: sheetHeight,
             ),
-            child: Container(
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF10101A) : const Color(0xFFF8FAFD),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-                border: Border(
-                  top: BorderSide(
+            child: Material(
+              color: surfaceColor,
+              borderRadius: borderRadius,
+              clipBehavior: Clip.antiAlias,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: borderRadius,
+                  border: Border.all(
                     color: isDark
                         ? Colors.white.withValues(alpha: 0.14)
                         : Colors.black.withValues(alpha: 0.08),
                     width: 1.2,
                   ),
-                  left: isWide
-                      ? BorderSide(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.14)
-                              : Colors.black.withValues(alpha: 0.08),
-                          width: 1.2,
-                        )
-                      : BorderSide.none,
-                  right: isWide
-                      ? BorderSide(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.14)
-                              : Colors.black.withValues(alpha: 0.08),
-                          width: 1.2,
-                        )
-                      : BorderSide.none,
                 ),
-              ),
-              child: Column(
-                children: [
-                  // Drag Handle
-                  Center(
-                    child: Container(
-                      margin: const EdgeInsets.only(top: 12, bottom: 8),
-                      width: 36,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.25)
-                            : Colors.black.withValues(alpha: 0.18),
-                        borderRadius: BorderRadius.circular(2),
+                child: Column(
+                  children: [
+                    // Drag Handle (mobile sheet only)
+                    if (!widget.isDialog)
+                      Center(
+                        child: Container(
+                          margin: const EdgeInsets.only(top: 12, bottom: 8),
+                          width: 36,
+                          height: 4,
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.25)
+                                : Colors.black.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
 
                   // Header Bar
                   Padding(
@@ -625,8 +636,9 @@ class _LyricsSheetState extends ConsumerState<_LyricsSheet> {
               ),
             ),
           ),
-        );
-      },
-    );
-  }
+        ),
+      );
+    },
+  );
+}
 }

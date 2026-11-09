@@ -22,7 +22,7 @@ final routerProvider = GoRouter(
             GoRoute(
               path: '/',
               pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: HomeScreen()),
+                  NoTransitionPage(key: state.pageKey, child: const HomeScreen()),
             ),
           ],
         ),
@@ -31,6 +31,7 @@ final routerProvider = GoRouter(
             GoRoute(
               path: '/search',
               pageBuilder: (context, state) => NoTransitionPage(
+                key: state.pageKey,
                 child: SearchScreen(
                   initialQuery: state.uri.queryParameters['q'],
                 ),
@@ -43,7 +44,7 @@ final routerProvider = GoRouter(
             GoRoute(
               path: '/library',
               pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: LibraryScreen()),
+                  NoTransitionPage(key: state.pageKey, child: const LibraryScreen()),
             ),
           ],
         ),
@@ -52,7 +53,7 @@ final routerProvider = GoRouter(
             GoRoute(
               path: '/settings',
               pageBuilder: (context, state) =>
-                  const NoTransitionPage(child: SettingsScreen()),
+                  NoTransitionPage(key: state.pageKey, child: const SettingsScreen()),
             ),
           ],
         ),
@@ -61,25 +62,30 @@ final routerProvider = GoRouter(
     GoRoute(
       path: '/album/:id',
       pageBuilder: (context, state) => _buildSmoothPage(
+        state.pageKey,
         AlbumScreen(id: state.pathParameters['id']!, isPlaylist: false),
       ),
     ),
     GoRoute(
       path: '/playlist/:id',
       pageBuilder: (context, state) => _buildSmoothPage(
+        state.pageKey,
         AlbumScreen(id: state.pathParameters['id']!, isPlaylist: true),
       ),
     ),
     GoRoute(
       path: '/artist/:id',
-      pageBuilder: (context, state) =>
-          _buildSmoothPage(ArtistScreen(browseId: state.pathParameters['id']!)),
+      pageBuilder: (context, state) => _buildSmoothPage(
+        state.pageKey,
+        ArtistScreen(browseId: state.pathParameters['id']!),
+      ),
     ),
   ],
 );
 
-CustomTransitionPage<void> _buildSmoothPage(Widget child) {
+CustomTransitionPage<void> _buildSmoothPage(LocalKey key, Widget child) {
   return CustomTransitionPage<void>(
+    key: key,
     child: child,
     transitionDuration: EuMotion.standard,
     reverseTransitionDuration: EuMotion.quick,

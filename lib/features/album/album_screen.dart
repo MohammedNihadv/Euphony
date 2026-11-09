@@ -407,17 +407,6 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                                   bottom: EuSpace.sm,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: isCurrentSong
-                                      ? EuBrutal.accent.withValues(alpha: 0.12)
-                                      : theme.colorScheme.surfaceContainerLow,
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(
-                                    color: isCurrentSong
-                                        ? EuBrutal.accent.withValues(alpha: 0.5)
-                                        : theme.colorScheme.outlineVariant
-                                              .withValues(alpha: 0.15),
-                                    width: isCurrentSong ? 1.4 : 1.0,
-                                  ),
                                   boxShadow: isCurrentSong
                                       ? [
                                           BoxShadow(
@@ -439,8 +428,21 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                                         ],
                                 ),
                                 child: Material(
-                                  type: MaterialType.transparency,
+                                  color: isCurrentSong
+                                      ? EuBrutal.accent.withValues(alpha: 0.12)
+                                      : theme.colorScheme.surfaceContainerLow,
                                   borderRadius: BorderRadius.circular(14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
+                                    side: BorderSide(
+                                      color: isCurrentSong
+                                          ? EuBrutal.accent.withValues(alpha: 0.5)
+                                          : theme.colorScheme.outlineVariant
+                                                .withValues(alpha: 0.15),
+                                      width: isCurrentSong ? 1.4 : 1.0,
+                                    ),
+                                  ),
+                                  clipBehavior: Clip.antiAlias,
                                   child: ListTile(
                                     onTap: () {
                                       if (isCurrentSong) {

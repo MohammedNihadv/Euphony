@@ -6,6 +6,7 @@
 #include <flutter/method_channel.h>
 #include <flutter/standard_method_codec.h>
 #include <shellapi.h>
+#include <dwmapi.h>
 
 #include <memory>
 
@@ -44,6 +45,8 @@ class FlutterWindow : public Win32Window {
   bool is_mini_mode_ = false;
   bool close_to_tray_ = false;
   RECT normal_rect_ = {0};
+  LONG_PTR normal_style_ = 0;
+  LONG_PTR normal_ex_style_ = 0;
   NOTIFYICONDATA nid_ = {0};
   bool tray_icon_active_ = false;
 };

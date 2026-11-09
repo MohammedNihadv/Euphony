@@ -15,7 +15,6 @@ import '../../design/theme/theme_controller.dart';
 import '../../design/tokens/brutal.dart';
 import '../../design/tokens/tokens.dart';
 import '../../design/widgets/brand_badge.dart';
-import '../../playback/desktop_media_controls.dart';
 import 'backup_service.dart';
 import 'log_exporter.dart';
 import 'settings_provider.dart';
@@ -37,6 +36,8 @@ class SettingsScreen extends ConsumerWidget {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: false,
+        toolbarHeight: 64,
+        titleSpacing: 20,
         backgroundColor: themeData.colorScheme.surface,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
@@ -105,18 +106,23 @@ class SettingsScreen extends ConsumerWidget {
                     const Divider(height: 1),
                     const SizedBox(height: EuSpace.sm),
 
-                    // Dynamic Island Toggle
-                    _SettingsSwitchRow(
-                      icon: Icons.motion_photos_on_rounded,
-                      iconColor: EuBrutal.accent,
-                      title: 'Dynamic Island',
-                      subtitle: 'In-app capsule replaces mini-player',
-                      value: settings.dynamicIsland,
-                      onChanged: (value) =>
-                          settingsController.setDynamicIsland(value),
-                    ),
-                    const Divider(height: 1),
-                    const SizedBox(height: EuSpace.xs),
+                    // Dynamic Island Toggle (Mobile only - Desktop has dedicated player bar)
+                    if (kIsWeb ||
+                        (!Platform.isWindows &&
+                            !Platform.isLinux &&
+                            !Platform.isMacOS)) ...[
+                      _SettingsSwitchRow(
+                        icon: Icons.motion_photos_on_rounded,
+                        iconColor: EuBrutal.accent,
+                        title: 'Dynamic Island',
+                        subtitle: 'In-app capsule replaces mini-player',
+                        value: settings.dynamicIsland,
+                        onChanged: (value) =>
+                            settingsController.setDynamicIsland(value),
+                      ),
+                      const Divider(height: 1),
+                      const SizedBox(height: EuSpace.xs),
+                    ],
 
                     // AMOLED Black Toggle
                     _SettingsSwitchRow(
@@ -422,46 +428,7 @@ class SettingsScreen extends ConsumerWidget {
                   ],
                 ),
 
-                // ---------------- Desktop Integrations Card ----------------
-                if (!kIsWeb &&
-                    (Platform.isWindows ||
-                        Platform.isLinux ||
-                        Platform.isMacOS)) ...[
-                  const SizedBox(height: EuSpace.lg),
-                  _SettingsSectionCard(
-                    icon: Icons.desktop_windows_rounded,
-                    iconColor: const Color(0xFF5865F2),
-                    title: 'Desktop Integrations',
-                    children: [
-                      _SettingsSwitchRow(
-                        icon: Icons.album_rounded,
-                        iconColor: const Color(0xFF5865F2),
-                        title: 'Discord Rich Presence',
-                        subtitle:
-                            'Broadcast current song, artist, album art and playback progress to Discord',
-                        value: settings.discordRpcEnabled,
-                        onChanged: (value) =>
-                            settingsController.setDiscordRpcEnabled(value),
-                      ),
-                      if (Platform.isWindows) ...[
-                        const Divider(height: 1),
-                        const SizedBox(height: EuSpace.xs),
-                        _SettingsSwitchRow(
-                          icon: Icons.archive_rounded,
-                          iconColor: Colors.teal,
-                          title: 'Minimize to System Tray',
-                          subtitle:
-                              'Keep playing in background when closing or minimizing main window',
-                          value: settings.closeToTray,
-                          onChanged: (value) {
-                            settingsController.setCloseToTray(value);
-                            DesktopMediaControls().setCloseToTray(enabled: value);
-                          },
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
+
                 const SizedBox(height: EuSpace.lg),
 
                 // ---------------- 4. Storage, Cache & Data Card ----------------
@@ -1151,7 +1118,12 @@ class _SettingsHeroBanner extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Hardware-accelerated playback with Dynamic Island & custom audio pipe',
+            !kIsWeb &&
+                    (Platform.isWindows ||
+                        Platform.isLinux ||
+                        Platform.isMacOS)
+                ? 'Hardware-accelerated playback with custom high-fidelity audio engine'
+                : 'Hardware-accelerated playback with Dynamic Island & custom audio pipe',
             style: TextStyle(
               fontSize: 12.5,
               fontWeight: FontWeight.w700,
@@ -1169,10 +1141,19 @@ class _SettingsHeroBanner extends StatelessWidget {
                 icon: Icons.graphic_eq_rounded,
                 label: 'Audio $audioQuality',
               ),
-              _buildMiniStatusChip(
-                icon: Icons.smart_screen_rounded,
-                label: 'Island: ${dynamicIsland ? 'AUTO' : 'OFF'}',
-              ),
+              if (kIsWeb ||
+                  (!Platform.isWindows &&
+                      !Platform.isLinux &&
+                      !Platform.isMacOS))
+                _buildMiniStatusChip(
+                  icon: Icons.smart_screen_rounded,
+                  label: 'Island: ${dynamicIsland ? 'AUTO' : 'OFF'}',
+                )
+              else
+                _buildMiniStatusChip(
+                  icon: Icons.desktop_windows_rounded,
+                  label: 'Engine: Hi-Fi',
+                ),
               _buildMiniStatusChip(
                 icon: Icons.public_rounded,
                 label: region.split(' - ').first,
@@ -1873,25 +1854,7 @@ class _AboutEuphonyCard extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: EuBrutal.highlight,
-                      borderRadius: BorderRadius.circular(14),
-                      boxShadow: [
-                        BoxShadow(
-                          color: EuBrutal.highlight.withValues(alpha: 0.35),
-                          blurRadius: 10,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.graphic_eq_rounded,
-                      color: EuBrutal.onHighlight,
-                      size: 26,
-                    ),
-                  ),
+                  const EuphonyLogoMark(size: 46, radius: 14),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
@@ -2013,79 +1976,165 @@ class _AboutEuphonyCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              // Support & Sponsor Tile
+              // High-Identity Support & Sponsor Card
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                margin: const EdgeInsets.only(top: 14),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.05)
-                      : Colors.black.withValues(alpha: 0.03),
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.10)
-                        : Colors.black.withValues(alpha: 0.08),
-                    width: 1.0,
+                  gradient: LinearGradient(
+                    colors: isDark
+                        ? [
+                            const Color(0xFF26122C),
+                            const Color(0xFF16152B),
+                          ]
+                        : [
+                            const Color(0xFFFFF1F6),
+                            const Color(0xFFF3F0FF),
+                          ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: const Color(0xFFEA4AAA).withValues(alpha: isDark ? 0.35 : 0.25),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFEA4AAA).withValues(alpha: isDark ? 0.15 : 0.08),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Support Development',
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w800,
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFEA4AAA), Color(0xFFDB2777)],
                             ),
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFEA4AAA).withValues(alpha: 0.4),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Keep Euphony free & independent',
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.volunteer_activism_rounded, size: 13, color: Colors.white),
+                              SizedBox(width: 5),
+                              Text(
+                                'SUPPORT EUPHONY',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 10,
+                                  letterSpacing: 0.6,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            '100% Free & Ad-Free',
                             style: TextStyle(
-                              fontSize: 11.5,
-                              color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? Colors.white70 : Colors.black87,
                             ),
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Keep Music Free & Independent',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 15,
+                        letterSpacing: -0.2,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFFEA4AAA),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        visualDensity: VisualDensity.compact,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Euphony has zero ads, zero trackers, and zero subscriptions. Your contribution helps sustain development and servers.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        height: 1.35,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.70),
                       ),
-                      onPressed: () async {
-                        final uri = Uri.parse('https://github.com/sponsors/MohammedNihadv');
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri, mode: LaunchMode.externalApplication);
-                        }
-                      },
-                      icon: const Icon(Icons.favorite_rounded, size: 14),
-                      label: const Text('GitHub', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
                     ),
-                    const SizedBox(width: 6),
-                    FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF6366F1),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                        visualDensity: VisualDensity.compact,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      onPressed: () async {
-                        final uri = Uri.parse('https://supertipz.in/pay/mhdnihadv');
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri, mode: LaunchMode.externalApplication);
-                        }
-                      },
-                      icon: const Icon(Icons.bolt_rounded, size: 15),
-                      label: const Text('UPI', style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: FilledButton.icon(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFFEA4AAA),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 11),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 2,
+                              shadowColor: const Color(0xFFEA4AAA).withValues(alpha: 0.5),
+                            ),
+                            onPressed: () async {
+                              final uri = Uri.parse('https://github.com/sponsors/MohammedNihadv');
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              }
+                            },
+                            icon: const Icon(Icons.favorite_rounded, size: 16),
+                            label: const Text(
+                              'GitHub Sponsor',
+                              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: FilledButton.icon(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF6366F1),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 11),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 2,
+                              shadowColor: const Color(0xFF6366F1).withValues(alpha: 0.5),
+                            ),
+                            onPressed: () async {
+                              final uri = Uri.parse('https://supertipz.in/pay/mhdnihadv');
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              }
+                            },
+                            icon: const Icon(Icons.bolt_rounded, size: 17),
+                            label: const Text(
+                              'UPI / Fast Tip',
+                              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -2099,49 +2148,40 @@ class _AboutEuphonyCard extends StatelessWidget {
 
   void _showPlayProtectSheet(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    showModalBottomSheet<void>(
+    showDialog<void>(
       context: context,
-      useRootNavigator: true,
-      backgroundColor: Colors.transparent,
-      showDragHandle: false,
       barrierColor: Colors.black.withValues(alpha: isDark ? 0.65 : 0.40),
-      isScrollControlled: true,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF141424) : Colors.white,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          border: Border.all(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.12)
-                : Colors.black.withValues(alpha: 0.08),
-            width: 1.2,
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              24,
-              16,
-              24,
-              MediaQuery.of(context).viewInsets.bottom + 20,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF161624) : Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: 0.06),
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.50 : 0.12),
+                  blurRadius: 36,
+                  offset: const Offset(0, 12),
+                ),
+              ],
             ),
+            child: Padding(
+              padding: const EdgeInsets.all(24),
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: Container(
-                      width: 40,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.white24 : Colors.black26,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
                   Row(
                     children: [
                       Container(
@@ -2182,6 +2222,12 @@ class _AboutEuphonyCard extends StatelessWidget {
                             ),
                           ],
                         ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded, size: 20),
+                        color: isDark ? Colors.white60 : Colors.black45,
+                        tooltip: 'Close',
+                        onPressed: () => Navigator.pop(context),
                       ),
                     ],
                   ),
@@ -2231,22 +2277,23 @@ class _AboutEuphonyCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: OutlinedButton(
+                        child: FilledButton.tonal(
                           onPressed: () => Navigator.pop(context),
-                          style: OutlinedButton.styleFrom(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: isDark
+                                ? const Color(0xFF222036)
+                                : const Color(0xFFF1F3F9),
+                            foregroundColor:
+                                isDark ? Colors.white : Colors.black87,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            side: BorderSide(
-                              color: isDark ? Colors.white24 : Colors.black26,
-                            ),
                           ),
-                          child: Text(
+                          child: const Text(
                             'Got It',
                             style: TextStyle(
                               fontWeight: FontWeight.w800,
-                              color: isDark ? Colors.white : Colors.black87,
                             ),
                           ),
                         ),
@@ -2259,8 +2306,9 @@ class _AboutEuphonyCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class _FedarationBentoTile extends StatelessWidget {
@@ -2285,81 +2333,96 @@ class _FedarationBentoTile extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         onTap: onTap,
         child: Container(
-          height: 100,
-          padding: const EdgeInsets.all(12),
+          height: 56,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: isDark
-                ? Colors.white.withValues(alpha: 0.07)
-                : Colors.white.withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(16),
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.black.withValues(alpha: 0.03),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
               color: isDark
-                  ? Colors.white.withValues(alpha: 0.10)
+                  ? Colors.white.withValues(alpha: 0.08)
                   : Colors.black.withValues(alpha: 0.06),
               width: 1,
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: badgeColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(icon, size: 16, color: badgeColor),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: badgeColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      badge,
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: badgeColor.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(9),
+                ),
+                child: Icon(icon, size: 18, color: badgeColor),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: badgeColor,
                         fontWeight: FontWeight.w800,
-                        fontSize: 8,
-                        letterSpacing: 0.3,
+                        fontSize: 13,
+                        color: isDark ? Colors.white : Colors.black87,
+                        letterSpacing: -0.2,
                       ),
                     ),
+                    const SizedBox(height: 1),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 11,
+                        color: isDark ? Colors.white54 : Colors.black45,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6,
+                  vertical: 3,
+                ),
+                decoration: BoxDecoration(
+                  color: badgeColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(6),
+                  border: Border.all(
+                    color: badgeColor.withValues(alpha: 0.30),
+                    width: 0.8,
                   ),
-                ],
-              ),
-              const Spacer(),
-              Text(
-                title,
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 12,
-                  color: isDark ? Colors.white : Colors.black87,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 10,
-                  color: isDark ? Colors.white54 : Colors.black45,
+                child: Text(
+                  badge,
+                  style: TextStyle(
+                    color: badgeColor,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 8.5,
+                    letterSpacing: 0.4,
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 10,
+                color: isDark ? Colors.white30 : Colors.black26,
               ),
             ],
           ),

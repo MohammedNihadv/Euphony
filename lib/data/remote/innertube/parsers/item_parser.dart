@@ -64,10 +64,10 @@ Result<MusicItem> parseListItem(
 ItemHint? _inferFromSubtitle(Map<String, dynamic> renderer) {
   final text = flexColumnText(renderer, 1)?.toLowerCase();
   return switch (text) {
-    'artist' => ItemHint.artist,
+    'artist' || 'profile' => ItemHint.artist,
     'album' || 'single' || 'ep' => ItemHint.album,
-    'playlist' => ItemHint.playlist,
-    'song' => ItemHint.song,
+    'playlist' || 'podcast' => ItemHint.playlist,
+    'song' || 'episode' => ItemHint.song,
     'video' => ItemHint.video,
     'station' || 'radio' => ItemHint.station,
     _ => null,

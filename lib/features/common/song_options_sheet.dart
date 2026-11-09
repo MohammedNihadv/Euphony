@@ -13,21 +13,39 @@ import '../../playback/player_provider.dart';
 
 void showSongOptionsSheet(BuildContext context, Song song) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  showModalBottomSheet<void>(
-    context: context,
-    useRootNavigator: true,
-    isScrollControlled: true,
-    showDragHandle: false,
-    backgroundColor: Colors.transparent,
-    barrierColor: Colors.black.withValues(alpha: isDark ? 0.70 : 0.40),
-    builder: (context) => _SongOptionsSheetBody(song: song),
-  );
+  final isDesktop = MediaQuery.sizeOf(context).width >= 700;
+
+  if (isDesktop) {
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: isDark ? 0.65 : 0.40),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 440, maxHeight: 580),
+          child: _SongOptionsSheetBody(song: song, isDialog: true),
+        ),
+      ),
+    );
+  } else {
+    showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      showDragHandle: false,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: isDark ? 0.70 : 0.40),
+      builder: (context) => _SongOptionsSheetBody(song: song, isDialog: false),
+    );
+  }
 }
 
 class _SongOptionsSheetBody extends ConsumerWidget {
-  const _SongOptionsSheetBody({required this.song});
+  const _SongOptionsSheetBody({required this.song, this.isDialog = false});
 
   final Song song;
+  final bool isDialog;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,49 +53,46 @@ class _SongOptionsSheetBody extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      height: MediaQuery.sizeOf(context).height * 0.68,
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF10101A) : const Color(0xFFF8FAFD),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border(
-          top: BorderSide(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.14)
-                : Colors.black.withValues(alpha: 0.08),
-            width: 1.2,
-          ),
-        ),
-      ),
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          // Drag handle
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 12, bottom: 6),
-              width: 36,
-              height: 4,
-              decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.25)
-                    : Colors.black.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              EuSpace.lg,
-              EuSpace.xs,
-              EuSpace.lg,
-              EuSpace.md,
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 54,
-                  height: 54,
+    return Material(
+      color: isDark ? const Color(0xFF13131F) : const Color(0xFFFBFBFE),
+      borderRadius: isDialog
+          ? BorderRadius.circular(24)
+          : const BorderRadius.vertical(top: Radius.circular(28)),
+      clipBehavior: Clip.antiAlias,
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: isDialog ? 540 : MediaQuery.sizeOf(context).height * 0.68,
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              // Drag handle
+              if (!isDialog)
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 12, bottom: 6),
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.25)
+                          : Colors.black.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  EuSpace.lg,
+                  isDialog ? EuSpace.lg : EuSpace.xs,
+                  isDialog ? EuSpace.sm : EuSpace.lg,
+                  EuSpace.md,
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 54,
+                      height: 54,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
@@ -139,6 +154,13 @@ class _SongOptionsSheetBody extends ConsumerWidget {
                     ],
                   ),
                 ),
+                if (isDialog)
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    color: isDark ? Colors.white60 : Colors.black45,
+                    tooltip: 'Close',
+                    onPressed: () => Navigator.pop(context),
+                  ),
               ],
             ),
           ),
@@ -391,60 +413,35 @@ class _SongOptionsSheetBody extends ConsumerWidget {
           const SizedBox(height: EuSpace.lg),
         ],
       ),
-    );
+    ),
+  ),
+);
   }
 }
 
 void _showAddToPlaylistSheet(BuildContext context, Song song) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  showModalBottomSheet<void>(
-    context: context,
-    useRootNavigator: true,
-    isScrollControlled: true,
-    showDragHandle: false,
-    backgroundColor: Colors.transparent,
-    barrierColor: Colors.black.withValues(alpha: isDark ? 0.70 : 0.40),
-    builder: (context) {
-      return Consumer(
-        builder: (context, ref, child) {
-          final dao = ref.watch(savedPlaylistsDaoProvider);
-          return StreamBuilder<List<SavedPlaylistEntry>>(
-            stream: dao.watchAll(),
-            builder: (context, snapshot) {
-              final playlists = snapshot.data ?? const [];
-              return Container(
-                height: MediaQuery.sizeOf(context).height * 0.65,
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF10101A)
-                      : const Color(0xFFF8FAFD),
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(28),
-                  ),
-                  border: Border(
-                    top: BorderSide(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.16)
-                          : Colors.white.withValues(alpha: 0.90),
-                      width: 1.2,
-                    ),
-                    left: BorderSide(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.10)
-                          : Colors.black.withValues(alpha: 0.06),
-                      width: 1.0,
-                    ),
-                    right: BorderSide(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.10)
-                          : Colors.black.withValues(alpha: 0.06),
-                      width: 1.0,
-                    ),
-                  ),
-                ),
-                child: ListView(
-                  padding: EdgeInsets.zero,
-                  children: [
+  final isDesktop = MediaQuery.sizeOf(context).width >= 700;
+
+  Widget buildContent() => Consumer(
+    builder: (context, ref, child) {
+      final dao = ref.watch(savedPlaylistsDaoProvider);
+      return StreamBuilder<List<SavedPlaylistEntry>>(
+        stream: dao.watchAll(),
+        builder: (context, snapshot) {
+          final playlists = snapshot.data ?? const [];
+          return Material(
+            color: isDark ? const Color(0xFF13131F) : const Color(0xFFFBFBFE),
+            borderRadius: isDesktop
+                ? BorderRadius.circular(24)
+                : const BorderRadius.vertical(top: Radius.circular(28)),
+            clipBehavior: Clip.antiAlias,
+            child: SizedBox(
+              height: isDesktop ? 500 : MediaQuery.sizeOf(context).height * 0.65,
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  if (!isDesktop)
                     Center(
                       child: Container(
                         margin: const EdgeInsets.only(top: 12, bottom: 6),
@@ -458,21 +455,38 @@ void _showAddToPlaylistSheet(BuildContext context, Song song) {
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: EuSpace.lg,
-                        vertical: EuSpace.sm,
-                      ),
-                      child: Text(
-                        'ADD TO PLAYLIST',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.2,
-                          fontSize: 16,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
-                      ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      EuSpace.lg,
+                      EuSpace.sm,
+                      EuSpace.md,
+                      EuSpace.sm,
                     ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.playlist_add_rounded, size: 22, color: EuBrutal.accent),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'ADD TO PLAYLIST',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.0,
+                              fontSize: 15,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                        ),
+                        if (isDesktop)
+                          IconButton(
+                            icon: const Icon(Icons.close_rounded, size: 20),
+                            color: isDark ? Colors.white60 : Colors.black45,
+                            tooltip: 'Close',
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                      ],
+                    ),
+                  ),
                     Divider(
                       color: isDark
                           ? Colors.white.withValues(alpha: 0.08)
@@ -570,13 +584,37 @@ void _showAddToPlaylistSheet(BuildContext context, Song song) {
                     const SizedBox(height: EuSpace.md),
                   ],
                 ),
-              );
-            },
-          );
-        },
-      );
-    },
-  );
+              ),
+            );
+          },
+        );
+      },
+    );
+
+  if (isDesktop) {
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: isDark ? 0.65 : 0.40),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 440, maxHeight: 540),
+          child: buildContent(),
+        ),
+      ),
+    );
+  } else {
+    showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      isScrollControlled: true,
+      showDragHandle: false,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: isDark ? 0.70 : 0.40),
+      builder: (_) => buildContent(),
+    );
+  }
 }
 
 void _showNewPlaylistDialog(BuildContext context, Song song) {

@@ -349,7 +349,7 @@ List<MusicItem> _parseRows(
       case Ok(:final value):
         items.add(value);
       case Err(:final failure):
-        _log.warning('dropped a row in "$context": $failure');
+        _log.fine('dropped a row in "$context": $failure');
     }
   }
   return items;

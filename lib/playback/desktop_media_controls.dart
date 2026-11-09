@@ -36,46 +36,47 @@ class DesktopMediaControls {
     if (!isSupported) return;
     final next = !isMiniPlayer.value;
     isMiniPlayer.value = next;
-    try {
-      _channel.invokeMethod(next ? 'enterMiniPlayer' : 'exitMiniPlayer');
-    } catch (_) {}
+    _channel
+        .invokeMethod(next ? 'enterMiniPlayer' : 'exitMiniPlayer')
+        .ignore();
   }
 
   void enterMiniPlayer() {
     if (!isSupported) return;
     isMiniPlayer.value = true;
-    try {
-      _channel.invokeMethod('enterMiniPlayer');
-    } catch (_) {}
+    _channel.invokeMethod('enterMiniPlayer').ignore();
   }
 
   void exitMiniPlayer() {
     if (!isSupported) return;
     isMiniPlayer.value = false;
-    try {
-      _channel.invokeMethod('exitMiniPlayer');
-    } catch (_) {}
+    _channel.invokeMethod('exitMiniPlayer').ignore();
+  }
+
+  void closeMiniPlayer() {
+    if (!isSupported) return;
+    isMiniPlayer.value = false;
+    _channel.invokeMethod('closeMiniPlayer').ignore();
+  }
+
+  void startDragging() {
+    if (!isSupported) return;
+    _channel.invokeMethod('startDragging').ignore();
   }
 
   void minimizeToTray() {
     if (!isSupported) return;
-    try {
-      _channel.invokeMethod('minimizeToTray');
-    } catch (_) {}
+    _channel.invokeMethod('minimizeToTray').ignore();
   }
 
   void restoreFromTray() {
     if (!isSupported) return;
-    try {
-      _channel.invokeMethod('restoreFromTray');
-    } catch (_) {}
+    _channel.invokeMethod('restoreFromTray').ignore();
   }
 
   void setCloseToTray({required bool enabled}) {
     if (!isSupported) return;
-    try {
-      _channel.invokeMethod('setCloseToTray', {'enabled': enabled});
-    } catch (_) {}
+    _channel.invokeMethod('setCloseToTray', {'enabled': enabled}).ignore();
   }
 
   void init({
@@ -168,13 +169,11 @@ class DesktopMediaControls {
     if (!isSupported) return;
     _lastPositionSec = null;
 
-    try {
-      _channel.invokeMethod('updateMetadata', {
-        'title': song.title,
-        'artist': song.artistNames,
-        'album': song.albumTitle,
-      });
-    } catch (_) {}
+    _channel.invokeMethod('updateMetadata', {
+      'title': song.title,
+      'artist': song.artistNames,
+      'album': song.albumTitle,
+    }).ignore();
 
     try {
       if (_smtc != null) {
@@ -213,9 +212,7 @@ class DesktopMediaControls {
   void setPlaying({required bool playing}) {
     _isPlaying = playing;
     if (!isSupported) return;
-    try {
-      _channel.invokeMethod('setPlaybackStatus', {'playing': playing});
-    } catch (_) {}
+    _channel.invokeMethod('setPlaybackStatus', {'playing': playing}).ignore();
 
     try {
       _smtc?.setPlaybackStatus(
@@ -230,12 +227,9 @@ class DesktopMediaControls {
     _isPlaying = false;
     _lastPositionSec = null;
     if (!isSupported) return;
-    try {
-      _channel.invokeMethod(
-        'setPlaybackStatus',
-        {'playing': false, 'stopped': true},
-      );
-    } catch (_) {}
+    _channel
+        .invokeMethod('setPlaybackStatus', {'playing': false, 'stopped': true})
+        .ignore();
 
     try {
       _smtc?.setPlaybackStatus(PlaybackStatus.Stopped);

@@ -230,6 +230,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        toolbarHeight: 64,
+        titleSpacing: 20,
+        backgroundColor: theme.colorScheme.surface,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         title: const EuphonyPageCapsule(
           label: 'Explore',
           icon: Icons.search_rounded,
@@ -1596,12 +1603,14 @@ class _SettingsSheet extends ConsumerWidget {
     final controller = ref.read(themeControllerProvider.notifier);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return ClipRRect(
+    final surfaceColor = isDark ? const Color(0xFF13131E) : const Color(0xFFF8FAFD);
+
+    return Material(
+      color: surfaceColor,
       borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      clipBehavior: Clip.antiAlias,
       child: Container(
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xF210101A) : const Color(0xF8F8FAFD),
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           border: Border(
             top: BorderSide(
               color: isDark

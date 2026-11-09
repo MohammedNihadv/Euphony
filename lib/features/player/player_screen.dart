@@ -610,6 +610,27 @@ class _PulsingGlowRingState extends State<_PulsingGlowRing>
 // Track Header
 // ---------------------------------------------------------------------------
 
+void _openArtist(BuildContext context, WidgetRef ref, Song song) {
+  final details = ref.read(songDetailsProvider(song)).asData?.value;
+  final artistId = details?.artistId ??
+      (song.artists.isNotEmpty && song.artists.first.browseId != null
+          ? song.artists.first.browseId
+          : null);
+  final artistName = song.artists.isNotEmpty
+      ? song.artists.first.name
+      : (song.artistNames.isNotEmpty ? song.artistNames : 'Artist');
+
+  if (Navigator.of(context).canPop()) {
+    Navigator.of(context).pop();
+  }
+
+  if (artistId != null && artistId.isNotEmpty) {
+    context.push('/artist/$artistId');
+  } else {
+    context.push('/search?q=${Uri.encodeComponent(artistName)}');
+  }
+}
+
 class _TrackHeader extends ConsumerWidget {
   const _TrackHeader({required this.song});
 
@@ -664,50 +685,56 @@ class _TrackHeader extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  // Authors / Artists Chip with avatar
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.06)
-                          : Colors.black.withValues(alpha: 0.04),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.10)
-                            : Colors.black.withValues(alpha: 0.06),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.person_outline_rounded,
-                          size: 14,
-                          color: isDark ? Colors.white70 : Colors.black87,
+                  // Authors / Artists Chip with avatar — clickable to open artist page
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () => _openArtist(context, ref, song),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
                         ),
-                        const SizedBox(width: 5),
-                        Flexible(
-                          child: Text(
-                            song.artistNames.isEmpty
-                                ? 'Unknown Artist'
-                                : song.artistNames,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.90)
-                                  : Colors.black87,
-                            ),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.08)
+                              : Colors.black.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.14)
+                                : Colors.black.withValues(alpha: 0.08),
+                            width: 1,
                           ),
                         ),
-                      ],
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.person_outline_rounded,
+                              size: 14,
+                              color: isDark ? Colors.white70 : Colors.black87,
+                            ),
+                            const SizedBox(width: 5),
+                            Flexible(
+                              child: Text(
+                                song.artistNames.isEmpty
+                                    ? 'Unknown Artist'
+                                    : song.artistNames,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.95)
+                                      : Colors.black87,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -1430,185 +1457,243 @@ void _showSpeedSheet(BuildContext context, WidgetRef ref) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final currentSpeed = ref.read(playbackSpeedProvider);
   final speeds = [0.75, 1.0, 1.25, 1.5, 2.0];
-  showModalBottomSheet<void>(
-    context: context,
-    useRootNavigator: true,
-    showDragHandle: false,
-    backgroundColor: Colors.transparent,
-    barrierColor: Colors.black.withValues(alpha: isDark ? 0.70 : 0.40),
-    builder: (context) => Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF10101A) : const Color(0xFFF8FAFD),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border(
-          top: BorderSide(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.16)
-                : Colors.black.withValues(alpha: 0.08),
-            width: 1.2,
-          ),
-        ),
-      ),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  margin: const EdgeInsets.only(top: 12, bottom: 6),
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.25)
-                        : Colors.black.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+  final isDesktop = MediaQuery.sizeOf(context).width >= 700;
+
+  Widget buildContent() => Material(
+    color: isDark ? const Color(0xFF141422) : Colors.white,
+    borderRadius: isDesktop
+        ? BorderRadius.circular(24)
+        : const BorderRadius.vertical(top: Radius.circular(28)),
+    clipBehavior: Clip.antiAlias,
+    child: SafeArea(
+      top: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!isDesktop)
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 6),
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.25)
+                      : Colors.black.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: EuSpace.lg,
-                  vertical: EuSpace.sm,
-                ),
-                child: Text(
-                  'PLAYBACK SPEED',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
-                    fontSize: 16,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                ),
-              ),
-              Divider(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : Colors.black.withValues(alpha: 0.06),
-                thickness: 1,
-                height: 1,
-              ),
-              for (final speed in speeds)
-                ListTile(
-                  title: Text(
-                    '${speed}x',
+            ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              EuSpace.lg,
+              EuSpace.md,
+              EuSpace.md,
+              EuSpace.sm,
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.speed_rounded, size: 22, color: EuBrutal.accent),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'PLAYBACK SPEED',
                     style: TextStyle(
-                      fontWeight: speed == currentSpeed
-                          ? FontWeight.w900
-                          : FontWeight.w700,
-                      color: speed == currentSpeed
-                          ? EuBrutal.accent
-                          : (isDark ? Colors.white : Colors.black87),
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.0,
+                      fontSize: 15,
+                      color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
-                  trailing: speed == currentSpeed
-                      ? const Icon(Icons.check_rounded, color: EuBrutal.accent)
-                      : null,
-                  onTap: () {
-                    ref.read(playbackSpeedProvider.notifier).setSpeed(speed);
-                    Navigator.pop(context);
-                  },
                 ),
-              const SizedBox(height: EuSpace.md),
-            ],
+                if (isDesktop)
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    color: isDark ? Colors.white60 : Colors.black45,
+                    tooltip: 'Close',
+                    onPressed: () => Navigator.pop(context),
+                  ),
+              ],
+            ),
           ),
-        ),
+          Divider(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.black.withValues(alpha: 0.06),
+            thickness: 1,
+            height: 1,
+          ),
+          for (final speed in speeds)
+            ListTile(
+              title: Text(
+                '${speed}x',
+                style: TextStyle(
+                  fontWeight: speed == currentSpeed
+                      ? FontWeight.w900
+                      : FontWeight.w700,
+                  color: speed == currentSpeed
+                      ? EuBrutal.accent
+                      : (isDark ? Colors.white : Colors.black87),
+                ),
+              ),
+              trailing: speed == currentSpeed
+                  ? const Icon(Icons.check_rounded, color: EuBrutal.accent)
+                  : null,
+              onTap: () {
+                ref.read(playbackSpeedProvider.notifier).setSpeed(speed);
+                Navigator.pop(context);
+              },
+            ),
+          const SizedBox(height: EuSpace.sm),
+        ],
       ),
     ),
   );
+
+  if (isDesktop) {
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: isDark ? 0.65 : 0.40),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 380),
+          child: buildContent(),
+        ),
+      ),
+    );
+  } else {
+    showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      showDragHandle: false,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: isDark ? 0.70 : 0.40),
+      builder: (_) => buildContent(),
+    );
+  }
 }
 
 void _showSleepTimerSheet(BuildContext context, WidgetRef ref) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final currentPreset = ref.read(sleepTimerProvider).preset;
-  showModalBottomSheet<void>(
-    context: context,
-    useRootNavigator: true,
-    showDragHandle: false,
-    backgroundColor: Colors.transparent,
-    barrierColor: Colors.black.withValues(alpha: isDark ? 0.70 : 0.40),
-    builder: (context) => Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF10101A) : const Color(0xFFF8FAFD),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        border: Border(
-          top: BorderSide(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.16)
-                : Colors.black.withValues(alpha: 0.08),
-            width: 1.2,
-          ),
-        ),
-      ),
-      child: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  margin: const EdgeInsets.only(top: 12, bottom: 6),
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.25)
-                        : Colors.black.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+  final isDesktop = MediaQuery.sizeOf(context).width >= 700;
+
+  Widget buildContent() => Material(
+    color: isDark ? const Color(0xFF141422) : Colors.white,
+    borderRadius: isDesktop
+        ? BorderRadius.circular(24)
+        : const BorderRadius.vertical(top: Radius.circular(28)),
+    clipBehavior: Clip.antiAlias,
+    child: SafeArea(
+      top: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!isDesktop)
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 6),
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.25)
+                      : Colors.black.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: EuSpace.lg,
-                  vertical: EuSpace.sm,
-                ),
-                child: Text(
-                  'SLEEP TIMER',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
-                    fontSize: 16,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                ),
-              ),
-              Divider(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : Colors.black.withValues(alpha: 0.06),
-                thickness: 1,
-                height: 1,
-              ),
-              for (final preset in SleepTimerPreset.values)
-                ListTile(
-                  title: Text(
-                    preset.label,
+            ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              EuSpace.lg,
+              EuSpace.md,
+              EuSpace.md,
+              EuSpace.sm,
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.bedtime_rounded, size: 22, color: EuBrutal.accent),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'SLEEP TIMER',
                     style: TextStyle(
-                      fontWeight: preset == currentPreset
-                          ? FontWeight.w900
-                          : FontWeight.w700,
-                      color: preset == currentPreset
-                          ? EuBrutal.accent
-                          : (isDark ? Colors.white : Colors.black87),
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.0,
+                      fontSize: 15,
+                      color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
-                  trailing: preset == currentPreset
-                      ? const Icon(Icons.check_rounded, color: EuBrutal.accent)
-                      : null,
-                  onTap: () {
-                    ref.read(sleepTimerProvider.notifier).setPreset(preset);
-                    Navigator.pop(context);
-                  },
                 ),
-              const SizedBox(height: EuSpace.md),
-            ],
+                if (isDesktop)
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, size: 20),
+                    color: isDark ? Colors.white60 : Colors.black45,
+                    tooltip: 'Close',
+                    onPressed: () => Navigator.pop(context),
+                  ),
+              ],
+            ),
           ),
-        ),
+          Divider(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.black.withValues(alpha: 0.06),
+            thickness: 1,
+            height: 1,
+          ),
+          for (final preset in SleepTimerPreset.values)
+            ListTile(
+              title: Text(
+                preset.label,
+                style: TextStyle(
+                  fontWeight: preset == currentPreset
+                      ? FontWeight.w900
+                      : FontWeight.w700,
+                  color: preset == currentPreset
+                      ? EuBrutal.accent
+                      : (isDark ? Colors.white : Colors.black87),
+                ),
+              ),
+              trailing: preset == currentPreset
+                  ? const Icon(Icons.check_rounded, color: EuBrutal.accent)
+                  : null,
+              onTap: () {
+                ref.read(sleepTimerProvider.notifier).setPreset(preset);
+                Navigator.pop(context);
+              },
+            ),
+          const SizedBox(height: EuSpace.sm),
+        ],
       ),
     ),
   );
+
+  if (isDesktop) {
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: isDark ? 0.65 : 0.40),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 380),
+          child: buildContent(),
+        ),
+      ),
+    );
+  } else {
+    showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      showDragHandle: false,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: isDark ? 0.70 : 0.40),
+      builder: (_) => buildContent(),
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1626,6 +1711,15 @@ class _ScrollToLyricsPrompt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = isDark
+        ? Colors.white.withValues(alpha: 0.65)
+        : context.eu.ink.withValues(alpha: 0.65);
+    final iconColor = isDark
+        ? Colors.white.withValues(alpha: 0.85)
+        : context.eu.ink.withValues(alpha: 0.85);
+
     return Center(
       child: Material(
         color: Colors.transparent,
@@ -1640,7 +1734,7 @@ class _ScrollToLyricsPrompt extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.65),
+                    color: textColor,
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.5,
@@ -1650,7 +1744,7 @@ class _ScrollToLyricsPrompt extends StatelessWidget {
                 Icon(
                   Icons.keyboard_arrow_down_rounded,
                   size: 26,
-                  color: Colors.white.withValues(alpha: 0.85),
+                  color: iconColor,
                 ),
               ],
             ),
@@ -1787,7 +1881,7 @@ class _EmbeddedLyricsCardState extends ConsumerState<_EmbeddedLyricsCard> {
                 'Live Lyrics',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w900,
-                  color: Colors.white,
+                  color: isDark ? Colors.white : context.eu.ink,
                   letterSpacing: -0.2,
                   fontSize: 18,
                 ),
@@ -1798,7 +1892,10 @@ class _EmbeddedLyricsCardState extends ConsumerState<_EmbeddedLyricsCard> {
                 iconSize: 20,
                 padding: const EdgeInsets.all(6),
                 constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                icon: const Icon(Icons.share_outlined, color: Colors.white70),
+                icon: Icon(
+                  Icons.share_outlined,
+                  color: isDark ? Colors.white70 : context.eu.ink.withValues(alpha: 0.70),
+                ),
                 tooltip: 'Copy lyrics',
                 onPressed: () {
                   final SongLyrics? lyrics = lyricsAsync.asData?.value;
@@ -1821,16 +1918,18 @@ class _EmbeddedLyricsCardState extends ConsumerState<_EmbeddedLyricsCard> {
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     minimumSize: Size.zero,
-                    backgroundColor: Colors.white.withValues(alpha: 0.10),
+                    backgroundColor: isDark
+                        ? Colors.white.withValues(alpha: 0.10)
+                        : Colors.black.withValues(alpha: 0.05),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                   onPressed: () => showLyricsSheet(context, widget.song),
-                  child: const Text(
+                  child: Text(
                     'Full Sheet',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: isDark ? Colors.white : context.eu.ink,
                       fontWeight: FontWeight.w800,
                       fontSize: 13,
                     ),
@@ -1857,11 +1956,11 @@ class _EmbeddedLyricsCardState extends ConsumerState<_EmbeddedLyricsCard> {
                     ),
                   ),
                 ),
-                error: (_, _) => const Center(
+                error: (_, _) => Center(
                   child: Text(
                     'Lyrics not available for this track',
                     style: TextStyle(
-                      color: Colors.white54,
+                      color: isDark ? Colors.white54 : context.eu.ink.withValues(alpha: 0.50),
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1870,11 +1969,11 @@ class _EmbeddedLyricsCardState extends ConsumerState<_EmbeddedLyricsCard> {
                 data: (lyrics) {
                   if (lyrics == null ||
                       (!lyrics.isSynced && (lyrics.plainLyrics == null || lyrics.plainLyrics!.isEmpty))) {
-                    return const Center(
+                    return Center(
                       child: Text(
                         'Lyrics not available for this track',
                         style: TextStyle(
-                          color: Colors.white54,
+                          color: isDark ? Colors.white54 : context.eu.ink.withValues(alpha: 0.50),
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1945,19 +2044,23 @@ class _EmbeddedLyricsCardState extends ConsumerState<_EmbeddedLyricsCard> {
                                       ),
                                       decoration: BoxDecoration(
                                         color: isActive
-                                            ? Colors.white.withValues(alpha: 0.14)
+                                            ? (isDark
+                                                ? Colors.white.withValues(alpha: 0.14)
+                                                : EuBrutal.accent.withValues(alpha: 0.12))
                                             : Colors.transparent,
                                         borderRadius: BorderRadius.circular(18),
                                         border: isActive
                                             ? Border.all(
-                                                color: Colors.white.withValues(alpha: 0.24),
+                                                color: isDark
+                                                    ? Colors.white.withValues(alpha: 0.24)
+                                                    : EuBrutal.accent.withValues(alpha: 0.35),
                                                 width: 1.2,
                                               )
                                             : null,
                                         boxShadow: isActive
                                             ? [
                                                 BoxShadow(
-                                                  color: EuBrutal.accent.withValues(alpha: 0.30),
+                                                  color: EuBrutal.accent.withValues(alpha: isDark ? 0.30 : 0.15),
                                                   blurRadius: 20,
                                                   spreadRadius: 1,
                                                   offset: const Offset(0, 4),
@@ -1969,8 +2072,10 @@ class _EmbeddedLyricsCardState extends ConsumerState<_EmbeddedLyricsCard> {
                                         duration: const Duration(milliseconds: 220),
                                         style: TextStyle(
                                           color: isActive
-                                              ? Colors.white
-                                              : Colors.white.withValues(alpha: 0.36),
+                                              ? (isDark ? Colors.white : Colors.black)
+                                              : (isDark
+                                                  ? Colors.white.withValues(alpha: 0.36)
+                                                  : context.eu.ink.withValues(alpha: 0.36)),
                                           fontSize: isActive ? 24.0 : 19.0,
                                           fontWeight: isActive
                                               ? FontWeight.w900
@@ -1980,7 +2085,9 @@ class _EmbeddedLyricsCardState extends ConsumerState<_EmbeddedLyricsCard> {
                                           shadows: isActive
                                               ? [
                                                   Shadow(
-                                                    color: EuBrutal.accent.withValues(alpha: 0.60),
+                                                    color: EuBrutal.accent.withValues(
+                                                      alpha: isDark ? 0.60 : 0.25,
+                                                    ),
                                                     blurRadius: 18,
                                                   ),
                                                 ]
@@ -2077,7 +2184,9 @@ class _EmbeddedLyricsCardState extends ConsumerState<_EmbeddedLyricsCard> {
                         child: Text(
                           lines[index],
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.85),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.85)
+                                : context.eu.ink.withValues(alpha: 0.85),
                             fontSize: 20.0,
                             fontWeight: FontWeight.w700,
                             letterSpacing: -0.2,
@@ -2101,19 +2210,25 @@ class _EmbeddedLyricsCardState extends ConsumerState<_EmbeddedLyricsCard> {
               children: [
                 Text(
                   lyricsAsync.asData?.value?.isSynced == true ? 'Line-synced' : 'Unsynced',
-                  style: const TextStyle(
-                    color: Colors.white54,
+                  style: TextStyle(
+                    color: isDark ? Colors.white54 : context.eu.ink.withValues(alpha: 0.54),
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(width: 6),
-                const Text('•', style: TextStyle(color: Colors.white24, fontSize: 11)),
+                Text(
+                  '•',
+                  style: TextStyle(
+                    color: isDark ? Colors.white24 : context.eu.ink.withValues(alpha: 0.24),
+                    fontSize: 11,
+                  ),
+                ),
                 const SizedBox(width: 6),
-                const Text(
+                Text(
                   'Provided by LRCLIB',
                   style: TextStyle(
-                    color: Colors.white38,
+                    color: isDark ? Colors.white38 : context.eu.ink.withValues(alpha: 0.38),
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
@@ -2141,8 +2256,6 @@ class _ArtistInfoCard extends ConsumerWidget {
 
     final artistName = details?.artistName ??
         (song.artistNames.isEmpty ? 'Artist' : song.artistNames);
-    final artistId = details?.artistId ??
-        (song.artists.isNotEmpty ? song.artists.first.browseId : null);
     final subscribers = details?.artistSubscribers ?? 'Artist';
     final artworkUrl = details?.artistThumbnailUrl ??
         song.artwork?.max ??
@@ -2174,13 +2287,7 @@ class _ArtistInfoCard extends ConsumerWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: () {
-              if (artistId != null && artistId.isNotEmpty) {
-                context.push('/artist/$artistId');
-              } else {
-                context.push('/search?q=${Uri.encodeComponent(artistName)}');
-              }
-            },
+            onTap: () => _openArtist(context, ref, song),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -2273,8 +2380,8 @@ class _ArtistInfoCard extends ConsumerWidget {
                               artistName,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: isDark ? Colors.white : context.eu.ink,
                                 fontSize: 18,
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: -0.3,
@@ -2286,7 +2393,9 @@ class _ArtistInfoCard extends ConsumerWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.65),
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.65)
+                                    : context.eu.ink.withValues(alpha: 0.65),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -2298,29 +2407,33 @@ class _ArtistInfoCard extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.12),
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.12)
+                              : Colors.black.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.20),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.20)
+                                : Colors.black.withValues(alpha: 0.08),
                             width: 1,
                           ),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               'Profile',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: isDark ? Colors.white : context.eu.ink,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
-                            SizedBox(width: 4),
+                            const SizedBox(width: 4),
                             Icon(
                               Icons.arrow_forward_ios_rounded,
                               size: 11,
-                              color: Colors.white70,
+                              color: isDark ? Colors.white70 : context.eu.ink.withValues(alpha: 0.70),
                             ),
                           ],
                         ),
@@ -2387,11 +2500,16 @@ class _SongDetailsCardState extends ConsumerState<_SongDetailsCard> {
     return null;
   }
 
-  List<InlineSpan> _buildDescriptionSpans(String text) {
+  List<InlineSpan> _buildDescriptionSpans(String text, bool isDark, Color ink) {
     final spans = <InlineSpan>[];
     final combinedRegex = RegExp(
       r'((?:(?:\d{1,2}:)?\d{1,2}:\d{2})|https?://[^\s()]+(?:\([^\s()]+\)|[^\s`!()\[\]{};:\x27",<>?«»“”‘’]))',
     );
+
+    final regularColor = isDark
+        ? Colors.white.withValues(alpha: 0.85)
+        : ink.withValues(alpha: 0.85);
+    final linkColor = isDark ? const Color(0xFF38BDF8) : EuBrutal.accent;
 
     int currentIndex = 0;
     for (final match in combinedRegex.allMatches(text)) {
@@ -2400,7 +2518,7 @@ class _SongDetailsCardState extends ConsumerState<_SongDetailsCard> {
           TextSpan(
             text: text.substring(currentIndex, match.start),
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.85),
+              color: regularColor,
               fontSize: 13.5,
               height: 1.45,
             ),
@@ -2415,12 +2533,12 @@ class _SongDetailsCardState extends ConsumerState<_SongDetailsCard> {
         spans.add(
           TextSpan(
             text: matchText,
-            style: const TextStyle(
-              color: Color(0xFF38BDF8),
+            style: TextStyle(
+              color: linkColor,
               fontSize: 13.5,
               fontWeight: FontWeight.w600,
               decoration: TextDecoration.underline,
-              decorationColor: Color(0xFF38BDF8),
+              decorationColor: linkColor,
               height: 1.45,
             ),
             recognizer: TapGestureRecognizer()
@@ -2437,12 +2555,12 @@ class _SongDetailsCardState extends ConsumerState<_SongDetailsCard> {
         spans.add(
           TextSpan(
             text: matchText,
-            style: const TextStyle(
-              color: Color(0xFF38BDF8),
+            style: TextStyle(
+              color: linkColor,
               fontSize: 13.5,
               fontWeight: FontWeight.w700,
               decoration: TextDecoration.underline,
-              decorationColor: Color(0xFF38BDF8),
+              decorationColor: linkColor,
               height: 1.45,
             ),
             recognizer: TapGestureRecognizer()
@@ -2470,7 +2588,7 @@ class _SongDetailsCardState extends ConsumerState<_SongDetailsCard> {
         TextSpan(
           text: text.substring(currentIndex),
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.85),
+            color: regularColor,
             fontSize: 13.5,
             height: 1.45,
           ),
@@ -2481,14 +2599,23 @@ class _SongDetailsCardState extends ConsumerState<_SongDetailsCard> {
     return spans;
   }
 
-  Widget _buildStatChip({required IconData icon, required String label}) {
+  Widget _buildStatChip({
+    required IconData icon,
+    required String label,
+    required bool isDark,
+    required Color ink,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.14),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.14)
+              : Colors.black.withValues(alpha: 0.08),
           width: 1,
         ),
       ),
@@ -2499,8 +2626,8 @@ class _SongDetailsCardState extends ConsumerState<_SongDetailsCard> {
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: isDark ? Colors.white : ink,
               fontSize: 12.5,
               fontWeight: FontWeight.w700,
             ),
@@ -2514,6 +2641,7 @@ class _SongDetailsCardState extends ConsumerState<_SongDetailsCard> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final ink = context.eu.ink;
     final detailsAsync = ref.watch(songDetailsProvider(widget.song));
     final SongDetails? details = detailsAsync.asData?.value;
 
@@ -2560,20 +2688,22 @@ class _SongDetailsCardState extends ConsumerState<_SongDetailsCard> {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.10),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.10)
+                      : Colors.black.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.info_outline_rounded,
                   size: 16,
-                  color: Colors.white,
+                  color: isDark ? Colors.white : ink,
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Track Details & Stats',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: isDark ? Colors.white : ink,
                   fontSize: 15,
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.2,
@@ -2592,16 +2722,22 @@ class _SongDetailsCardState extends ConsumerState<_SongDetailsCard> {
                 _buildStatChip(
                   icon: Icons.play_arrow_rounded,
                   label: '${_formatCompactNumber(viewCount)} views',
+                  isDark: isDark,
+                  ink: ink,
                 ),
               if (likeCount != null)
                 _buildStatChip(
                   icon: Icons.thumb_up_rounded,
                   label: '${_formatCompactNumber(likeCount)} likes',
+                  isDark: isDark,
+                  ink: ink,
                 ),
               if (dateStr != null)
                 _buildStatChip(
                   icon: Icons.calendar_today_rounded,
                   label: dateStr,
+                  isDark: isDark,
+                  ink: ink,
                 ),
             ],
           ),
@@ -2615,12 +2751,12 @@ class _SongDetailsCardState extends ConsumerState<_SongDetailsCard> {
                   ? CrossFadeState.showSecond
                   : CrossFadeState.showFirst,
               firstChild: Text.rich(
-                TextSpan(children: _buildDescriptionSpans(description)),
+                TextSpan(children: _buildDescriptionSpans(description, isDark, ink)),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),
               secondChild: Text.rich(
-                TextSpan(children: _buildDescriptionSpans(description)),
+                TextSpan(children: _buildDescriptionSpans(description, isDark, ink)),
               ),
             ),
             const SizedBox(height: 8),
@@ -2647,7 +2783,9 @@ class _SongDetailsCardState extends ConsumerState<_SongDetailsCard> {
                       ? 'Album: ${widget.song.albumTitle}'
                       : 'No additional description for this track.'),
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.60),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.60)
+                    : ink.withValues(alpha: 0.60),
                 fontSize: 13.5,
                 height: 1.4,
               ),

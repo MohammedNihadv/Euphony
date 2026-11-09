@@ -92,6 +92,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: false,
+        toolbarHeight: 64,
+        titleSpacing: 20,
+        backgroundColor: theme.colorScheme.surface,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         title: const EuphonyPageCapsule(
           label: 'Home',
           icon: Icons.home_rounded,
@@ -572,7 +579,6 @@ class _HomeSectionBlock extends ConsumerWidget {
     final isFresh = _isFreshSection(section.title);
     final isTrending = _isTrendingSection(section.title);
     final badgeTag = _extractBadgeFor(section.title);
-    final isShowcase = badgeTag != null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -603,7 +609,7 @@ class _HomeSectionBlock extends ConsumerWidget {
         ),
         const SizedBox(height: EuSpace.md),
         SizedBox(
-          height: isShowcase ? 245 : 220,
+          height: 232,
           child: ListView.separated(
             clipBehavior: Clip.none,
             padding: const EdgeInsets.only(bottom: 8, left: 2, right: 16),
@@ -612,214 +618,11 @@ class _HomeSectionBlock extends ConsumerWidget {
             separatorBuilder: (_, index) => const SizedBox(width: EuSpace.md),
             itemBuilder: (context, index) {
               final item = section.items[index];
-              if (isShowcase) {
-                return _RegionalShowcaseCard(
-                  item: item,
-                  badgeTag: badgeTag,
-                  sectionItems: section.items,
-                );
-              }
               return _HomeItemCard(item: item, sectionItems: section.items);
             },
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Regional Industry Showcase Card (Tall aesthetic cover with neon sticker pill and glass reflection).
-class _RegionalShowcaseCard extends ConsumerWidget {
-  const _RegionalShowcaseCard({
-    required this.item,
-    required this.badgeTag,
-    this.sectionItems,
-  });
-
-  final MusicItem item;
-  final String badgeTag;
-  final List<MusicItem>? sectionItems;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final artworkUrl = _artworkUrlFor(item);
-
-    return Container(
-      width: 156,
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF161626) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.10)
-              : Colors.black.withValues(alpha: 0.08),
-          width: 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
-            offset: const Offset(0, 4),
-            blurRadius: 12,
-          ),
-        ],
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () {
-            switch (item) {
-              case SongItem(:final song):
-                if (sectionItems != null) {
-                  final songs = sectionItems!
-                      .whereType<SongItem>()
-                      .map((e) => e.song)
-                      .toList();
-                  final idx = songs.indexWhere((s) => s.id == song.id);
-                  if (idx >= 0) {
-                    ref
-                        .read(playerControllerProvider)
-                        .playQueue(songs, startIndex: idx);
-                  } else {
-                    ref.read(playerControllerProvider).playSong(song);
-                  }
-                } else {
-                  ref.read(playerControllerProvider).playSong(song);
-                }
-              case AlbumItem(:final album):
-                context.push('/album/${album.browseId}');
-              case ArtistItem(:final artist):
-                context.push('/artist/${artist.browseId}');
-              case PlaylistItem(:final playlist):
-                context.push('/playlist/${playlist.id}');
-              case StationItem(:final playlistId):
-                context.push('/playlist/$playlistId');
-            }
-          },
-          onLongPress: () {
-            if (item is SongItem) {
-              showSongOptionsSheet(context, (item as SongItem).song);
-            }
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Cover Artwork with top-left badge sticker and bottom gradient
-              Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(14),
-                    ),
-                    child: AspectRatio(
-                      aspectRatio: 1.0,
-                      child: artworkUrl != null
-                          ? Image.network(
-                              artworkUrl,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, _, _) => Container(
-                                color: EuBrutal.accent.withValues(alpha: 0.2),
-                                child: const Icon(
-                                  Icons.music_note,
-                                  color: EuBrutal.accent,
-                                ),
-                              ),
-                            )
-                          : Container(
-                              color: EuBrutal.accent.withValues(alpha: 0.2),
-                              child: const Icon(
-                                Icons.music_note,
-                                color: EuBrutal.accent,
-                              ),
-                            ),
-                    ),
-                  ),
-                  Positioned.fill(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(14),
-                        ),
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withValues(alpha: 0.5),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 7,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: EuBrutal.accent,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(color: context.eu.ink, width: 1.2),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black45,
-                            offset: Offset(1, 1),
-                          ),
-                        ],
-                      ),
-                      child: Text(
-                        badgeTag,
-                        style: const TextStyle(
-                          color: EuBrutal.onAccent,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 10,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              // Title & details
-              Padding(
-                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _titleFor(item),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      _subtitleFor(item),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 11,
-                        color: theme.colorScheme.onSurface.withValues(
-                          alpha: 0.7,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
@@ -875,10 +678,10 @@ class _HomeItemCard extends ConsumerWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      width: 145,
+      width: 156,
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF161626) : Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isDark
               ? Colors.white.withValues(alpha: 0.10)
@@ -887,16 +690,16 @@ class _HomeItemCard extends ConsumerWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.05),
+            color: Colors.black.withValues(alpha: isDark ? 0.32 : 0.06),
             offset: const Offset(0, 4),
-            blurRadius: 10,
+            blurRadius: 12,
           ),
         ],
       ),
       child: Material(
         type: MaterialType.transparency,
         child: InkWell(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           onTap: () {
             switch (item) {
               case SongItem(:final song):
@@ -932,7 +735,7 @@ class _HomeItemCard extends ConsumerWidget {
             }
           },
           child: Padding(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(9),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -941,7 +744,7 @@ class _HomeItemCard extends ConsumerWidget {
                   aspectRatio: 1.0,
                   child: Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: _artworkUrlFor(item) != null
@@ -975,10 +778,11 @@ class _HomeItemCard extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w900,
-                    fontSize: 13,
+                    fontSize: 13.5,
+                    letterSpacing: -0.2,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 3),
                 // Artist / Subtitle
                 Text(
                   _subtitleFor(item),
@@ -986,7 +790,7 @@ class _HomeItemCard extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    fontSize: 11,
+                    fontSize: 11.5,
                     color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
                   ),
                 ),

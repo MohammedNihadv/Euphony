@@ -7,20 +7,40 @@ import '../../design/widgets/animated_waveform.dart';
 import '../../playback/player_provider.dart';
 import 'player_screen.dart';
 
-/// Opens the play queue with a glassmorphic sheet.
-Future<void> showQueueSheet(BuildContext context) => showModalBottomSheet<void>(
-  context: context,
-  isScrollControlled: true,
-  useRootNavigator: true,
-  showDragHandle: false,
-  backgroundColor: Colors.transparent,
-  barrierColor: Colors.black.withValues(alpha: 0.65),
-  builder: (_) => const QueueSheet(),
-);
+/// Opens the play queue with a glassmorphic sheet or centered desktop dialog.
+Future<void> showQueueSheet(BuildContext context) {
+  final isDesktop = MediaQuery.sizeOf(context).width >= 700;
+  if (isDesktop) {
+    return showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.65),
+      builder: (_) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 520, maxHeight: 680),
+          child: const QueueSheet(isDialog: true),
+        ),
+      ),
+    );
+  }
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    useRootNavigator: true,
+    showDragHandle: false,
+    backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withValues(alpha: 0.65),
+    builder: (_) => const QueueSheet(),
+  );
+}
 
 /// The play queue: what is coming, in the order it will actually play.
 class QueueSheet extends ConsumerWidget {
-  const QueueSheet({super.key});
+  const QueueSheet({super.key, this.isDialog = false});
+
+  final bool isDialog;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,54 +48,48 @@ class QueueSheet extends ConsumerWidget {
     final isDark = theme.brightness == Brightness.dark;
     final queue = ref.watch(queueProvider);
     final entries = queue.ordered;
+    final surfaceColor = isDark ? const Color(0xFF13131E) : const Color(0xFFF8FAFD);
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.85,
-      minChildSize: 0.4,
-      maxChildSize: 0.95,
-      expand: false,
-      builder: (context, scrollController) => ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+    Widget buildQueueContent({ScrollController? scrollController}) {
+      return Material(
+        color: surfaceColor,
+        borderRadius: isDialog
+            ? BorderRadius.circular(24)
+            : const BorderRadius.vertical(top: Radius.circular(28)),
+        clipBehavior: Clip.antiAlias,
         child: Container(
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xF210101A) : const Color(0xF5F6F6FC),
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-            border: Border(
-              top: BorderSide(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.16)
-                    : Colors.white.withValues(alpha: 0.9),
-                width: 1.2,
-              ),
+            borderRadius: isDialog
+                ? BorderRadius.circular(24)
+                : const BorderRadius.vertical(top: Radius.circular(28)),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.12)
+                  : Colors.black.withValues(alpha: 0.08),
+              width: 1.2,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.45),
-                blurRadius: 36,
-                offset: const Offset(0, -6),
-              ),
-            ],
           ),
           child: Column(
             children: [
-              // Drag handle
-              Center(
-                child: Container(
-                  margin: const EdgeInsets.only(top: 10, bottom: 4),
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.25)
-                        : Colors.black.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(2),
+              // Drag handle (mobile sheet only)
+              if (!isDialog)
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 10, bottom: 4),
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.25)
+                          : Colors.black.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
-              ),
 
               // Header bar
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 14, 12),
+                padding: EdgeInsets.fromLTRB(20, isDialog ? 16 : 8, 14, 12),
                 child: Row(
                   children: [
                     Container(
@@ -140,9 +154,9 @@ class QueueSheet extends ConsumerWidget {
                         },
                       ),
                     IconButton(
-                      icon: const Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        size: 26,
+                      icon: Icon(
+                        isDialog ? Icons.close_rounded : Icons.keyboard_arrow_down_rounded,
+                        size: isDialog ? 20 : 26,
                       ),
                       tooltip: 'Close',
                       color: isDark ? Colors.white60 : Colors.black54,
@@ -209,7 +223,20 @@ class QueueSheet extends ConsumerWidget {
             ],
           ),
         ),
-      ),
+      );
+    }
+
+    if (isDialog) {
+      return buildQueueContent();
+    }
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.85,
+      minChildSize: 0.4,
+      maxChildSize: 0.95,
+      expand: false,
+      builder: (context, scrollController) =>
+          buildQueueContent(scrollController: scrollController),
     );
   }
 }

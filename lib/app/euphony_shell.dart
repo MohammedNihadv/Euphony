@@ -264,7 +264,7 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
             !kIsWeb &&
             (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
           return const Scaffold(
-            backgroundColor: Color(0xFF101018),
+            backgroundColor: Color(0xFF111118),
             body: DesktopMiniPlayerHud(),
           );
         }
@@ -548,12 +548,13 @@ class _DesktopSidebarState extends ConsumerState<_DesktopSidebar> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final width = _collapsed ? 72.0 : 236.0;
+    final width = _collapsed ? 76.0 : 236.0;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 240),
       curve: Curves.easeInOutCubic,
       width: width,
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: isDark
             ? const Color(0xFF13131A).withValues(alpha: 0.95)
@@ -581,20 +582,12 @@ class _DesktopSidebarState extends ConsumerState<_DesktopSidebar> {
             right: false,
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final isCompactHeight = constraints.maxHeight < 560;
-                final isExpanded = constraints.maxWidth > 150;
-                final content = _buildSidebarContent(
+                final isExpanded = !_collapsed && constraints.maxWidth > 180;
+                return _buildSidebarContent(
                   context,
                   isDark,
-                  isCompactHeight,
                   isExpanded,
                 );
-                return isCompactHeight
-                    ? SingleChildScrollView(
-                        physics: const ClampingScrollPhysics(),
-                        child: content,
-                      )
-                    : content;
               },
             ),
           ),
@@ -606,7 +599,6 @@ class _DesktopSidebarState extends ConsumerState<_DesktopSidebar> {
   Widget _buildSidebarContent(
     BuildContext context,
     bool isDark,
-    bool isCompactHeight,
     bool isExpanded,
   ) {
     return Column(
@@ -617,76 +609,88 @@ class _DesktopSidebarState extends ConsumerState<_DesktopSidebar> {
         _buildBrandHeader(context, isDark, isExpanded),
         const SizedBox(height: 10),
 
-        // Primary Navigation Destinations (Home, Search, Library, Settings)
-        for (int i = 0; i < _destinations.length; i++)
-          _DesktopSidebarItem(
-            icon: i == widget.selectedIndex
-                ? _destinations[i].selectedIcon
-                : _destinations[i].icon,
-            label: _destinations[i].label,
-            isExpanded: isExpanded,
-            selected: i == widget.selectedIndex,
-            shortcut: 'Ctrl+${i + 1}',
-            onTap: () => widget.onSelected(i),
-          ),
+        // Scrollable Navigation & Quick Collections Area
+        Expanded(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Primary Navigation Destinations (Home, Search, Library, Settings)
+                for (int i = 0; i < _destinations.length; i++)
+                  _DesktopSidebarItem(
+                    icon: i == widget.selectedIndex
+                        ? _destinations[i].selectedIcon
+                        : _destinations[i].icon,
+                    label: _destinations[i].label,
+                    isExpanded: isExpanded,
+                    selected: i == widget.selectedIndex,
+                    shortcut: 'Ctrl+${i + 1}',
+                    onTap: () => widget.onSelected(i),
+                  ),
 
-        // Thin sleek divider line
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Center(
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 240),
-              curve: Curves.easeInOutCubic,
-              width: isExpanded ? 204.0 : 32.0,
-              height: 1.2,
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.12)
-                  : Colors.black.withValues(alpha: 0.08),
+                // Thin sleek divider line
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Center(
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 240),
+                      curve: Curves.easeInOutCubic,
+                      width: isExpanded ? 204.0 : 32.0,
+                      height: 1.2,
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.12)
+                          : Colors.black.withValues(alpha: 0.08),
+                    ),
+                  ),
+                ),
+
+                // Quick Collection Items (YOUR MUSIC)
+                _DesktopSidebarItem(
+                  icon: Icons.favorite_rounded,
+                  iconColor: EuBrutal.alert,
+                  label: 'Liked Songs',
+                  isExpanded: isExpanded,
+                  selected: false,
+                  onTap: () {
+                    ref.read(librarySelectedTabProvider.notifier).selectTab(0);
+                    widget.onSelected(2);
+                  },
+                ),
+                _DesktopSidebarItem(
+                  icon: Icons.download_done_rounded,
+                  label: 'Downloads',
+                  isExpanded: isExpanded,
+                  selected: false,
+                  onTap: () {
+                    ref.read(librarySelectedTabProvider.notifier).selectTab(1);
+                    widget.onSelected(2);
+                  },
+                ),
+                _DesktopSidebarItem(
+                  icon: Icons.queue_music_rounded,
+                  label: 'Playlists',
+                  isExpanded: isExpanded,
+                  selected: false,
+                  onTap: () {
+                    ref.read(librarySelectedTabProvider.notifier).selectTab(2);
+                    widget.onSelected(2);
+                  },
+                ),
+                _DesktopSidebarItem(
+                  icon: Icons.history_rounded,
+                  label: 'History',
+                  isExpanded: isExpanded,
+                  selected: false,
+                  onTap: () {
+                    ref.read(librarySelectedTabProvider.notifier).selectTab(4);
+                    widget.onSelected(2);
+                  },
+                ),
+              ],
             ),
           ),
         ),
-
-        // Quick Collection Items (YOUR MUSIC)
-        _DesktopSidebarItem(
-          icon: Icons.favorite_rounded,
-          iconColor: EuBrutal.alert,
-          label: 'Liked Songs',
-          isExpanded: isExpanded,
-          selected: false,
-          onTap: () {
-            ref.read(librarySelectedTabProvider.notifier).selectTab(0);
-            widget.onSelected(2);
-          },
-        ),
-        _DesktopSidebarItem(
-          icon: Icons.download_done_rounded,
-          label: 'Downloads',
-          isExpanded: isExpanded,
-          selected: false,
-          onTap: () {
-            ref.read(librarySelectedTabProvider.notifier).selectTab(1);
-            widget.onSelected(2);
-          },
-        ),
-        _DesktopSidebarItem(
-          icon: Icons.trending_up_rounded,
-          label: 'Trending Charts',
-          isExpanded: isExpanded,
-          selected: false,
-          onTap: () => widget.onSelected(1),
-        ),
-        _DesktopSidebarItem(
-          icon: Icons.queue_music_rounded,
-          label: 'Playlists',
-          isExpanded: isExpanded,
-          selected: false,
-          onTap: () {
-            ref.read(librarySelectedTabProvider.notifier).selectTab(2);
-            widget.onSelected(2);
-          },
-        ),
-
-        if (!isCompactHeight) const Spacer(),
 
         // Bottom Expand / Collapse Toggle Button
         _DesktopSidebarItem(
@@ -734,7 +738,7 @@ class _DesktopSidebarState extends ConsumerState<_DesktopSidebar> {
               ],
             ),
           ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 8),
       ],
     );
   }
@@ -756,64 +760,86 @@ class _DesktopSidebarState extends ConsumerState<_DesktopSidebar> {
               setState(() => _collapsed = false);
             }
           },
-          child: Row(
-            children: [
-              // Purple brand square icon — centered at x = 36.0 (15 + 42/2 = 36)
-              Container(
-                margin: const EdgeInsets.only(left: 15.0),
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: EuBrutal.accent,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: EuBrutal.accent.withValues(alpha: 0.4),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
+          child: isExpanded
+              ? Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16),
+                      child: Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(11),
+                          boxShadow: [
+                            BoxShadow(
+                              color: EuBrutal.accent.withValues(alpha: 0.35),
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Image.asset(
+                          'assets/images/app.icon.png',
+                          width: 38,
+                          height: 38,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
+                    const SizedBox(width: 12),
+                    const Expanded(
+                      child: Text(
+                        'Euphony',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      iconSize: 20,
+                      padding: const EdgeInsets.all(4),
+                      constraints: const BoxConstraints(
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
+                      icon: Icon(
+                        Icons.keyboard_double_arrow_left_rounded,
+                        color: isDark ? Colors.white60 : Colors.black54,
+                      ),
+                      tooltip: 'Collapse sidebar',
+                      onPressed: () => setState(() => _collapsed = true),
+                    ),
+                    const SizedBox(width: 6),
                   ],
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.graphic_eq_rounded,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-              ),
-              if (isExpanded) ...[
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Text(
-                    'Euphony',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
+                )
+              : Center(
+                  child: Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(11),
+                      boxShadow: [
+                        BoxShadow(
+                          color: EuBrutal.accent.withValues(alpha: 0.35),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Image.asset(
+                      'assets/images/app.icon.png',
+                      width: 38,
+                      height: 38,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
-                IconButton(
-                  iconSize: 20,
-                  padding: const EdgeInsets.all(4),
-                  constraints: const BoxConstraints(
-                    minWidth: 32,
-                    minHeight: 32,
-                  ),
-                  icon: Icon(
-                    Icons.keyboard_double_arrow_left_rounded,
-                    color: isDark ? Colors.white60 : Colors.black54,
-                  ),
-                  tooltip: 'Collapse sidebar',
-                  onPressed: () => setState(() => _collapsed = true),
-                ),
-                const SizedBox(width: 6),
-              ],
-            ],
-          ),
         ),
       ),
     );
@@ -904,55 +930,63 @@ class _DesktopSidebarItemState extends State<_DesktopSidebarItem> {
                       ]
                     : null,
               ),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 48,
-                    height: 46,
-                    child: Center(
+              child: widget.isExpanded
+                  ? ClipRect(
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 44,
+                            height: 46,
+                            child: Center(
+                              child: Icon(
+                                widget.icon,
+                                size: 22,
+                                color: effectiveIconColor,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: ClipRect(
+                              child: Text(
+                                widget.label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                softWrap: false,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: widget.selected
+                                      ? FontWeight.w900
+                                      : FontWeight.w700,
+                                  color: effectiveTextColor,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (widget.selected)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 12),
+                              child: Container(
+                                width: 6,
+                                height: 6,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            )
+                          else
+                            const SizedBox(width: 8),
+                        ],
+                      ),
+                    )
+                  : Center(
                       child: Icon(
                         widget.icon,
                         size: 22,
                         color: effectiveIconColor,
                       ),
                     ),
-                  ),
-                  if (widget.isExpanded) ...[
-                    Expanded(
-                      child: ClipRect(
-                        child: Text(
-                          widget.label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: false,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: widget.selected
-                                ? FontWeight.w900
-                                : FontWeight.w700,
-                            color: effectiveTextColor,
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                      ),
-                    ),
-                    if (widget.selected)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                          ),
-                        ),
-                      )
-                    else
-                      const SizedBox(width: 8),
-                  ],
-                ],
-              ),
             ),
           ),
         ),
