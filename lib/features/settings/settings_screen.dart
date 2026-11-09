@@ -335,23 +335,53 @@ class SettingsScreen extends ConsumerWidget {
                               : '${settings.crossfadeSeconds}s seamless audio dissolve',
                           style: const TextStyle(fontSize: 12),
                         ),
-                        trailing: DropdownButton<int>(
-                          value: settings.crossfadeSeconds,
-                          underline: const SizedBox.shrink(),
-                          borderRadius: BorderRadius.circular(12),
-                          items: const [
-                            DropdownMenuItem(value: 0, child: Text('Off')),
-                            DropdownMenuItem(value: 2, child: Text('2s')),
-                            DropdownMenuItem(value: 4, child: Text('4s')),
-                            DropdownMenuItem(value: 6, child: Text('6s')),
-                            DropdownMenuItem(value: 8, child: Text('8s')),
-                            DropdownMenuItem(value: 12, child: Text('12s')),
-                          ],
-                          onChanged: (val) {
-                            if (val != null) {
-                              settingsController.setCrossfadeSeconds(val);
-                            }
-                          },
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0x1F252538)
+                                : const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.14)
+                                  : Colors.black.withValues(alpha: 0.1),
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(
+                                  alpha: isDark ? 0.2 : 0.04,
+                                ),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                settings.crossfadeSeconds == 0
+                                    ? 'Off'
+                                    : '${settings.crossfadeSeconds}s',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(Icons.arrow_drop_down_rounded, size: 16),
+                            ],
+                          ),
+                        ),
+                        onTap: () => _showCrossfadeDialog(
+                          context,
+                          settings.crossfadeSeconds,
+                          settingsController,
                         ),
                       ),
                     ),
@@ -384,39 +414,51 @@ class SettingsScreen extends ConsumerWidget {
                           'Speed: ${settings.audioSpeed.toStringAsFixed(2)}x · Pitch: ${settings.audioPitch.toStringAsFixed(2)}x',
                           style: const TextStyle(fontSize: 12),
                         ),
-                        trailing: DropdownButton<String>(
-                          value: settings.audioDspPreset,
-                          underline: const SizedBox.shrink(),
-                          borderRadius: BorderRadius.circular(12),
-                          items: const [
-                            DropdownMenuItem(value: 'normal', child: Text('Normal (1.0x)')),
-                            DropdownMenuItem(value: 'nightcore', child: Text('Nightcore (1.25x)')),
-                            DropdownMenuItem(value: 'slowed', child: Text('Slowed & Lo-Fi (0.85x)')),
-                            DropdownMenuItem(value: 'spedUp', child: Text('Sped Up (1.15x)')),
-                            DropdownMenuItem(value: 'fast', child: Text('Fast (1.50x)')),
-                          ],
-                          onChanged: (val) {
-                            if (val != null) {
-                              settingsController.setAudioDspPreset(val);
-                              switch (val) {
-                                case 'normal':
-                                  settingsController.setAudioSpeed(1.0);
-                                  settingsController.setAudioPitch(1.0);
-                                case 'nightcore':
-                                  settingsController.setAudioSpeed(1.25);
-                                  settingsController.setAudioPitch(1.25);
-                                case 'slowed':
-                                  settingsController.setAudioSpeed(0.85);
-                                  settingsController.setAudioPitch(0.85);
-                                case 'spedUp':
-                                  settingsController.setAudioSpeed(1.15);
-                                  settingsController.setAudioPitch(1.0);
-                                case 'fast':
-                                  settingsController.setAudioSpeed(1.50);
-                                  settingsController.setAudioPitch(1.0);
-                              }
-                            }
-                          },
+                        trailing: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isDark
+                                ? const Color(0x1F252538)
+                                : const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.14)
+                                  : Colors.black.withValues(alpha: 0.1),
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(
+                                  alpha: isDark ? 0.2 : 0.04,
+                                ),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _dspPresetShortName(settings.audioDspPreset),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(Icons.arrow_drop_down_rounded, size: 16),
+                            ],
+                          ),
+                        ),
+                        onTap: () => _showDspPresetDialog(
+                          context,
+                          settings.audioDspPreset,
+                          settingsController,
                         ),
                       ),
                     ),
@@ -1013,6 +1055,315 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ],
               ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _dspPresetShortName(String preset) {
+    switch (preset) {
+      case 'nightcore':
+        return 'Nightcore';
+      case 'slowed':
+        return 'Slowed';
+      case 'spedUp':
+        return 'Sped Up';
+      case 'fast':
+        return 'Fast';
+      case 'normal':
+      default:
+        return 'Normal';
+    }
+  }
+
+  void _showCrossfadeDialog(
+    BuildContext context,
+    int currentCrossfade,
+    SettingsController controller,
+  ) {
+    final options = [
+      (seconds: 0, title: 'Off', desc: 'Immediate cut between tracks'),
+      (seconds: 2, title: '2 Seconds', desc: 'Quick seamless transition'),
+      (seconds: 4, title: '4 Seconds', desc: 'Smooth crossfade (Recommended)'),
+      (seconds: 6, title: '6 Seconds', desc: 'Extended audio dissolve'),
+      (seconds: 8, title: '8 Seconds', desc: 'Deep atmospheric blend'),
+      (seconds: 12, title: '12 Seconds', desc: 'Club-style long mix'),
+    ];
+
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF161626) : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : Colors.black.withValues(alpha: 0.08),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6366F1).withValues(alpha: 0.14),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.tune_rounded,
+                        color: Color(0xFF6366F1),
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    const Text(
+                      'TRACK CROSSFADE',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.8,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 380),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    separatorBuilder: (_, _) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final opt = options[index];
+                      final isSelected = opt.seconds == currentCrossfade;
+                      return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
+                        title: Text(
+                          opt.title,
+                          style: TextStyle(
+                            fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                            color: isSelected ? const Color(0xFF6366F1) : null,
+                          ),
+                        ),
+                        subtitle: Text(
+                          opt.desc,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        trailing: isSelected
+                            ? Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF6366F1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.check_rounded,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : null,
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          controller.setCrossfadeSeconds(opt.seconds);
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDspPresetDialog(
+    BuildContext context,
+    String currentPreset,
+    SettingsController controller,
+  ) {
+    final presets = [
+      (
+        id: 'normal',
+        title: 'Normal (1.0x)',
+        desc: 'Original tempo & pitch (1.00x / 1.00x)',
+        speed: 1.0,
+        pitch: 1.0,
+      ),
+      (
+        id: 'nightcore',
+        title: 'Nightcore (1.25x)',
+        desc: 'Upbeat speed & higher pitch (1.25x / 1.25x)',
+        speed: 1.25,
+        pitch: 1.25,
+      ),
+      (
+        id: 'slowed',
+        title: 'Slowed & Lo-Fi (0.85x)',
+        desc: 'Relaxed tempo & deep tone (0.85x / 0.85x)',
+        speed: 0.85,
+        pitch: 0.85,
+      ),
+      (
+        id: 'spedUp',
+        title: 'Sped Up (1.15x)',
+        desc: 'Energetic boost, original pitch (1.15x / 1.00x)',
+        speed: 1.15,
+        pitch: 1.0,
+      ),
+      (
+        id: 'fast',
+        title: 'Fast (1.50x)',
+        desc: '1.5x tempo preview, original pitch (1.50x / 1.00x)',
+        speed: 1.50,
+        pitch: 1.0,
+      ),
+    ];
+
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 24,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF161626) : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.15)
+                    : Colors.black.withValues(alpha: 0.08),
+                width: 1.2,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEC4899).withValues(alpha: 0.14),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.speed_rounded,
+                        color: Color(0xFFEC4899),
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    const Text(
+                      'AUDIO DSP PRESET',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.8,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 380),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: presets.length,
+                    separatorBuilder: (_, _) => const Divider(height: 1),
+                    itemBuilder: (context, index) {
+                      final preset = presets[index];
+                      final isSelected = preset.id == currentPreset;
+                      return ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
+                        title: Text(
+                          preset.title,
+                          style: TextStyle(
+                            fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                            color: isSelected ? const Color(0xFFEC4899) : null,
+                          ),
+                        ),
+                        subtitle: Text(
+                          preset.desc,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        trailing: isSelected
+                            ? Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFEC4899),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.check_rounded,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : null,
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          controller.setAudioDspPreset(preset.id);
+                          controller.setAudioSpeed(preset.speed);
+                          controller.setAudioPitch(preset.pitch);
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         );
@@ -1900,15 +2251,7 @@ class _AboutEuphonyCard extends StatelessWidget {
                       badge: 'WEB APP',
                       badgeColor: const Color(0xFF3B82F6),
                       subtitle: 'euphony.fedaration.in',
-                      onTap: () async {
-                        final uri = Uri.parse('https://euphony.fedaration.in/');
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(
-                            uri,
-                            mode: LaunchMode.externalApplication,
-                          );
-                        }
-                      },
+                      onTap: () => _launchExternalUrl('https://euphony.fedaration.in/'),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -1919,17 +2262,9 @@ class _AboutEuphonyCard extends StatelessWidget {
                       badge: 'SOURCE',
                       badgeColor: const Color(0xFF10B981),
                       subtitle: 'Open-source',
-                      onTap: () async {
-                        final uri = Uri.parse(
-                          'https://github.com/MohammedNihadv/Euphony',
-                        );
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(
-                            uri,
-                            mode: LaunchMode.externalApplication,
-                          );
-                        }
-                      },
+                      onTap: () => _launchExternalUrl(
+                        'https://github.com/MohammedNihadv/Euphony',
+                      ),
                     ),
                   ),
                 ],
@@ -1944,15 +2279,7 @@ class _AboutEuphonyCard extends StatelessWidget {
                       badge: 'OFFICIAL',
                       badgeColor: EuBrutal.accent,
                       subtitle: 'fedaration.in',
-                      onTap: () async {
-                        final uri = Uri.parse('https://fedaration.in/');
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(
-                            uri,
-                            mode: LaunchMode.externalApplication,
-                          );
-                        }
-                      },
+                      onTap: () => _launchExternalUrl('https://fedaration.in/'),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -2088,12 +2415,7 @@ class _AboutEuphonyCard extends StatelessWidget {
                               elevation: 2,
                               shadowColor: const Color(0xFFEA4AAA).withValues(alpha: 0.5),
                             ),
-                            onPressed: () async {
-                              final uri = Uri.parse('https://github.com/sponsors/MohammedNihadv');
-                              if (await canLaunchUrl(uri)) {
-                                await launchUrl(uri, mode: LaunchMode.externalApplication);
-                              }
-                            },
+                            onPressed: () => _launchExternalUrl('https://github.com/sponsors/MohammedNihadv'),
                             icon: const Icon(Icons.favorite_rounded, size: 16),
                             label: const Text(
                               'GitHub Sponsor',
@@ -2114,12 +2436,7 @@ class _AboutEuphonyCard extends StatelessWidget {
                               elevation: 2,
                               shadowColor: const Color(0xFF6366F1).withValues(alpha: 0.5),
                             ),
-                            onPressed: () async {
-                              final uri = Uri.parse('https://supertipz.in/pay/mhdnihadv');
-                              if (await canLaunchUrl(uri)) {
-                                await launchUrl(uri, mode: LaunchMode.externalApplication);
-                              }
-                            },
+                            onPressed: () => _launchExternalUrl('https://supertipz.in/pay/mhdnihadv'),
                             icon: const Icon(Icons.bolt_rounded, size: 17),
                             label: const Text(
                               'UPI / Fast Tip',
@@ -2244,15 +2561,7 @@ class _AboutEuphonyCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () async {
-                            final uri = Uri.parse('https://fedaration.in/');
-                            if (await canLaunchUrl(uri)) {
-                              await launchUrl(
-                                uri,
-                                mode: LaunchMode.externalApplication,
-                              );
-                            }
-                          },
+                          onPressed: () => _launchExternalUrl('https://fedaration.in/'),
                           icon: const Icon(Icons.language_rounded, size: 18),
                           label: const Text(
                             'Fedaration.in',
@@ -2325,102 +2634,121 @@ class _FedarationBentoTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
+      color: isDark
+          ? Colors.white.withValues(alpha: 0.05)
+          : Colors.black.withValues(alpha: 0.03),
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
+        side: BorderSide(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.06),
+          width: 1,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
         onTap: onTap,
-        child: Container(
+        child: SizedBox(
           height: 56,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.05)
-                : Colors.black.withValues(alpha: 0.03),
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.06),
-              width: 1,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: badgeColor.withValues(alpha: 0.14),
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: Icon(icon, size: 18, color: badgeColor),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                          color: isDark ? Colors.white : Colors.black87,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 1),
+                      Text(
+                        subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 11,
+                          color: isDark ? Colors.white54 : Colors.black45,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: badgeColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(
+                      color: badgeColor.withValues(alpha: 0.30),
+                      width: 0.8,
+                    ),
+                  ),
+                  child: Text(
+                    badge,
+                    style: TextStyle(
+                      color: badgeColor,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 8.5,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 10,
+                  color: isDark ? Colors.white30 : Colors.black26,
+                ),
+              ],
             ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: badgeColor.withValues(alpha: 0.14),
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: Icon(icon, size: 18, color: badgeColor),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                        color: isDark ? Colors.white : Colors.black87,
-                        letterSpacing: -0.2,
-                      ),
-                    ),
-                    const SizedBox(height: 1),
-                    Text(
-                      subtitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 11,
-                        color: isDark ? Colors.white54 : Colors.black45,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 6,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: badgeColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(
-                    color: badgeColor.withValues(alpha: 0.30),
-                    width: 0.8,
-                  ),
-                ),
-                child: Text(
-                  badge,
-                  style: TextStyle(
-                    color: badgeColor,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 8.5,
-                    letterSpacing: 0.4,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.arrow_forward_ios_rounded,
-                size: 10,
-                color: isDark ? Colors.white30 : Colors.black26,
-              ),
-            ],
           ),
         ),
       ),
     );
+  }
+}
+
+Future<void> _launchExternalUrl(String urlString) async {
+  await HapticFeedback.lightImpact();
+  final uri = Uri.parse(urlString);
+  try {
+    final launched = await launchUrl(
+      uri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!launched) {
+      await launchUrl(uri, mode: LaunchMode.platformDefault);
+    }
+  } catch (e) {
+    debugPrint('Could not launch external URL $urlString: $e');
+    try {
+      await launchUrl(uri);
+    } catch (_) {}
   }
 }
