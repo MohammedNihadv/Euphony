@@ -198,7 +198,7 @@ class _NarrowLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final maxArtSize = (viewportHeight * 0.33).clamp(160.0, 320.0);
+    final maxArtSize = (viewportHeight * 0.36).clamp(180.0, 350.0);
     final minContentHeight = maxArtSize + 360.0;
     final foldHeight = viewportHeight < minContentHeight ? minContentHeight : viewportHeight;
     return SingleChildScrollView(
@@ -280,14 +280,14 @@ class _WideLayout extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final foldHeight = viewportHeight < 560.0 ? 560.0 : viewportHeight;
-    final artSize = (foldHeight * 0.44).clamp(260.0, 400.0).toDouble();
+    final artSize = (foldHeight * 0.50).clamp(300.0, 440.0).toDouble();
 
     return SingleChildScrollView(
       controller: scrollController,
       padding: const EdgeInsets.symmetric(horizontal: EuSpace.xxl),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 920),
+          constraints: const BoxConstraints(maxWidth: 960),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
