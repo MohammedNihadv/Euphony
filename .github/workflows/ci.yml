@@ -122,6 +122,40 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
+      - name: Pre-download and extract smtc_windows binary bundle
+        shell: pwsh
+        run: |
+          $pubCache = if ($env:PUB_CACHE) { $env:PUB_CACHE } else { "$env:LOCALAPPDATA\Pub\Cache" }
+          $smtcDir = Get-ChildItem -Path "$pubCache\hosted\pub.dev" -Filter "smtc_windows-*" | Select-Object -First 1
+          if ($smtcDir) {
+            $winDir = Join-Path $smtcDir.FullName "windows"
+            $dest = Join-Path $winDir "smtc_windows-v0.1.3.tar.gz"
+            $targetDir = Join-Path $winDir "smtc_windows-v0.1.3"
+            Write-Host "Pre-downloading smtc_windows bundle to $dest"
+            curl.exe -L --retry 5 --retry-delay 2 "https://github.com/KRTirtho/frb_plugins/releases/download/smtc_windows-v0.1.3/windows.tar.gz" -o $dest
+            New-Item -ItemType Directory -Force -Path $targetDir
+            tar.exe -xzf $dest -C $targetDir
+            $cmakeFile = Join-Path $winDir "CMakeLists.txt"
+            $lines = @(
+              'cmake_minimum_required(VERSION 3.14)'
+              'project("smtc_windows" LANGUAGES CXX)'
+              'set(smtc_windows_bundled_libraries'
+              '  "${CMAKE_CURRENT_SOURCE_DIR}/smtc_windows-v0.1.3/${FLUTTER_TARGET_PLATFORM}/smtc_windows.dll"'
+              '  PARENT_SCOPE'
+              ')'
+            )
+            Set-Content -Path $cmakeFile -Value $lines
+            Write-Host "Configured $cmakeFile with pre-extracted binaries."
+          }
+      - name: Pre-download mpv audio bundle for media_kit
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path build/windows/x64
+          curl.exe -L --retry 5 --retry-delay 2 --retry-all-errors "https://github.com/media-kit/libmpv-win32-audio-build/releases/download/2023-09-24/mpv-dev-x86_64-20230924-git-652a1dd.7z" -o "build/windows/x64/mpv-dev-x86_64-20230924-git-652a1dd.7z"
+          $md5 = (Get-FileHash -Algorithm MD5 "build/windows/x64/mpv-dev-x86_64-20230924-git-652a1dd.7z").Hash.ToLower()
+          if ($md5 -ne "cd738e16e2a19626d7cfa48801524f8c") {
+            Write-Error "MD5 mismatch for mpv bundle: $md5"
+          }
       - run: flutter build windows --release --dart-define=ENABLE_UPDATES=true
       - name: Build installer (Inno Setup)
         shell: pwsh
