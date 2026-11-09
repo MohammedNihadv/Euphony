@@ -61,11 +61,11 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
 </p>
 
 <p align="center">
-  <img src="assets/images/readme/android.svg" width="16" height="16" align="center"/> Android &nbsp;•&nbsp;
-  <img src="assets/images/readme/apple.svg" width="16" height="16" align="center"/> iOS &nbsp;•&nbsp;
-  <img src="assets/images/readme/windows.svg" width="16" height="16" align="center"/> Windows &nbsp;•&nbsp;
-  <img src="assets/images/readme/apple.svg" width="16" height="16" align="center"/> macOS &nbsp;•&nbsp;
-  <img src="assets/images/readme/linux.svg" width="16" height="16" align="center"/> Linux
+  <img src="assets/images/readme/android.svg" width="18" height="18" align="absmiddle"/>&nbsp; <strong>Android</strong> &nbsp;&nbsp;•&nbsp;&nbsp;
+  <img src="assets/images/readme/apple.svg" width="18" height="18" align="absmiddle"/>&nbsp; <strong>iOS</strong> &nbsp;&nbsp;•&nbsp;&nbsp;
+  <img src="assets/images/readme/windows.svg" width="18" height="18" align="absmiddle"/>&nbsp; <strong>Windows</strong> &nbsp;&nbsp;•&nbsp;&nbsp;
+  <img src="assets/images/readme/apple.svg" width="18" height="18" align="absmiddle"/>&nbsp; <strong>macOS</strong> &nbsp;&nbsp;•&nbsp;&nbsp;
+  <img src="assets/images/readme/linux.svg" width="18" height="18" align="absmiddle"/>&nbsp; <strong>Linux</strong>
 </p>
 
 </div>
@@ -95,15 +95,15 @@ Grab the [**latest release**](https://github.com/MohammedNihadv/Euphony/releases
 
 | Platform | Package | Installation Guide |
 | :--- | :--- | :--- |
-| <img src="assets/images/readme/windows.svg" width="16" height="16" align="center"/> **Windows 10/11** | `euphony-windows-setup.exe` | Run the installer — no admin needed, adds Start-menu & desktop shortcuts. |
-| <img src="assets/images/readme/apple.svg" width="16" height="16" align="center"/> **macOS** | `euphony-macos.dmg` | Open the disk image and drag **Euphony** to Applications. |
-| <img src="assets/images/readme/ubuntu.svg" width="16" height="16" align="center"/> **Linux (Debian / Ubuntu / Mint)** | `euphony-linux-amd64.deb` | Double-click or `sudo apt install ./euphony-linux-amd64.deb` (auto-installs all audio dependencies). |
-| <img src="assets/images/readme/linux.svg" width="16" height="16" align="center"/> **Linux (Universal)** | `euphony-linux-x86_64.AppImage` | `chmod +x` the file and run it. |
-| <img src="assets/images/readme/android.svg" width="16" height="16" align="center"/> **Android (Standard)** | `app-arm64-v8a-release.apk` | Best for 99% of phones (2017+). Tap to install. |
-| <img src="assets/images/readme/fdroid.svg" width="16" height="16" align="center"/> **Android (F-Droid)** | [F-Droid Repository](https://f-droid.org/en/packages/com.mhdni.euphony/) | Open-source app store with automatic background updates. |
-| <img src="assets/images/readme/android.svg" width="16" height="16" align="center"/> Android (Legacy 32-bit) | `app-armeabi-v7a-release.apk` | Older 32-bit devices. |
-| <img src="assets/images/readme/android.svg" width="16" height="16" align="center"/> Android (x86_64) | `app-x86_64-release.apk` | Emulators & Intel Chromebooks. |
-| <img src="assets/images/readme/apple.svg" width="16" height="16" align="center"/> **iOS** | `euphony-ios.ipa` | Unsigned build — sideload with **AltStore**, **Sideloadly** or **TrollStore** (no App Store account needed). |
+| <img src="assets/images/readme/windows.svg" width="18" height="18" align="absmiddle"/> **Windows 10/11** | `euphony-windows-setup.exe` | Run the installer — no admin needed, adds Start-menu & desktop shortcuts. |
+| <img src="assets/images/readme/apple.svg" width="18" height="18" align="absmiddle"/> **macOS** | `euphony-macos.dmg` | Open the disk image and drag **Euphony** to Applications. |
+| <img src="assets/images/readme/ubuntu.svg" width="18" height="18" align="absmiddle"/> **Linux (Debian / Ubuntu / Mint)** | `euphony-linux-amd64.deb` | Double-click or `sudo apt install ./euphony-linux-amd64.deb` (auto-installs all audio dependencies). |
+| <img src="assets/images/readme/linux.svg" width="18" height="18" align="absmiddle"/> **Linux (Universal)** | `euphony-linux-x86_64.AppImage` | `chmod +x` the file and run it. |
+| <img src="assets/images/readme/android.svg" width="18" height="18" align="absmiddle"/> **Android (Standard)** | `app-arm64-v8a-release.apk` | Best for 99% of phones (2017+). Tap to install. |
+| <img src="assets/images/readme/fdroid.svg" width="18" height="18" align="absmiddle"/> **Android (F-Droid)** | [F-Droid Repository](https://f-droid.org/en/packages/com.mhdni.euphony/) | Open-source app store with automatic background updates. |
+| <img src="assets/images/readme/android.svg" width="18" height="18" align="absmiddle"/> Android (Legacy 32-bit) | `app-armeabi-v7a-release.apk` | Older 32-bit devices. |
+| <img src="assets/images/readme/android.svg" width="18" height="18" align="absmiddle"/> Android (x86_64) | `app-x86_64-release.apk` | Emulators & Intel Chromebooks. |
+| <img src="assets/images/readme/apple.svg" width="18" height="18" align="absmiddle"/> **iOS** | `euphony-ios.ipa` | Unsigned build — sideload with **AltStore**, **Sideloadly** or **TrollStore** (no App Store account needed). |
 
 ---
 
