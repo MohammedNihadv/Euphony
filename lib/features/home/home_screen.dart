@@ -257,14 +257,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ? Colors.white.withValues(alpha: 0.06)
                     : Colors.black.withValues(alpha: 0.05)),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected
-                ? EuBrutal.accent
-                : (isDark
-                      ? Colors.white.withValues(alpha: 0.10)
-                      : Colors.black.withValues(alpha: 0.08)),
-            width: 1.0,
-          ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
@@ -384,10 +376,6 @@ class _HeroBannerState extends State<_HeroBanner>
               colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
             ),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.22),
-              width: 1.2,
-            ),
             boxShadow: [
               BoxShadow(
                 color: const Color(0xFF4F46E5).withValues(
@@ -1139,10 +1127,6 @@ class _FeaturedChartsCarouselState extends State<_FeaturedChartsCarousel> {
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color: isDark ? Colors.white24 : context.eu.ink,
-                        width: 1.5,
-                      ),
                       boxShadow: [
                         BoxShadow(
                           color: card.gradient.first.withValues(alpha: 0.35),

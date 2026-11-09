@@ -201,8 +201,10 @@ class SettingsScreen extends ConsumerWidget {
                     const SizedBox(height: EuSpace.sm),
 
                     // Content Region
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
+                    Material(
+                      type: MaterialType.transparency,
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
                       leading: Container(
                         width: 36,
                         height: 36,
@@ -273,6 +275,7 @@ class SettingsScreen extends ConsumerWidget {
                         settingsController,
                       ),
                     ),
+                  ),
                     const Divider(height: 1),
                     const SizedBox(height: EuSpace.xs),
 
@@ -305,110 +308,116 @@ class SettingsScreen extends ConsumerWidget {
                     const SizedBox(height: EuSpace.xs),
 
                     // Audio Crossfade
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF6366F1).withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
+                    Material(
+                      type: MaterialType.transparency,
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF6366F1).withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.tune_rounded,
+                            color: Color(0xFF6366F1),
+                            size: 20,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.tune_rounded,
-                          color: Color(0xFF6366F1),
-                          size: 20,
+                        title: const Text(
+                          'Track Crossfade',
+                          style: TextStyle(fontWeight: FontWeight.w900),
                         ),
-                      ),
-                      title: const Text(
-                        'Track Crossfade',
-                        style: TextStyle(fontWeight: FontWeight.w900),
-                      ),
-                      subtitle: Text(
-                        settings.crossfadeSeconds == 0
-                            ? 'Off — immediate cut between tracks'
-                            : '${settings.crossfadeSeconds}s seamless audio dissolve',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      trailing: DropdownButton<int>(
-                        value: settings.crossfadeSeconds,
-                        underline: const SizedBox.shrink(),
-                        borderRadius: BorderRadius.circular(12),
-                        items: const [
-                          DropdownMenuItem(value: 0, child: Text('Off')),
-                          DropdownMenuItem(value: 2, child: Text('2s')),
-                          DropdownMenuItem(value: 4, child: Text('4s')),
-                          DropdownMenuItem(value: 6, child: Text('6s')),
-                          DropdownMenuItem(value: 8, child: Text('8s')),
-                          DropdownMenuItem(value: 12, child: Text('12s')),
-                        ],
-                        onChanged: (val) {
-                          if (val != null) {
-                            settingsController.setCrossfadeSeconds(val);
-                          }
-                        },
+                        subtitle: Text(
+                          settings.crossfadeSeconds == 0
+                              ? 'Off — immediate cut between tracks'
+                              : '${settings.crossfadeSeconds}s seamless audio dissolve',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        trailing: DropdownButton<int>(
+                          value: settings.crossfadeSeconds,
+                          underline: const SizedBox.shrink(),
+                          borderRadius: BorderRadius.circular(12),
+                          items: const [
+                            DropdownMenuItem(value: 0, child: Text('Off')),
+                            DropdownMenuItem(value: 2, child: Text('2s')),
+                            DropdownMenuItem(value: 4, child: Text('4s')),
+                            DropdownMenuItem(value: 6, child: Text('6s')),
+                            DropdownMenuItem(value: 8, child: Text('8s')),
+                            DropdownMenuItem(value: 12, child: Text('12s')),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) {
+                              settingsController.setCrossfadeSeconds(val);
+                            }
+                          },
+                        ),
                       ),
                     ),
                     const Divider(height: 1),
                     const SizedBox(height: EuSpace.xs),
 
                     // DSP Presets (Nightcore / Slowed & Lo-Fi / Sped Up / Normal)
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFEC4899).withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
+                    Material(
+                      type: MaterialType.transparency,
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEC4899).withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.speed_rounded,
+                            color: Color(0xFFEC4899),
+                            size: 20,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.speed_rounded,
-                          color: Color(0xFFEC4899),
-                          size: 20,
+                        title: const Text(
+                          'Audio DSP Preset',
+                          style: TextStyle(fontWeight: FontWeight.w900),
                         ),
-                      ),
-                      title: const Text(
-                        'Audio DSP Preset',
-                        style: TextStyle(fontWeight: FontWeight.w900),
-                      ),
-                      subtitle: Text(
-                        'Speed: ${settings.audioSpeed.toStringAsFixed(2)}x · Pitch: ${settings.audioPitch.toStringAsFixed(2)}x',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      trailing: DropdownButton<String>(
-                        value: settings.audioDspPreset,
-                        underline: const SizedBox.shrink(),
-                        borderRadius: BorderRadius.circular(12),
-                        items: const [
-                          DropdownMenuItem(value: 'normal', child: Text('Normal (1.0x)')),
-                          DropdownMenuItem(value: 'nightcore', child: Text('Nightcore (1.25x)')),
-                          DropdownMenuItem(value: 'slowed', child: Text('Slowed & Lo-Fi (0.85x)')),
-                          DropdownMenuItem(value: 'spedUp', child: Text('Sped Up (1.15x)')),
-                          DropdownMenuItem(value: 'fast', child: Text('Fast (1.50x)')),
-                        ],
-                        onChanged: (val) {
-                          if (val != null) {
-                            settingsController.setAudioDspPreset(val);
-                            switch (val) {
-                              case 'normal':
-                                settingsController.setAudioSpeed(1.0);
-                                settingsController.setAudioPitch(1.0);
-                              case 'nightcore':
-                                settingsController.setAudioSpeed(1.25);
-                                settingsController.setAudioPitch(1.25);
-                              case 'slowed':
-                                settingsController.setAudioSpeed(0.85);
-                                settingsController.setAudioPitch(0.85);
-                              case 'spedUp':
-                                settingsController.setAudioSpeed(1.15);
-                                settingsController.setAudioPitch(1.0);
-                              case 'fast':
-                                settingsController.setAudioSpeed(1.50);
-                                settingsController.setAudioPitch(1.0);
+                        subtitle: Text(
+                          'Speed: ${settings.audioSpeed.toStringAsFixed(2)}x · Pitch: ${settings.audioPitch.toStringAsFixed(2)}x',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                        trailing: DropdownButton<String>(
+                          value: settings.audioDspPreset,
+                          underline: const SizedBox.shrink(),
+                          borderRadius: BorderRadius.circular(12),
+                          items: const [
+                            DropdownMenuItem(value: 'normal', child: Text('Normal (1.0x)')),
+                            DropdownMenuItem(value: 'nightcore', child: Text('Nightcore (1.25x)')),
+                            DropdownMenuItem(value: 'slowed', child: Text('Slowed & Lo-Fi (0.85x)')),
+                            DropdownMenuItem(value: 'spedUp', child: Text('Sped Up (1.15x)')),
+                            DropdownMenuItem(value: 'fast', child: Text('Fast (1.50x)')),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) {
+                              settingsController.setAudioDspPreset(val);
+                              switch (val) {
+                                case 'normal':
+                                  settingsController.setAudioSpeed(1.0);
+                                  settingsController.setAudioPitch(1.0);
+                                case 'nightcore':
+                                  settingsController.setAudioSpeed(1.25);
+                                  settingsController.setAudioPitch(1.25);
+                                case 'slowed':
+                                  settingsController.setAudioSpeed(0.85);
+                                  settingsController.setAudioPitch(0.85);
+                                case 'spedUp':
+                                  settingsController.setAudioSpeed(1.15);
+                                  settingsController.setAudioPitch(1.0);
+                                case 'fast':
+                                  settingsController.setAudioSpeed(1.50);
+                                  settingsController.setAudioPitch(1.0);
+                              }
                             }
-                          }
-                        },
+                          },
+                        ),
                       ),
                     ),
                     const Divider(height: 1),
@@ -437,57 +446,60 @@ class SettingsScreen extends ConsumerWidget {
                   iconColor: const Color(0xFFF59E0B),
                   title: 'Storage & Diagnostics',
                   children: [
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: const Color(
-                            0xFFF59E0B,
-                          ).withValues(alpha: 0.14),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.auto_delete_rounded,
-                          color: Color(0xFFF59E0B),
-                          size: 20,
-                        ),
-                      ),
-                      title: const Text(
-                        'Clear Cache',
-                        style: TextStyle(fontWeight: FontWeight.w900),
-                      ),
-                      subtitle: const Text(
-                        'Frees temporary memory & media cache without losing library',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      trailing: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isDark
-                              ? const Color(0x1F252538)
-                              : const Color(0xFFF1F5F9),
-                          foregroundColor: context.eu.ink,
-                          side: BorderSide(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.14)
-                                : Colors.black.withValues(alpha: 0.1),
-                            width: 1.2,
+                    Material(
+                      type: MaterialType.transparency,
+                      child: ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0xFFF59E0B,
+                            ).withValues(alpha: 0.14),
+                            shape: BoxShape.circle,
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          elevation: 0,
-                          shadowColor: Colors.transparent,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
+                          child: const Icon(
+                            Icons.auto_delete_rounded,
+                            color: Color(0xFFF59E0B),
+                            size: 20,
                           ),
                         ),
-                        onPressed: () => _clearCache(context),
-                        child: const Text(
-                          'CLEAR',
+                        title: const Text(
+                          'Clear Cache',
                           style: TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                        subtitle: const Text(
+                          'Frees temporary memory & media cache without losing library',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                        trailing: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isDark
+                                ? const Color(0x1F252538)
+                                : const Color(0xFFF1F5F9),
+                            foregroundColor: context.eu.ink,
+                            side: BorderSide(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.14)
+                                  : Colors.black.withValues(alpha: 0.1),
+                              width: 1.2,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 0,
+                            shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 8,
+                            ),
+                          ),
+                          onPressed: () => _clearCache(context),
+                          child: const Text(
+                            'CLEAR',
+                            style: TextStyle(fontWeight: FontWeight.w900),
+                          ),
                         ),
                       ),
                     ),
@@ -1066,10 +1078,6 @@ class _SettingsHeroBanner extends StatelessWidget {
           colors: [Color(0xFF6366F1), Color(0xFF4F46E5)],
         ),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.22),
-          width: 1.2,
-        ),
         boxShadow: [
           BoxShadow(
             color: const Color(
@@ -1231,12 +1239,6 @@ class _SettingsSectionCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.12)
-              : Colors.black.withValues(alpha: 0.08),
-          width: 1.2,
-        ),
         boxShadow: [
           BoxShadow(
             color: isDark
@@ -1255,10 +1257,11 @@ class _SettingsSectionCard extends StatelessWidget {
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(21),
-        child: Container(
-          color: isDark ? const Color(0xFF1B1B29) : Colors.white,
+      child: Material(
+        color: isDark ? const Color(0xFF1B1B29) : Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1647,12 +1650,6 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.12)
-              : Colors.black.withValues(alpha: 0.08),
-          width: 1.2,
-        ),
         boxShadow: [
           BoxShadow(
             color: isDark
@@ -1671,10 +1668,11 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(21),
-        child: Container(
-          color: isDark ? const Color(0xFF1B1B29) : Colors.white,
+      child: Material(
+        color: isDark ? const Color(0xFF1B1B29) : Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1820,12 +1818,6 @@ class _AboutEuphonyCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.12)
-              : Colors.black.withValues(alpha: 0.08),
-          width: 1.2,
-        ),
         boxShadow: [
           BoxShadow(
             color: isDark
@@ -1844,10 +1836,11 @@ class _AboutEuphonyCard extends StatelessWidget {
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(21),
-        child: Container(
-          color: isDark ? const Color(0xFF1B1B29) : Colors.white,
+      child: Material(
+        color: isDark ? const Color(0xFF1B1B29) : Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
           padding: const EdgeInsets.all(22),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

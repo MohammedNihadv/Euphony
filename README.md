@@ -22,7 +22,7 @@ Life already has enough interruptions. Your music doesn't need 30-second unskipp
   <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/app-arm64-v8a-release.apk">
     <img src="https://img.shields.io/badge/Android-DOWNLOAD_APK-3DDC84?style=for-the-badge&logo=android&logoColor=3DDC84&labelColor=18181b" alt="Download for Android"/>
   </a>
-  <a href="https://f-droid.org/packages/com.mhdni.euphony/">
+  <a href="https://f-droid.org/en/packages/com.mhdni.euphony/">
     <img src="https://img.shields.io/badge/F--Droid-GET_IT_ON-1976D2?style=for-the-badge&logo=f-droid&logoColor=1976D2&labelColor=18181b" alt="Get it on F-Droid"/>
   </a>
   <a href="https://github.com/MohammedNihadv/Euphony/releases/latest/download/euphony-ios.ipa">
@@ -94,7 +94,7 @@ Grab the [**latest release**](https://github.com/MohammedNihadv/Euphony/releases
 | 🐧 **Linux** (Debian / Ubuntu / Mint) | `euphony-linux-amd64.deb` | Double-click or `sudo apt install ./euphony-linux-amd64.deb` (auto-installs all audio dependencies). |
 | 🐧 **Linux** (Universal) | `euphony-linux-x86_64.AppImage` | `chmod +x` the file and run it. |
 | 📱 **Android** | `app-arm64-v8a-release.apk` | ⭐ Best for 99% of phones (2017+). Tap to install. |
-| 📱 **Android (F-Droid)** | [F-Droid Repository](https://f-droid.org/packages/com.mhdni.euphony/) | Open-source app store with automatic background updates. |
+| 📱 **Android (F-Droid)** | [F-Droid Repository](https://f-droid.org/en/packages/com.mhdni.euphony/) | Open-source app store with automatic background updates. |
 | 📱 Android (legacy) | `app-armeabi-v7a-release.apk` | Older 32-bit devices. |
 | 📱 Android (x86) | `app-x86_64-release.apk` | Emulators & Intel Chromebooks. |
 | 🍎 **iOS** | `euphony-ios.ipa` | Unsigned build — sideload with **AltStore**, **Sideloadly** or **TrollStore** (no App Store account needed). |
