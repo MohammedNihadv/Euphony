@@ -611,8 +611,10 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: EuSpace.lg),
 
                 // ---------------- 5. App Updates Card ----------------
-                const _AppUpdateCard(),
-                const SizedBox(height: EuSpace.lg),
+                if (kEnableUpdates) ...[
+                  const _AppUpdateCard(),
+                  const SizedBox(height: EuSpace.lg),
+                ],
 
                 // ---------------- 6. About Euphony (Brutalist Signature Card) ----------------
                 _AboutEuphonyCard(appVersion: appVersion),

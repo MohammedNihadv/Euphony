@@ -60,7 +60,7 @@ jobs:
           if ($md5 -ne "cd738e16e2a19626d7cfa48801524f8c") {
             Write-Error "MD5 mismatch for mpv bundle: $md5"
           }
-      - run: flutter build windows --release
+      - run: flutter build windows --release --dart-define=ENABLE_UPDATES=true
       - name: Build Inno Setup Installer
         shell: pwsh
         run: |
@@ -93,7 +93,7 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
-      - run: flutter build linux --release
+      - run: flutter build linux --release --dart-define=ENABLE_UPDATES=true
       - name: Package
         run: |
           cd build/linux/x64/release/bundle
@@ -115,7 +115,7 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
-      - run: flutter build macos --release
+      - run: flutter build macos --release --dart-define=ENABLE_UPDATES=true
       - name: Package
         run: |
           cd build/macos/Build/Products/Release

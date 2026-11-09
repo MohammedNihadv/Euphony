@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -26,10 +27,22 @@ class UpdateInfo {
   final bool hasUpdate;
 }
 
-/// Whether update checking is enabled at build time.
-/// Defaults to false for F-Droid and reproducible release builds.
-const bool kEnableUpdates =
-    bool.fromEnvironment('ENABLE_UPDATES', defaultValue: false);
+/// Whether update checking is enabled.
+///
+/// On Desktop (Windows, macOS, Linux), update checking is enabled by default so
+/// users who download setup installers or AppImages get update notifications.
+/// On Android, it defaults to false to ensure strict F-Droid compliance, and is
+/// enabled via --dart-define=ENABLE_UPDATES=true for direct GitHub release builds.
+bool get kEnableUpdates {
+  const hasEnv = bool.hasEnvironment('ENABLE_UPDATES');
+  if (hasEnv) {
+    return const bool.fromEnvironment('ENABLE_UPDATES');
+  }
+  return !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.windows ||
+          defaultTargetPlatform == TargetPlatform.macOS ||
+          defaultTargetPlatform == TargetPlatform.linux);
+}
 
 class UpdateChecker {
   UpdateChecker({Dio? dio}) : _dio = dio ?? Dio();

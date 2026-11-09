@@ -122,7 +122,7 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
-      - run: flutter build windows --release
+      - run: flutter build windows --release --dart-define=ENABLE_UPDATES=true
       - name: Build installer (Inno Setup)
         shell: pwsh
         run: |
@@ -154,7 +154,7 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
-      - run: flutter build linux --release
+      - run: flutter build linux --release --dart-define=ENABLE_UPDATES=true
       - name: Build AppImage and Debian package
         run: |
           sudo apt-get install -y wget file dpkg-dev
@@ -182,7 +182,7 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: dart run build_runner build --delete-conflicting-outputs
-      - run: flutter build macos --release
+      - run: flutter build macos --release --dart-define=ENABLE_UPDATES=true
       - name: Build DMG
         run: |
           cd build/macos/Build/Products/Release
