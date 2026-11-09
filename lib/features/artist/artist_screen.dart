@@ -643,12 +643,6 @@ class _ArtistAlbumCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF161626) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.10)
-              : Colors.black.withValues(alpha: 0.08),
-          width: 1.0,
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.32 : 0.06),
@@ -743,12 +737,6 @@ class _ArtistPlaylistCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF161626) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.10)
-              : Colors.black.withValues(alpha: 0.08),
-          width: 1.0,
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.32 : 0.06),

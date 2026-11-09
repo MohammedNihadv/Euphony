@@ -1243,12 +1243,7 @@ class _LibraryTile extends StatelessWidget {
         color: tileColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(14),
-          side: BorderSide(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.10)
-                : Colors.black.withValues(alpha: 0.06),
-            width: 1.0,
-          ),
+          side: BorderSide.none,
         ),
         clipBehavior: Clip.antiAlias,
         child: ListTile(
@@ -1263,12 +1258,6 @@ class _LibraryTile extends StatelessWidget {
             height: 48,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.14)
-                    : Colors.black.withValues(alpha: 0.08),
-                width: 1.0,
-              ),
               color: isDark
                   ? const Color(0xFF1E1E2E)
                   : Colors.black.withValues(alpha: 0.04),

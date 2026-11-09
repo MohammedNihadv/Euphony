@@ -69,8 +69,8 @@ abstract final class EuTheme {
     final inkColor = isLight
         ? const Color(0xFF0D0D14)
         : const Color(0xFFF4F3FA);
-    final inkSide = BorderSide(color: inkColor, width: 2);
-    final inkThinSide = BorderSide(color: inkColor, width: 1.5);
+    const inkSide = BorderSide.none;
+    const inkThinSide = BorderSide.none;
 
     return base.copyWith(
       textTheme: text,
@@ -93,14 +93,17 @@ abstract final class EuTheme {
         elevation: EuElevation.flat,
         color: scheme.surfaceContainerLow,
         margin: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: EuShape.md, side: inkSide),
+        shape: const RoundedRectangleBorder(
+          borderRadius: EuShape.md,
+          side: inkSide,
+        ),
         clipBehavior: Clip.antiAlias,
       ),
 
       searchBarTheme: SearchBarThemeData(
         backgroundColor: WidgetStatePropertyAll(scheme.surfaceContainerLow),
         elevation: const WidgetStatePropertyAll(0),
-        side: WidgetStatePropertyAll(inkSide),
+        side: const WidgetStatePropertyAll(inkSide),
         shape: const WidgetStatePropertyAll(
           RoundedRectangleBorder(borderRadius: EuShape.md),
         ),
@@ -138,7 +141,7 @@ abstract final class EuTheme {
         style: FilledButton.styleFrom(
           backgroundColor: scheme.primary,
           foregroundColor: EuBrutal.onAccent,
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
             borderRadius: EuShape.md,
             side: inkSide,
           ),
@@ -153,7 +156,7 @@ abstract final class EuTheme {
 
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
             borderRadius: EuShape.pill,
             side: inkSide,
           ),
@@ -163,7 +166,7 @@ abstract final class EuTheme {
       ),
 
       chipTheme: ChipThemeData(
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: EuShape.pill,
           side: inkThinSide,
         ),
@@ -188,7 +191,7 @@ abstract final class EuTheme {
         backgroundColor: scheme.surfaceContainerLow,
         surfaceTintColor: Colors.transparent,
         elevation: EuElevation.sheet,
-        shape: RoundedRectangleBorder(
+        shape: const RoundedRectangleBorder(
           borderRadius: EuShape.sheetTop,
           side: inkSide,
         ),
@@ -199,7 +202,10 @@ abstract final class EuTheme {
       dialogTheme: DialogThemeData(
         backgroundColor: scheme.surfaceContainerHigh,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: EuShape.lg, side: inkSide),
+        shape: const RoundedRectangleBorder(
+          borderRadius: EuShape.lg,
+          side: inkSide,
+        ),
         titleTextStyle: text.headlineSmall?.copyWith(
           color: scheme.onSurface,
           fontWeight: FontWeight.w900,
@@ -233,7 +239,10 @@ abstract final class EuTheme {
           color: scheme.onInverseSurface,
           fontWeight: FontWeight.w700,
         ),
-        shape: RoundedRectangleBorder(borderRadius: EuShape.md, side: inkSide),
+        shape: const RoundedRectangleBorder(
+          borderRadius: EuShape.md,
+          side: inkSide,
+        ),
         insetPadding: const EdgeInsets.all(EuSpace.lg),
       ),
 

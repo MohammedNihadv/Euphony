@@ -253,12 +253,6 @@ class _ArtistDiscographyScreenState
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.12)
-                                : Colors.black.withValues(alpha: 0.08),
-                            width: 1.2,
-                          ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(

@@ -83,18 +83,18 @@ abstract final class EuBrutal {
 
   // --- Borders ------------------------------------------------------------
 
-  /// Cards, sheets, buttons — anything that reads as a slab.
+  /// Cards, sheets, buttons — clean borderless styling.
   static const Border border = Border.fromBorderSide(
-    BorderSide(color: ink, width: 2),
+    BorderSide.none,
   );
 
-  /// List rows and chips, where the base weight would crowd the content.
+  /// List rows and chips.
   static const Border thinBorder = Border.fromBorderSide(
-    BorderSide(color: ink, width: 1.5),
+    BorderSide.none,
   );
 
-  static const BorderSide side = BorderSide(color: ink, width: 2);
-  static const BorderSide thinSide = BorderSide(color: ink, width: 1.5);
+  static const BorderSide side = BorderSide.none;
+  static const BorderSide thinSide = BorderSide.none;
 
   /// A slab: flat fill, optional subtle frame, hard or diffused shadow.
   static BoxDecoration boxDecoration({
@@ -172,10 +172,10 @@ class EuBrutalTokens {
   Border get thinBorder => Border.fromBorderSide(thinSide);
 
   /// 2px border side.
-  BorderSide get side => BorderSide(color: ink, width: 2);
+  BorderSide get side => BorderSide.none;
 
   /// 1.5px border side.
-  BorderSide get thinSide => BorderSide(color: ink, width: 1.5);
+  BorderSide get thinSide => BorderSide.none;
 
   /// Hard 4px offset box shadow — always near-black.
   List<BoxShadow> get hardShadow => EuBrutal.hardShadow;

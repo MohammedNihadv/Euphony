@@ -469,13 +469,14 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                                       : theme.colorScheme.surfaceContainerLow,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
-                                    side: BorderSide(
-                                      color: isCurrentSong
-                                          ? EuBrutal.accent.withValues(alpha: 0.5)
-                                          : theme.colorScheme.outlineVariant
-                                                .withValues(alpha: 0.15),
-                                      width: isCurrentSong ? 1.4 : 1.0,
-                                    ),
+                                    side: isCurrentSong
+                                        ? BorderSide(
+                                            color: EuBrutal.accent.withValues(
+                                              alpha: 0.6,
+                                            ),
+                                            width: 1.4,
+                                          )
+                                        : BorderSide.none,
                                   ),
                                   clipBehavior: Clip.antiAlias,
                                   child: ListTile(

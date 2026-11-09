@@ -635,16 +635,11 @@ class _SectionBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: context.eu.ink.withValues(alpha: isDark ? 0.5 : 0.8),
-          width: 1.5,
-        ),
         boxShadow: [
           BoxShadow(
             color: color.withValues(alpha: 0.4),
@@ -682,12 +677,6 @@ class _HomeItemCard extends ConsumerWidget {
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF161626) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.10)
-              : Colors.black.withValues(alpha: 0.08),
-          width: 1.0,
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.32 : 0.06),

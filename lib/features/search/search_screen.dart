@@ -297,21 +297,24 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                 height: 44,
                                 decoration: BoxDecoration(
                                   color: isDark
-                                      ? const Color(0x65161626)
-                                      : Colors.white.withValues(alpha: 0.85),
+                                      ? const Color(0xFF161626)
+                                      : Colors.white,
                                   borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: _focusNode.hasFocus
-                                        ? EuBrutal.accent
-                                        : (isDark
-                                              ? Colors.white.withValues(
-                                                  alpha: 0.12,
-                                                )
-                                              : Colors.black.withValues(
-                                                  alpha: 0.08,
-                                                )),
-                                    width: _focusNode.hasFocus ? 1.4 : 1.0,
-                                  ),
+                                  border: _focusNode.hasFocus
+                                      ? Border.all(
+                                          color: EuBrutal.accent,
+                                          width: 1.4,
+                                        )
+                                      : null,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                        alpha: isDark ? 0.35 : 0.05,
+                                      ),
+                                      blurRadius: 14,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
                                 ),
                                 child: SearchBar(
                                   constraints: const BoxConstraints(
@@ -324,6 +327,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                                   elevation: const WidgetStatePropertyAll(0),
                                   backgroundColor: const WidgetStatePropertyAll(
                                     Colors.transparent,
+                                  ),
+                                  side: const WidgetStatePropertyAll(
+                                    BorderSide.none,
+                                  ),
+                                  shape: WidgetStatePropertyAll(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
                                   ),
                                   controller: _controller,
                                   focusNode: _focusNode,
@@ -692,13 +703,10 @@ class _SearchLanding extends ConsumerWidget {
                             vertical: 8,
                           ),
                           decoration: BoxDecoration(
+                            color: theme.brightness == Brightness.dark
+                                ? Colors.white.withValues(alpha: 0.08)
+                                : Colors.black.withValues(alpha: 0.05),
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: theme.colorScheme.onSurface.withValues(
-                                alpha: 0.3,
-                              ),
-                              width: 1.2,
-                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
@@ -765,27 +773,37 @@ class _SearchLanding extends ConsumerWidget {
                   behavior: HitTestBehavior.opaque,
                   onTap: () => onSelected(item.title),
                   child: Container(
-                    padding: const EdgeInsets.all(EuSpace.md),
-                    decoration: EuBrutal.boxDecoration(
-                      color: item.color,
-                      borderRadius: BorderRadius.circular(14),
-                      shadows: EuBrutal.smHardShadow,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
                     ),
+                    decoration: BoxDecoration(
+                      color: item.color,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: item.color.withValues(alpha: 0.35),
+                          blurRadius: 14,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    clipBehavior: Clip.antiAlias,
                     child: Stack(
                       children: [
                         Positioned(
-                          right: -8,
-                          bottom: -12,
+                          right: -10,
+                          bottom: -14,
                           child: Transform.rotate(
                             angle: 0.35,
                             child: Icon(
                               item.icon,
-                              size: 56,
+                              size: 58,
                               color:
                                   (item.color.computeLuminance() > 0.5
                                           ? const Color(0xFF0D0D14)
                                           : Colors.white)
-                                      .withValues(alpha: 0.28),
+                                      .withValues(alpha: 0.22),
                             ),
                           ),
                         ),
@@ -798,8 +816,9 @@ class _SearchLanding extends ConsumerWidget {
                             color: item.color.computeLuminance() > 0.5
                                 ? const Color(0xFF0D0D14)
                                 : Colors.white,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w900,
                             fontSize: 16,
+                            letterSpacing: -0.2,
                           ),
                         ),
                       ],
@@ -829,15 +848,14 @@ class _SuggestionStrip extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(top: 8),
       decoration: BoxDecoration(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF161626)
+            : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-          width: 1,
-        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 14,
             offset: const Offset(0, 4),
           ),
         ],
@@ -942,14 +960,12 @@ class _ResultSlivers extends StatelessWidget {
                                       ? Colors.white.withValues(alpha: 0.06)
                                       : Colors.black.withValues(alpha: 0.05)),
                             borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: isSelected
-                                  ? EuBrutal.accent
-                                  : (isDark
-                                        ? Colors.white.withValues(alpha: 0.10)
-                                        : Colors.black.withValues(alpha: 0.08)),
-                              width: 1.0,
-                            ),
+                            border: isSelected
+                                ? Border.all(
+                                    color: EuBrutal.accent,
+                                    width: 1.0,
+                                  )
+                                : null,
                             boxShadow: isSelected
                                 ? [
                                     BoxShadow(
@@ -1113,12 +1129,9 @@ class _DesktopItemCardState extends ConsumerState<_DesktopItemCard> {
                 ? (_hovered ? const Color(0xFF202036) : const Color(0xFF141424))
                 : (_hovered ? Colors.white : const Color(0xFFF8F8FC)),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: _hovered
-                  ? EuBrutal.accent
-                  : (isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.08)),
-              width: _hovered ? 1.5 : 1.0,
-            ),
+            border: _hovered
+                ? Border.all(color: EuBrutal.accent, width: 1.5)
+                : null,
             boxShadow: _hovered ? EuBrutal.smHardShadow : null,
           ),
           child: Column(
@@ -1132,12 +1145,6 @@ class _DesktopItemCardState extends ConsumerState<_DesktopItemCard> {
                       decoration: BoxDecoration(
                         shape: isArtist ? BoxShape.circle : BoxShape.rectangle,
                         borderRadius: isArtist ? null : BorderRadius.circular(10),
-                        border: Border.all(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.12)
-                              : Colors.black.withValues(alpha: 0.08),
-                          width: 1.0,
-                        ),
                       ),
                       child: ClipRRect(
                         borderRadius: isArtist
@@ -1226,12 +1233,6 @@ class _TopResultCard extends ConsumerWidget {
                   ? const Color(0x85161628)
                   : Colors.white.withValues(alpha: 0.88),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.14)
-                    : Colors.black.withValues(alpha: 0.08),
-                width: 1.0,
-              ),
             ),
             child: Material(
               type: MaterialType.transparency,
@@ -1375,12 +1376,6 @@ class _MusicItemTile extends ConsumerWidget {
             ? const Color(0x60161626)
             : Colors.white.withValues(alpha: 0.78),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.10)
-              : Colors.black.withValues(alpha: 0.06),
-          width: 1.0,
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.20 : 0.03),
@@ -1496,12 +1491,6 @@ class _Artwork extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(size > 60 ? 16 : 12),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.16)
-              : Colors.black.withValues(alpha: 0.08),
-          width: 1.0,
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
