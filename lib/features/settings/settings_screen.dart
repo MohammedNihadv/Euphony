@@ -2114,7 +2114,7 @@ class _AppUpdateCardState extends ConsumerState<_AppUpdateCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Current Build: v${info?.currentVersion ?? ref.watch(appVersionProvider).asData?.value ?? '1.0.1'}',
+                          'Current Build: v${info?.currentVersion ?? ref.watch(appVersionProvider).asData?.value ?? '1.0.2'}',
                           style: const TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 13,

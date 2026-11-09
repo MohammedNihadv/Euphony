@@ -64,7 +64,7 @@ jobs:
       - name: Build Inno Setup Installer
         shell: pwsh
         run: |
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=1.0.1 installer/windows/euphony.iss
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DAppVersion=1.0.2 installer/windows/euphony.iss
       - name: Package Portable Zip
         run: Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath euphony-windows-x64.zip
       - uses: actions/upload-artifact@v7

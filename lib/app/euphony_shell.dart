@@ -732,7 +732,7 @@ class _DesktopSidebarState extends ConsumerState<_DesktopSidebar> {
                     border: Border.all(color: EuBrutal.accent, width: 1),
                   ),
                   child: const Text(
-                    'v1.0.1',
+                    'v1.0.2',
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
