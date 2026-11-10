@@ -70,13 +70,13 @@ class SettingsRepository {
   Future<void> setContentRegion(String value) =>
       _prefs.setString(_kContentRegion, value);
 
-  bool get dynamicIsland => _prefs.getBool(_kDynamicIsland) ?? true;
+  bool get dynamicIsland => _prefs.getBool(_kDynamicIsland) ?? false;
   Future<void> setDynamicIsland(bool value) =>
       _prefs.setBool(_kDynamicIsland, value);
 
   static const _kHideMiniPlayerWithIsland = 'hide_mini_player_with_island';
   bool get hideMiniPlayerWithIsland =>
-      _prefs.getBool(_kHideMiniPlayerWithIsland) ?? true;
+      _prefs.getBool(_kHideMiniPlayerWithIsland) ?? false;
   Future<void> setHideMiniPlayerWithIsland(bool value) =>
       _prefs.setBool(_kHideMiniPlayerWithIsland, value);
 

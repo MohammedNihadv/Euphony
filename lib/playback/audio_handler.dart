@@ -191,8 +191,22 @@ class EuphonyAudioHandler extends BaseAudioHandler with SeekHandler {
 
   @override
   Future<void> stop() async {
+    mediaItem.add(null);
+    playbackState.add(
+      playbackState.value.copyWith(
+        processingState: AudioProcessingState.idle,
+        playing: false,
+      ),
+    );
     await _controller.stop();
     await super.stop();
+  }
+
+  @override
+  Future<void> onTaskRemoved() async {
+    if (!_player.playing) {
+      await stop();
+    }
   }
 
   Future<void> close() async {

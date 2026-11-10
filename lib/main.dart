@@ -87,7 +87,7 @@ Future<void> _startAudioService(ProviderContainer container) async {
         androidNotificationChannelId: 'com.mhdni.euphony.playback',
         androidNotificationChannelName: 'Playback',
         androidNotificationIcon: 'drawable/ic_stat_music_note',
-        androidNotificationOngoing: true,
+        androidNotificationOngoing: false,
         androidStopForegroundOnPause: true,
       ),
     );

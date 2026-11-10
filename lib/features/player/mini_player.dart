@@ -492,20 +492,33 @@ PageRouteBuilder<void> _buildPlayerRoute() {
   return PageRouteBuilder<void>(
     pageBuilder: (context, animation, secondaryAnimation) =>
         const PlayerScreen(),
-    transitionDuration: EuMotion.standard,
-    reverseTransitionDuration: EuMotion.quick,
+    transitionDuration: const Duration(milliseconds: 360),
+    reverseTransitionDuration: const Duration(milliseconds: 280),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       final curved = CurvedAnimation(
         parent: animation,
-        curve: EuMotion.emphasized,
-        reverseCurve: EuMotion.emphasizedIn,
+        curve: Curves.easeOutCubic,
+        reverseCurve: Curves.easeInCubic,
       );
-      return SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 1),
-          end: Offset.zero,
-        ).animate(curved),
-        child: child,
+      return FadeTransition(
+        opacity: CurvedAnimation(
+          parent: animation,
+          curve: const Interval(0.0, 0.65, curve: Curves.easeOut),
+        ),
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0.0, 0.12),
+            end: Offset.zero,
+          ).animate(curved),
+          child: ScaleTransition(
+            scale: Tween<double>(
+              begin: 0.88,
+              end: 1.0,
+            ).animate(curved),
+            alignment: Alignment.bottomCenter,
+            child: child,
+          ),
+        ),
       );
     },
   );

@@ -652,6 +652,14 @@ class PlayerController {
     _positionSub = _player.positionStream.listen((position) {
       if (_disposed) return;
       _mediaControls.updatePosition(position);
+      final duration = _player.duration;
+      if (duration != null &&
+          duration > const Duration(seconds: 1) &&
+          position >= duration - const Duration(milliseconds: 300) &&
+          !_advancing &&
+          _player.playing) {
+        unawaited(_onTrackCompleted());
+      }
     });
 
     _durationSub = _player.durationStream.listen((duration) {
@@ -684,18 +692,16 @@ class PlayerController {
         return;
       }
 
-      final next = _queue.nextIndex(wrap: repeat == LoopMode.all);
+      var next = _queue.nextIndex(wrap: repeat == LoopMode.all);
       if (next == null) {
         // End of the queue with repeat off: try to keep the music going with
         // related tracks (autoplay radio) before giving up.
         if (await _extendWithAutoplay()) {
-          final resumed = _queue.nextIndex(wrap: false);
-          if (resumed != null) {
-            _queue.setIndex(resumed);
-            await _playCurrent();
-            return;
-          }
+          next = _queue.nextIndex(wrap: false);
         }
+      }
+
+      if (next == null) {
         // Nothing to play next: stop cleanly rather than sitting in `completed`,
         // which reports as "playing" to the UI.
         await _player.stop();
@@ -1082,7 +1088,12 @@ class PlayerController {
   Future<void> play() async {
     if (_player.playing) return;
     if (_isDebounced()) return;
-    await togglePlayPause();
+    if (_player.processingState == ProcessingState.completed ||
+        _player.audioSource == null) {
+      await _playCurrent();
+    } else {
+      await _player.play();
+    }
   }
 
   Future<void> pause() async {

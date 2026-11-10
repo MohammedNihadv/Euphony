@@ -11,7 +11,7 @@ class SettingsState {
     required this.skipSilence,
     required this.contentRegion,
     required this.dynamicIsland,
-    this.hideMiniPlayerWithIsland = true,
+    this.hideMiniPlayerWithIsland = false,
     this.discordRpcEnabled = true,
     this.crossfadeSeconds = 0,
     this.sleepFadeOut = true,
