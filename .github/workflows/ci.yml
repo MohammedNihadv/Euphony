@@ -97,13 +97,25 @@ jobs:
             echo "keyPassword=$KEY_PASSWORD"
           } > android/key.properties
 
-      - name: Build Release APKs
+      - name: Build F-Droid APKs (Reproducible / Self-Updates Disabled)
+        run: |
+          flutter build apk --release --split-per-abi --dart-define=ENABLE_UPDATES=false
+          mkdir -p build/app/outputs/fdroid
+          for f in build/app/outputs/flutter-apk/app-*-release.apk; do
+            [ -f "$f" ] || continue
+            filename=$(basename "$f")
+            cp "$f" "build/app/outputs/fdroid/${filename/app-/app-fdroid-}"
+          done
+
+      - name: Build Standard Release APKs (Direct / In-App Updates Enabled)
         run: flutter build apk --release --split-per-abi --dart-define=ENABLE_UPDATES=true
 
       - uses: actions/upload-artifact@v7
         with:
           name: euphony-release-apks
-          path: build/app/outputs/flutter-apk/app-*-release.apk
+          path: |
+            build/app/outputs/flutter-apk/app-*-release.apk
+            build/app/outputs/fdroid/app-fdroid-*-release.apk
           if-no-files-found: error
 
   # Desktop builds only run for release tags — they are slower and the Android

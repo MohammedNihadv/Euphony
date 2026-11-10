@@ -655,9 +655,8 @@ class PlayerController {
       final duration = _player.duration;
       if (duration != null &&
           duration > const Duration(seconds: 1) &&
-          position >= duration - const Duration(milliseconds: 300) &&
-          !_advancing &&
-          _player.playing) {
+          position >= duration - const Duration(milliseconds: 500) &&
+          !_advancing) {
         unawaited(_onTrackCompleted());
       }
     });
@@ -705,7 +704,6 @@ class PlayerController {
         // Nothing to play next: stop cleanly rather than sitting in `completed`,
         // which reports as "playing" to the UI.
         await _player.stop();
-        _queue.clearQueue();
         return;
       }
       _queue.setIndex(next);
@@ -839,6 +837,14 @@ class PlayerController {
 
     if (source == null) {
       _fail('Could not play "${song.title}".');
+      if (_advancing) {
+        final repeat = _repeatMode();
+        final subsequent = _queue.nextIndex(wrap: repeat == LoopMode.all);
+        if (subsequent != null) {
+          _queue.setIndex(subsequent);
+          unawaited(_playCurrent());
+        }
+      }
       return;
     }
 
@@ -883,6 +889,14 @@ class PlayerController {
       _log.severe('playback failed for ${song.id}: $error');
       _streams.remove(song.id);
       _fail('Could not play "${song.title}".');
+      if (_advancing) {
+        final repeat = _repeatMode();
+        final subsequent = _queue.nextIndex(wrap: repeat == LoopMode.all);
+        if (subsequent != null) {
+          _queue.setIndex(subsequent);
+          unawaited(_playCurrent());
+        }
+      }
     }
   }
 
@@ -988,7 +1002,9 @@ class PlayerController {
             return null;
           }
           _log.info('resolved via Innertube for ${song.id}');
-          final resolved = ResolvedStream(url, direct: true);
+          final isDirect =
+              url.contains('itag=18') || url.contains('mime=video');
+          final resolved = ResolvedStream(url, direct: isDirect);
           _streams[song.id] = resolved;
           return resolved;
         },

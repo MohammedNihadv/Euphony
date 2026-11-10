@@ -116,6 +116,17 @@ class StreamProxy {
       }
     }
 
+    // If requested start exceeds total content length, return 416 Range Not Satisfiable
+    if (total != null && total > 0 && start >= total) {
+      request.response.statusCode = HttpStatus.requestedRangeNotSatisfiable;
+      request.response.headers.set(
+        HttpHeaders.contentRangeHeader,
+        'bytes */$total',
+      );
+      await request.response.close();
+      return;
+    }
+
     // Cap the upstream fetch to a chunk googlevideo will actually serve.
     var end = start + _chunkSize - 1;
     if (requestedEnd != null && requestedEnd < end) end = requestedEnd;
