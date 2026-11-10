@@ -403,36 +403,49 @@ class _GlassBrutalNavBar extends ConsumerWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(34),
                 boxShadow: [
+                  // Soft, expansive ambient drop shadow
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.14),
-                    offset: const Offset(0, 10),
-                    blurRadius: 28,
+                    color: Colors.black.withValues(alpha: isDark ? 0.38 : 0.10),
+                    offset: const Offset(0, 8),
+                    blurRadius: 30,
                     spreadRadius: -2,
                   ),
+                  // Top specular rim highlight for glass bevel
                   BoxShadow(
-                    color: (isDark ? Colors.white : Colors.black).withValues(
-                      alpha: isDark ? 0.06 : 0.03,
-                    ),
-                    offset: const Offset(0, 2),
-                    blurRadius: 6,
+                    color: Colors.white.withValues(alpha: isDark ? 0.07 : 0.70),
+                    offset: const Offset(0, 1),
+                    blurRadius: 0,
+                    spreadRadius: 0,
                   ),
                 ],
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(34),
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                  filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0x80141422)
-                          : Colors.white.withValues(alpha: 0.65),
+                      // True iPhone frosted liquid glass translucency
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: isDark
+                            ? [
+                                const Color(0xFF242436).withValues(alpha: 0.65),
+                                const Color(0xFF13131E).withValues(alpha: 0.52),
+                              ]
+                            : [
+                                Colors.white.withValues(alpha: 0.72),
+                                const Color(0xFFEDF2F7).withValues(alpha: 0.55),
+                              ],
+                      ),
                       borderRadius: BorderRadius.circular(34),
+                      // Ultra-refined specular rim border
                       border: Border.all(
                         color: isDark
-                            ? Colors.white.withValues(alpha: 0.16)
+                            ? Colors.white.withValues(alpha: 0.18)
                             : Colors.white.withValues(alpha: 0.85),
-                        width: 1.2,
+                        width: 1.0,
                       ),
                     ),
                     padding: const EdgeInsets.symmetric(
@@ -472,21 +485,25 @@ class _GlassBrutalNavBar extends ConsumerWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () => onSelected(index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeInOutCubic,
-        padding: EdgeInsets.symmetric(
-          horizontal: isSelected ? 12 : 8,
-          vertical: 7,
-        ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOutCubic,
+          padding: EdgeInsets.symmetric(
+            horizontal: isSelected ? 12 : 8,
+            vertical: 7,
+          ),
         decoration: BoxDecoration(
           color: isSelected ? EuBrutal.accent : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected
-                ? context.eu.ink.withValues(alpha: isDark ? 0.7 : 0.9)
+                ? (isDark
+                    ? Colors.white.withValues(alpha: 0.30)
+                    : EuBrutal.accentDeep)
                 : Colors.transparent,
-            width: 1.5,
+            width: 1.2,
           ),
           boxShadow: isSelected
               ? [
@@ -524,7 +541,8 @@ class _GlassBrutalNavBar extends ConsumerWidget {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }
 

@@ -173,19 +173,26 @@ class _GlassPillSlab extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
-          // Soft ambient drop shadow
+          // Soft, expansive ambient drop shadow
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.12),
-            blurRadius: 28,
+            color: Colors.black.withValues(alpha: isDark ? 0.38 : 0.10),
+            blurRadius: 30,
             spreadRadius: -2,
             offset: const Offset(0, 8),
+          ),
+          // Top specular rim highlight for glass bevel
+          BoxShadow(
+            color: Colors.white.withValues(alpha: isDark ? 0.07 : 0.70),
+            blurRadius: 0,
+            spreadRadius: 0,
+            offset: const Offset(0, 1),
           ),
           // Ethereal accent glow when playing
           if (isPlaying)
             BoxShadow(
-              color: EuBrutal.accent.withValues(alpha: 0.22),
-              blurRadius: 20,
-              spreadRadius: -3,
+              color: EuBrutal.accent.withValues(alpha: 0.24),
+              blurRadius: 22,
+              spreadRadius: -2,
               offset: const Offset(0, 2),
             ),
         ],
@@ -193,27 +200,30 @@ class _GlassPillSlab extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(22),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
           child: Container(
             decoration: BoxDecoration(
-              // Gradient glass fill
+              // True iPhone frosted liquid glass translucency
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: isDark
-                    ? [const Color(0xF21C1C28), const Color(0xD912121A)]
+                    ? [
+                        const Color(0xFF242436).withValues(alpha: 0.65),
+                        const Color(0xFF13131E).withValues(alpha: 0.52),
+                      ]
                     : [
-                        Colors.white.withValues(alpha: 0.92),
-                        const Color(0xFFF1F5F9).withValues(alpha: 0.85),
+                        Colors.white.withValues(alpha: 0.72),
+                        const Color(0xFFEDF2F7).withValues(alpha: 0.55),
                       ],
               ),
               borderRadius: BorderRadius.circular(22),
-              // Ultra-refined translucent rim
+              // Ultra-refined specular rim border
               border: Border.all(
                 color: isDark
-                    ? Colors.white.withValues(alpha: 0.16)
+                    ? Colors.white.withValues(alpha: 0.18)
                     : Colors.white.withValues(alpha: 0.85),
-                width: 1.2,
+                width: 1.0,
               ),
             ),
             child: child,

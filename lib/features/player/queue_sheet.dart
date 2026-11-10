@@ -89,7 +89,7 @@ class QueueSheet extends ConsumerWidget {
 
               // Header bar
               Padding(
-                padding: EdgeInsets.fromLTRB(20, isDialog ? 16 : 8, 14, 12),
+                padding: EdgeInsets.fromLTRB(16, isDialog ? 16 : 8, 10, 12),
                 child: Row(
                   children: [
                     Container(
@@ -106,44 +106,56 @@ class QueueSheet extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Text(
-                      'Up Next Queue',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.3,
-                        color: isDark ? Colors.white : Colors.black87,
+                    Flexible(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              'Up Next Queue',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -0.3,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 7,
+                              vertical: 2.5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.08)
+                                  : Colors.black.withValues(alpha: 0.06),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.08)
+                                    : Colors.black.withValues(alpha: 0.06),
+                              ),
+                            ),
+                            child: Text(
+                              '${entries.length}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: isDark ? Colors.white70 : Colors.black54,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.08)
-                            : Colors.black.withValues(alpha: 0.06),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.08)
-                              : Colors.black.withValues(alpha: 0.06),
-                        ),
-                      ),
-                      child: Text(
-                        '${entries.length}',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800,
-                          color: isDark ? Colors.white70 : Colors.black54,
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
                     if (entries.isNotEmpty)
                       IconButton(
+                        visualDensity: VisualDensity.compact,
                         icon: const Icon(Icons.delete_sweep_outlined, size: 20),
                         tooltip: 'Clear queue',
                         color: isDark ? Colors.white60 : Colors.black54,
@@ -154,6 +166,7 @@ class QueueSheet extends ConsumerWidget {
                         },
                       ),
                     IconButton(
+                      visualDensity: VisualDensity.compact,
                       icon: Icon(
                         isDialog ? Icons.close_rounded : Icons.keyboard_arrow_down_rounded,
                         size: isDialog ? 20 : 26,

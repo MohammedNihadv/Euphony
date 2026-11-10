@@ -198,9 +198,7 @@ class _NarrowLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final maxArtSize = (viewportHeight * 0.36).clamp(180.0, 350.0);
-    final minContentHeight = maxArtSize + 360.0;
-    final foldHeight = viewportHeight < minContentHeight ? minContentHeight : viewportHeight;
+    final maxArtSize = (viewportHeight - 400.0).clamp(160.0, 350.0);
     return SingleChildScrollView(
       controller: scrollController,
       padding: const EdgeInsets.symmetric(horizontal: EuSpace.xl),
@@ -211,38 +209,40 @@ class _NarrowLayout extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // FOLD 1: Full-viewport Now Playing view
-              SizedBox(
-                height: foldHeight,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: EuSpace.xs),
-                    Center(
-                      child: _Artwork(
-                        song: song,
-                        artSize: maxArtSize,
-                        isPlaying: isPlaying,
+              ConstrainedBox(
+                constraints: BoxConstraints(minHeight: viewportHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: EuSpace.xs),
+                      Center(
+                        child: _Artwork(
+                          song: song,
+                          artSize: maxArtSize,
+                          isPlaying: isPlaying,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: EuSpace.md),
-                    _TrackHeader(song: song),
-                    const SizedBox(height: EuSpace.md),
-                    const _GlassScrubber(),
-                    const SizedBox(height: EuSpace.sm),
-                    const _TransportControls(),
-                    const SizedBox(height: EuSpace.md),
-                    _GlassBottomActionBar(
-                      song: song,
-                      onLyricsTap: onLyricsTap,
-                    ),
-                    const SizedBox(height: EuSpace.xs),
-                    _ScrollToLyricsPrompt(
-                      onTap: onLyricsTap,
-                      label: 'Scroll to Lyrics & Info',
-                    ),
-                    const SizedBox(height: 12),
-                  ],
+                      const SizedBox(height: EuSpace.md),
+                      _TrackHeader(song: song),
+                      const SizedBox(height: EuSpace.md),
+                      const _GlassScrubber(),
+                      const SizedBox(height: EuSpace.sm),
+                      const _TransportControls(),
+                      const SizedBox(height: EuSpace.md),
+                      _GlassBottomActionBar(
+                        song: song,
+                        onLyricsTap: onLyricsTap,
+                      ),
+                      const SizedBox(height: EuSpace.xs),
+                      _ScrollToLyricsPrompt(
+                        onTap: onLyricsTap,
+                        label: 'Scroll to Lyrics & Info',
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
                 ),
               ),
 
@@ -1467,9 +1467,10 @@ void _showSpeedSheet(BuildContext context, WidgetRef ref) {
     clipBehavior: Clip.antiAlias,
     child: SafeArea(
       top: false,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
           if (!isDesktop)
             Center(
               child: Container(
@@ -1548,7 +1549,8 @@ void _showSpeedSheet(BuildContext context, WidgetRef ref) {
         ],
       ),
     ),
-  );
+  ),
+);
 
   if (isDesktop) {
     showDialog<void>(
@@ -1588,9 +1590,10 @@ void _showSleepTimerSheet(BuildContext context, WidgetRef ref) {
     clipBehavior: Clip.antiAlias,
     child: SafeArea(
       top: false,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
           if (!isDesktop)
             Center(
               child: Container(
@@ -1669,7 +1672,8 @@ void _showSleepTimerSheet(BuildContext context, WidgetRef ref) {
         ],
       ),
     ),
-  );
+  ),
+);
 
   if (isDesktop) {
     showDialog<void>(

@@ -2391,7 +2391,11 @@ class _AboutEuphonyCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      alignment: WrapAlignment.spaceBetween,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -2425,7 +2429,6 @@ class _AboutEuphonyCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                        const Spacer(),
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
@@ -2478,9 +2481,12 @@ class _AboutEuphonyCard extends StatelessWidget {
                             ),
                             onPressed: () => _launchExternalUrl('https://github.com/sponsors/MohammedNihadv'),
                             icon: const Icon(Icons.favorite_rounded, size: 16),
-                            label: const Text(
-                              'GitHub Sponsor',
-                              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+                            label: const FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'GitHub Sponsor',
+                                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+                              ),
                             ),
                           ),
                         ),
@@ -2499,9 +2505,12 @@ class _AboutEuphonyCard extends StatelessWidget {
                             ),
                             onPressed: () => _launchExternalUrl('https://supertipz.in/pay/mhdnihadv'),
                             icon: const Icon(Icons.bolt_rounded, size: 17),
-                            label: const Text(
-                              'UPI / Fast Tip',
-                              style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+                            label: const FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                'UPI / Fast Tip',
+                                style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+                              ),
                             ),
                           ),
                         ),
@@ -2710,84 +2719,84 @@ class _FedarationBentoTile extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        child: SizedBox(
-          height: 56,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Row(
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: badgeColor.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(9),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: badgeColor.withValues(alpha: 0.14),
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    child: Icon(icon, size: 17, color: badgeColor),
                   ),
-                  child: Icon(icon, size: 18, color: badgeColor),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        title,
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2.5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: badgeColor.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: badgeColor.withValues(alpha: 0.30),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        badge,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 13,
-                          color: isDark ? Colors.white : Colors.black87,
-                          letterSpacing: -0.2,
+                          color: badgeColor,
+                          fontWeight: FontWeight.w900,
+                          fontSize: 8.5,
+                          letterSpacing: 0.4,
                         ),
                       ),
-                      const SizedBox(height: 1),
-                      Text(
-                        subtitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 11,
-                          color: isDark ? Colors.white54 : Colors.black45,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: badgeColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: badgeColor.withValues(alpha: 0.30),
-                      width: 0.8,
                     ),
                   ),
-                  child: Text(
-                    badge,
+                ],
+              ),
+              const SizedBox(height: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: badgeColor,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 8.5,
-                      letterSpacing: 0.4,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 12.5,
+                      color: isDark ? Colors.white : Colors.black87,
+                      letterSpacing: -0.2,
                     ),
                   ),
-                ),
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 10,
-                  color: isDark ? Colors.white30 : Colors.black26,
-                ),
-              ],
-            ),
+                  const SizedBox(height: 1),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 10.5,
+                      color: isDark ? Colors.white54 : Colors.black45,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),

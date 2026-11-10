@@ -89,6 +89,7 @@ Future<void> _startAudioService(ProviderContainer container) async {
         androidNotificationIcon: 'drawable/ic_stat_music_note',
         androidNotificationOngoing: false,
         androidStopForegroundOnPause: true,
+        androidResumeOnClick: false,
       ),
     );
   } catch (error, stack) {

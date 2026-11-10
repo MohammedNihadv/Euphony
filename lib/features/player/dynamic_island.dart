@@ -26,7 +26,7 @@ import 'player_screen.dart';
 /// - Compact state: Sleek pill showing mini album art, song title, and live equalizer.
 /// - Expanded state: Morphs with a spring curve into a rich neo-brutalist glass card
 ///   with full playback controls, seekbar, live progress, and full-player shortcut.
-/// - Gestures: Swipe up to tuck away; tap to expand/collapse.
+/// - Gestures: Tap or swipe down to expand; swipe up or tap outside to collapse.
 class DynamicIsland extends ConsumerStatefulWidget {
   const DynamicIsland({super.key});
 
@@ -37,9 +37,7 @@ class DynamicIsland extends ConsumerStatefulWidget {
 class _DynamicIslandState extends ConsumerState<DynamicIsland> {
   bool _isExpanded = false;
   bool _manuallyOpened = false;
-  bool _isTucked = false;
   Timer? _autoCollapseTimer;
-  Timer? _pauseAutoHideTimer;
 
   @override
   void initState() {
@@ -57,17 +55,14 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
   @override
   void dispose() {
     _autoCollapseTimer?.cancel();
-    _pauseAutoHideTimer?.cancel();
     super.dispose();
   }
 
   void _triggerAutoExpand() {
     _autoCollapseTimer?.cancel();
-    _pauseAutoHideTimer?.cancel();
     if (!mounted) return;
     HapticFeedback.lightImpact();
     setState(() {
-      _isTucked = false;
       _isExpanded = true;
       _manuallyOpened = false;
     });
@@ -81,23 +76,10 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
     });
   }
 
-  void _schedulePauseAutoHide() {
-    _pauseAutoHideTimer?.cancel();
-    _pauseAutoHideTimer = Timer(const Duration(seconds: 6), () {
-      if (mounted && !ref.read(isPlayingProvider) && !_isExpanded) {
-        setState(() {
-          _isTucked = true;
-        });
-      }
-    });
-  }
-
   void _toggleExpanded() {
     HapticFeedback.lightImpact();
     _autoCollapseTimer?.cancel();
-    _pauseAutoHideTimer?.cancel();
     setState(() {
-      _isTucked = false;
       _isExpanded = !_isExpanded;
       _manuallyOpened = _isExpanded;
     });
@@ -111,21 +93,7 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
         _isExpanded = false;
         _manuallyOpened = false;
       });
-      if (!ref.read(isPlayingProvider)) {
-        _schedulePauseAutoHide();
-      }
     }
-  }
-
-  void _tuck() {
-    _autoCollapseTimer?.cancel();
-    _pauseAutoHideTimer?.cancel();
-    HapticFeedback.selectionClick();
-    setState(() {
-      _isExpanded = false;
-      _manuallyOpened = false;
-      _isTucked = true;
-    });
   }
 
   @override
@@ -139,18 +107,16 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
         _triggerAutoExpand();
       } else if (current == null) {
         _autoCollapseTimer?.cancel();
-        _pauseAutoHideTimer?.cancel();
         if (mounted) {
           setState(() {
             _isExpanded = false;
             _manuallyOpened = false;
-            _isTucked = true;
           });
         }
       }
     });
 
-    // Automatically trigger expansion when playback resumes, and auto-tuck when paused
+    // Automatically trigger expansion when playback resumes, and collapse on pause
     ref.listen<bool>(isPlayingProvider, (previous, current) {
       if (current == true && previous == false) {
         _triggerAutoExpand();
@@ -158,7 +124,6 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
         if (_isExpanded && !_manuallyOpened) {
           _collapse();
         }
-        _schedulePauseAutoHide();
       }
     });
 
@@ -175,10 +140,10 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
 
     final targetWidth = _isExpanded
         ? math.min(screenWidth - 32, 420.0)
-        : math.min(screenWidth - 48, 240.0);
-    final targetHeight = _isExpanded ? 204.0 : 48.0;
+        : math.min(screenWidth - 36, 256.0);
+    final targetHeight = _isExpanded ? 216.0 : 48.0;
     final notchTop = topPadding + 4.0;
-    final targetTop = _isTucked ? -80.0 : notchTop;
+    final targetTop = notchTop;
 
     final capsuleWidget = Container(
       width: targetWidth,
@@ -220,10 +185,17 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
             ),
             child: GestureDetector(
               onVerticalDragEnd: (details) {
-                // Swipe up to tuck away into notch
-                if (details.primaryVelocity != null &&
-                    details.primaryVelocity! < -100) {
-                  _tuck();
+                final vy = details.primaryVelocity ?? 0;
+                if (vy < -100) {
+                  // Swipe up: collapse expanded card back to compact pill
+                  if (_isExpanded) {
+                    _collapse();
+                  }
+                } else if (vy > 100) {
+                  // Swipe down: expand compact pill into card
+                  if (!_isExpanded) {
+                    _toggleExpanded();
+                  }
                 }
               },
               child: Material(
@@ -284,14 +256,7 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
           left: (screenWidth - targetWidth) / 2,
           width: targetWidth,
           height: targetHeight,
-          child: IgnorePointer(
-            ignoring: _isTucked,
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 240),
-              opacity: _isTucked ? 0.0 : 1.0,
-              child: capsuleWidget,
-            ),
-          ),
+          child: capsuleWidget,
         ),
       ],
     );
@@ -385,18 +350,26 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
             height: 16,
             color: EuBrutal.accent,
           ),
-          const SizedBox(width: 4),
+          const SizedBox(width: 6),
 
-          // Mini expand toggle button
+          // Mini close / stop button
           GestureDetector(
-            onTap: _toggleExpanded,
+            onTap: () {
+              HapticFeedback.lightImpact();
+              ref.read(playerControllerProvider).stop();
+            },
             behavior: HitTestBehavior.opaque,
-            child: Padding(
-              padding: const EdgeInsets.all(2.0),
+            child: Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white12 : Colors.black12,
+                shape: BoxShape.circle,
+              ),
               child: Icon(
-                Icons.unfold_more_rounded,
-                size: 16,
-                color: isDark ? Colors.white54 : Colors.black45,
+                Icons.close_rounded,
+                size: 14,
+                color: isDark ? Colors.white70 : Colors.black54,
               ),
             ),
           ),
@@ -423,14 +396,15 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
         ? (position.inMilliseconds / total.inMilliseconds).clamp(0.0, 1.0)
         : 0.0;
 
-    return Padding(
+    return ClipRect(
       key: const ValueKey('expanded'),
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+      child: SingleChildScrollView(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
           // Header Row: Status badge + Collapse button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -438,7 +412,7 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
               Flexible(
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
+                    horizontal: 7,
                     vertical: 3,
                   ),
                   decoration: BoxDecoration(
@@ -466,18 +440,18 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                           shape: BoxShape.circle,
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 5),
                       Flexible(
                         child: Text(
                           isPlaying
-                              ? 'DYNAMIC ISLAND · PLAYING'
-                              : 'DYNAMIC ISLAND · PAUSED',
+                              ? 'LIVE ISLAND'
+                              : 'ISLAND · PAUSED',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 9.5,
                             fontWeight: FontWeight.w900,
-                            letterSpacing: 0.6,
+                            letterSpacing: 0.4,
                             color: isPlaying
                                 ? (isDark
                                       ? const Color(0xFF4ADE80)
@@ -536,6 +510,31 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                       child: Icon(
                         Icons.keyboard_arrow_up_rounded,
                         size: 18,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  // Close / Stop button
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () {
+                      HapticFeedback.lightImpact();
+                      _collapse();
+                      ref.read(playerControllerProvider).stop();
+                    },
+                    child: Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white12
+                            : Colors.black.withValues(alpha: 0.06),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.close_rounded,
+                        size: 16,
                         color: isDark ? Colors.white70 : Colors.black87,
                       ),
                     ),
@@ -739,25 +738,23 @@ class _DynamicIslandState extends ConsumerState<DynamicIsland> {
                 },
               ),
               IconButton(
-                icon: const Icon(Icons.open_in_full_rounded),
-                iconSize: 18,
+                icon: const Icon(Icons.close_rounded),
+                iconSize: 20,
                 color: isDark ? Colors.white60 : Colors.black54,
-                tooltip: 'Open Full Player',
+                tooltip: 'Stop & Close',
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   _collapse();
-                  Navigator.of(
-                    context,
-                    rootNavigator: true,
-                  ).push(_buildPlayerRoute());
+                  ref.read(playerControllerProvider).stop();
                 },
               ),
             ],
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   String _formatDuration(Duration d) {
     final minutes = d.inMinutes;

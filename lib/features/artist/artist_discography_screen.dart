@@ -169,6 +169,7 @@ class _ArtistDiscographyScreenState
     final hasPlaylists = _playlists.isNotEmpty;
 
     return Scaffold(
+      extendBody: true,
       appBar: EuphonySubpageAppBar(
         categoryLabel: widget.sectionTitle,
         icon: Icons.library_music_rounded,
@@ -215,10 +216,7 @@ class _ArtistDiscographyScreenState
           }
           return const SafeArea(
             top: false,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 10),
-              child: MiniPlayer(),
-            ),
+            child: MiniPlayer(),
           );
         },
       ),
@@ -230,7 +228,12 @@ class _ArtistDiscographyScreenState
       builder: (context, constraints) {
         final crossAxisCount = (constraints.maxWidth / 175).floor().clamp(2, 6);
         return GridView.builder(
-          padding: const EdgeInsets.all(EuSpace.lg),
+          padding: const EdgeInsets.fromLTRB(
+            EuSpace.lg,
+            EuSpace.lg,
+            EuSpace.lg,
+            EuSpace.lg + 100,
+          ),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             childAspectRatio: 0.72,
@@ -329,7 +332,7 @@ class _ArtistDiscographyScreenState
 
   Widget _buildSongsList(BuildContext context, ThemeData theme) {
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 112),
       itemCount: _songs.length,
       itemBuilder: (context, index) {
         final song = _songs[index];
@@ -381,7 +384,12 @@ class _ArtistDiscographyScreenState
       builder: (context, constraints) {
         final crossAxisCount = (constraints.maxWidth / 175).floor().clamp(2, 6);
         return GridView.builder(
-          padding: const EdgeInsets.all(EuSpace.lg),
+          padding: const EdgeInsets.fromLTRB(
+            EuSpace.lg,
+            EuSpace.lg,
+            EuSpace.lg,
+            EuSpace.lg + 100,
+          ),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             childAspectRatio: 0.75,

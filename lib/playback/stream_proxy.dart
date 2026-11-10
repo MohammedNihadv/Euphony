@@ -136,8 +136,9 @@ class StreamProxy {
     upstream.headers.set(HttpHeaders.rangeHeader, 'bytes=$start-$end');
     upstream.headers.set(
       HttpHeaders.userAgentHeader,
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-      '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      // Use Android YouTube app UA — matches the Innertube ANDROID client we
+      // use to resolve the stream URL, so the same throttling rules apply.
+      'com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip',
     );
     final response = await upstream.close();
 

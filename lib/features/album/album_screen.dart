@@ -126,6 +126,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      extendBody: true,
       appBar: EuphonySubpageAppBar(
         categoryLabel: widget.isPlaylist ? 'Playlist' : 'Album',
         icon: widget.isPlaylist
@@ -677,6 +678,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                               );
                             },
                           ),
+                      const SizedBox(height: 100),
                     ],
                   ),
                 ),
@@ -692,10 +694,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
           }
           return const SafeArea(
             top: false,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 10),
-              child: MiniPlayer(),
-            ),
+            child: MiniPlayer(),
           );
         },
       ),

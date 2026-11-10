@@ -583,6 +583,10 @@ class PlayerController {
   /// Guards against duplicate track-completion events advancing the queue twice.
   bool _advancing = false;
 
+  /// Safety-net timer: fires when position sits near the end of track without
+  /// ExoPlayer emitting ProcessingState.completed (happens with throttled streams).
+  Timer? _endOfTrackTimer;
+
   StreamSubscription<PlayerState>? _stateSub;
   StreamSubscription<Duration>? _positionSub;
   StreamSubscription<Duration?>? _durationSub;
@@ -605,6 +609,7 @@ class PlayerController {
   /// the upcoming one.
   Completer<bool> _startNewLoad() {
     _cancelToken?.complete(true);
+    _cancelEndOfTrackTimer(); // new load → discard any pending safety-net advance
     final token = Completer<bool>();
     _cancelToken = token;
     return token;
@@ -652,12 +657,22 @@ class PlayerController {
     _positionSub = _player.positionStream.listen((position) {
       if (_disposed) return;
       _mediaControls.updatePosition(position);
+
+      // Safety net: ExoPlayer sometimes stalls at the end of a throttled stream
+      // without firing ProcessingState.completed (the HTTP layer gets a final
+      // 206 and closes but the player sits in `ready` with playing==true at max
+      // position). If we see position within 1 s of duration and the player is
+      // still in `ready` state for 2 s, treat it as a natural completion.
       final duration = _player.duration;
       if (duration != null &&
-          duration > const Duration(seconds: 1) &&
-          position >= duration - const Duration(milliseconds: 500) &&
+          duration > const Duration(seconds: 5) &&
+          position >= duration - const Duration(seconds: 1) &&
+          _player.processingState == ProcessingState.ready &&
+          _player.playing &&
           !_advancing) {
-        unawaited(_onTrackCompleted());
+        _scheduleEndOfTrackAdvance();
+      } else {
+        _cancelEndOfTrackTimer();
       }
     });
 
@@ -672,8 +687,30 @@ class PlayerController {
     unawaited(_stateSub?.cancel());
     unawaited(_positionSub?.cancel());
     unawaited(_durationSub?.cancel());
+    _cancelEndOfTrackTimer();
     _mediaControls.dispose();
     _discordRpc.dispose();
+  }
+
+  /// Starts a 2-second countdown after which we treat position-at-end as a
+  /// natural track completion (safety net for ExoPlayer throttled-stream stall).
+  void _scheduleEndOfTrackAdvance() {
+    if (_endOfTrackTimer != null) return; // already armed
+    _endOfTrackTimer = Timer(const Duration(seconds: 2), () {
+      _endOfTrackTimer = null;
+      if (!_disposed &&
+          !_advancing &&
+          _player.processingState == ProcessingState.ready &&
+          _player.playing) {
+        _log.info('safety-net: triggering advance (ExoPlayer stalled at end)');
+        unawaited(_onTrackCompleted());
+      }
+    });
+  }
+
+  void _cancelEndOfTrackTimer() {
+    _endOfTrackTimer?.cancel();
+    _endOfTrackTimer = null;
   }
 
   /// Advances when a track plays out, honouring the repeat mode.
@@ -683,6 +720,7 @@ class PlayerController {
   Future<void> _onTrackCompleted() async {
     if (_advancing) return;
     _advancing = true;
+    _cancelEndOfTrackTimer(); // prevent safety-net re-entry
     try {
       final repeat = _repeatMode();
       if (repeat == LoopMode.one) {
@@ -801,15 +839,6 @@ class PlayerController {
     // the full network round-trip — critical on Samsung where stream resolution
     // can take several seconds and two rapid taps would otherwise overlap.
     final token = _startNewLoad();
-
-    try {
-      // Pause playback cleanly without tearing down the media notification or ExoPlayer audio session.
-      // Do NOT call _player.stop() here: calling stop() destroys the system MediaNotification and
-      // tears down the Android/ColorOS/HyperOS system Live Island!
-      if (_player.playing) {
-        await _player.pause();
-      }
-    } catch (_) {}
 
     if (_disposed || token.isCompleted) return;
 
@@ -1002,9 +1031,12 @@ class PlayerController {
             return null;
           }
           _log.info('resolved via Innertube for ${song.id}');
-          final isDirect =
-              url.contains('itag=18') || url.contains('mime=video');
-          final resolved = ResolvedStream(url, direct: isDirect);
+          // Muxed itag=18 (video+audio 360p) is not throttled — play direct.
+          // Audio-only adaptive streams (opus, m4a) are throttled and need
+          // the loopback StreamProxy to serve them in bounded chunks.
+          final isMuxed = url.contains('itag=18') ||
+              (!url.contains('mime=audio') && url.contains('mime=video'));
+          final resolved = ResolvedStream(url, direct: isMuxed);
           _streams[song.id] = resolved;
           return resolved;
         },
@@ -1040,7 +1072,12 @@ class PlayerController {
         final url = chosen.url.toString();
         if (url.isNotEmpty) {
           _log.info('resolved muxed (itag ${chosen.tag}) for ${song.id}');
-          final resolved = ResolvedStream(url, direct: true);
+          // Muxed itag=18 (video+audio 360p) is not throttled — play direct.
+          // Audio-only adaptive streams (opus, m4a) are throttled and need
+          // the loopback StreamProxy to serve them in bounded chunks.
+          final isMuxed = url.contains('itag=18') ||
+              (!url.contains('mime=audio') && url.contains('mime=video'));
+          final resolved = ResolvedStream(url, direct: isMuxed);
           _streams[song.id] = resolved;
           return resolved;
         }

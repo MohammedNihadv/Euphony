@@ -58,6 +58,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      extendBody: true,
       appBar: EuphonySubpageAppBar(
         categoryLabel: 'Artist',
         icon: Icons.mic_external_on_rounded,
@@ -451,6 +452,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
 
                         const SizedBox(height: EuSpace.xl),
                       ],
+                      const SizedBox(height: 100),
                     ],
                   ),
                 ),
@@ -466,10 +468,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
           }
           return const SafeArea(
             top: false,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16, 0, 16, 10),
-              child: MiniPlayer(),
-            ),
+            child: MiniPlayer(),
           );
         },
       ),

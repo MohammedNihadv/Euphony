@@ -38,6 +38,9 @@ bool get kEnableUpdates {
   if (hasEnv) {
     return const bool.fromEnvironment('ENABLE_UPDATES');
   }
+  // In debug mode or on desktop, enable updates by default.
+  // F-Droid builds explicitly pass --dart-define=ENABLE_UPDATES=false.
+  if (kDebugMode) return true;
   return !kIsWeb &&
       (defaultTargetPlatform == TargetPlatform.windows ||
           defaultTargetPlatform == TargetPlatform.macOS ||
