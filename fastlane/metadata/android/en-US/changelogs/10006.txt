@@ -1,0 +1,4 @@
+- In-App Updates: Direct background APK download and installation with real-time progress and retry support.
+- Synchronized Live Lyrics: Smooth auto-scroll tracking during track playback.
+- UI Refinements: Liquid glass atmosphere, floating player bar clearance, and docked lyrics modal sheet.
+- AMOLED Pure Black: Automatic dark theme switching when toggled.

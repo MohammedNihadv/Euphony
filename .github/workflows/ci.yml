@@ -108,6 +108,8 @@ jobs:
           done
 
       - name: Build Standard Release APKs (Direct / In-App Updates Enabled)
+        env:
+          ENABLE_IN_APP_INSTALL: 'true'
         run: flutter build apk --release --split-per-abi --dart-define=ENABLE_UPDATES=true
 
       - uses: actions/upload-artifact@v7
@@ -287,6 +289,10 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           path: dist
+
+      - name: Inject Release Tag into Download Links
+        run: |
+          sed -i "s|releases/download/v[0-9.]*|releases/download/${{ github.ref_name }}|g" RELEASE_NOTES.md
 
       - uses: softprops/action-gh-release@v3
         with:

@@ -36,26 +36,112 @@ class _UpdateDialog extends StatefulWidget {
 }
 
 class _UpdateDialogState extends State<_UpdateDialog> {
-  bool _opening = false;
+  final _updater = AppUpdater();
+  bool _downloading = false;
+  double _progress = 0;
+  int _receivedBytes = 0;
+  int _totalBytes = 0;
   String? _error;
 
-  Future<void> _openRelease() async {
+  Future<void> _startUpdate() async {
     setState(() {
-      _opening = true;
+      _downloading = true;
       _error = null;
+      _progress = 0;
+      _receivedBytes = 0;
+      _totalBytes = 0;
     });
 
-    final error = await AppUpdater.openReleasePage(widget.info);
+    final url = await AppUpdater.pickApkUrl(widget.info);
+    if (url == null) {
+      final error = await AppUpdater.openReleasePage(widget.info);
+      if (!mounted) return;
+      if (error != null) {
+        setState(() {
+          _downloading = false;
+          _error = error;
+        });
+      } else {
+        Navigator.of(context).pop();
+      }
+      return;
+    }
+
+    final error = await _updater.downloadAndInstall(
+      url,
+      onProgress: (p, received, total) {
+        if (mounted) {
+          setState(() {
+            _progress = p;
+            _receivedBytes = received;
+            _totalBytes = total;
+          });
+        }
+      },
+    );
 
     if (!mounted) return;
     if (error != null) {
       setState(() {
-        _opening = false;
+        _downloading = false;
         _error = error;
       });
     } else {
       Navigator.of(context).pop();
     }
+  }
+
+  Future<void> _openBrowserFallback() async {
+    await AppUpdater.openReleasePage(widget.info);
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  Widget _buildBulletText(String text, bool isDark) {
+    final spans = <InlineSpan>[];
+    final regex = RegExp(r'\*\*(.+?)\*\*');
+    int lastEnd = 0;
+
+    for (final match in regex.allMatches(text)) {
+      if (match.start > lastEnd) {
+        spans.add(TextSpan(
+          text: text.substring(lastEnd, match.start),
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.82)
+                : const Color(0xFF334155),
+          ),
+        ));
+      }
+      spans.add(TextSpan(
+        text: match.group(1),
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
+          color: isDark ? Colors.white : const Color(0xFF0F172A),
+        ),
+      ));
+      lastEnd = match.end;
+    }
+
+    if (lastEnd < text.length) {
+      spans.add(TextSpan(
+        text: text.substring(lastEnd),
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.82)
+              : const Color(0xFF334155),
+        ),
+      ));
+    }
+
+    return Text.rich(
+      TextSpan(children: spans),
+      style: const TextStyle(height: 1.35),
+    );
   }
 
   @override
@@ -305,17 +391,7 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                               ),
                             ),
                             Expanded(
-                              child: Text(
-                                bullet,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.35,
-                                  color: isDark
-                                      ? Colors.white.withValues(alpha: 0.82)
-                                      : const Color(0xFF334155),
-                                ),
-                              ),
+                              child: _buildBulletText(bullet, isDark),
                             ),
                           ],
                         ),
@@ -376,6 +452,46 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                 ),
               ],
 
+              if (_downloading) ...[
+                const SizedBox(height: 16),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: _progress > 0 ? _progress : null,
+                    minHeight: 8,
+                    backgroundColor: isDark
+                        ? Colors.white.withValues(alpha: 0.08)
+                        : Colors.black.withValues(alpha: 0.06),
+                    valueColor: const AlwaysStoppedAnimation(EuBrutal.accent),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _progress > 0
+                          ? 'Downloading... ${(_progress * 100).toInt()}%'
+                          : 'Starting download...',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? Colors.white70 : const Color(0xFF475569),
+                      ),
+                    ),
+                    if (_totalBytes > 0)
+                      Text(
+                        '${(_receivedBytes / (1024 * 1024)).toStringAsFixed(1)} / ${(_totalBytes / (1024 * 1024)).toStringAsFixed(1)} MB',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white54 : Colors.black45,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+
               const SizedBox(height: 20),
 
               // Action Buttons
@@ -384,7 +500,7 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                   Expanded(
                     flex: 2,
                     child: OutlinedButton(
-                      onPressed: _opening ? null : () => Navigator.pop(context),
+                      onPressed: _downloading ? null : () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 13),
                         side: BorderSide(
@@ -398,7 +514,7 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                         ),
                       ),
                       child: Text(
-                        'Later',
+                        _error != null ? 'Cancel' : 'Later',
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 13,
@@ -409,15 +525,29 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                       ),
                     ),
                   ),
+                  if (_error != null) ...[
+                    const SizedBox(width: 8),
+                    IconButton(
+                      tooltip: 'Download in browser',
+                      onPressed: _openBrowserFallback,
+                      icon: const Icon(Icons.open_in_browser_rounded),
+                      style: IconButton.styleFrom(
+                        padding: const EdgeInsets.all(12),
+                        backgroundColor: isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : Colors.black.withValues(alpha: 0.06),
+                      ),
+                    ),
+                  ],
                   const SizedBox(width: 10),
                   Expanded(
                     flex: 3,
                     child: ElevatedButton.icon(
-                      onPressed: _opening
+                      onPressed: _downloading
                           ? null
                           : () async {
                               await HapticFeedback.mediumImpact();
-                              await _openRelease();
+                              await _startUpdate();
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: EuBrutal.accent,
@@ -429,7 +559,7 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                         elevation: 0,
                         shadowColor: Colors.transparent,
                       ),
-                      icon: _opening
+                      icon: _downloading
                           ? const SizedBox(
                               width: 16,
                               height: 16,
@@ -438,9 +568,16 @@ class _UpdateDialogState extends State<_UpdateDialog> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Icon(Icons.open_in_browser_rounded, size: 18),
+                          : Icon(
+                              _error != null
+                                  ? Icons.refresh_rounded
+                                  : Icons.download_rounded,
+                              size: 18,
+                            ),
                       label: Text(
-                        _error != null ? 'Retry' : 'Get Update',
+                        _downloading
+                            ? 'Downloading...'
+                            : (_error != null ? 'Retry' : 'Get Update'),
                         style: const TextStyle(
                           fontWeight: FontWeight.w900,
                           fontSize: 13.5,

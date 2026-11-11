@@ -1,5 +1,6 @@
 import com.android.build.gradle.internal.api.ApkVariantOutputImpl
 import java.io.FileInputStream
+import java.util.Base64
 import java.util.Properties
 
 plugins {
@@ -32,6 +33,20 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    val dartDefines = project.findProperty("dart-defines") as? String
+    val dartDefinesDecoded = if (dartDefines != null) {
+        try {
+            String(Base64.getDecoder().decode(dartDefines))
+        } catch (_: Exception) { "" }
+    } else { "" }
+
+    val isFdroidExplicit = dartDefinesDecoded.contains("ENABLE_UPDATES=false")
+    val enableInAppInstall = !isFdroidExplicit && (
+        System.getenv("ENABLE_IN_APP_INSTALL") == "true" ||
+        dartDefinesDecoded.contains("ENABLE_UPDATES=true") ||
+        gradle.startParameter.taskNames.any { it.contains("Debug", ignoreCase = true) }
+    )
+
     defaultConfig {
         applicationId = "com.mhdni.euphony"
         // Flutter's floor (24) already clears what the media-session and
@@ -40,6 +55,12 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        manifestPlaceholders["installPackagesPermission"] = if (enableInAppInstall) {
+            "android.permission.REQUEST_INSTALL_PACKAGES"
+        } else {
+            "com.mhdni.euphony.permission.NOOP"
+        }
     }
 
     dependenciesInfo {
