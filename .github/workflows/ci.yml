@@ -210,7 +210,7 @@ jobs:
         with:
           name: euphony-linux
           path: |
-            *.AppImage
+            euphony-linux-x86_64.AppImage
             dist/*.deb
           if-no-files-found: error
 
@@ -291,10 +291,10 @@ jobs:
       - uses: softprops/action-gh-release@v3
         with:
           files: |
-            dist/euphony-release-apks/*.apk
+            dist/euphony-release-apks/**/*.apk
             dist/euphony-windows/*.exe
-            dist/euphony-linux/*.AppImage
-            dist/euphony-linux/*.deb
+            dist/euphony-linux/euphony-linux-*.AppImage
+            dist/euphony-linux/**/*.deb
             dist/euphony-macos/*.dmg
             dist/euphony-ios/*.ipa
           # Human-written, community-friendly notes live in RELEASE_NOTES.md so
