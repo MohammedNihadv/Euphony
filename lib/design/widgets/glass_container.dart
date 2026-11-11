@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// A premium glassmorphism container.
 ///
 /// Wraps its [child] with a [BackdropFilter] blur effect and a semi-transparent
-/// fill, producing the frosted-glass look. Automatically falls back to an
+/// fill, producing the liquid-glass look. Automatically falls back to an
 /// opaque container when [BackdropFilter] is not supported (very old devices).
 ///
 /// Usage:

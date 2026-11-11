@@ -13,7 +13,7 @@ import 'player_screen.dart';
 /// Mini player — **Neo-Brutalist shell, glass interior**.
 ///
 /// Outer shell keeps the hard offset shadow and the bold 2px border that define
-/// the brutalist language. Inside that slab, BackdropFilter frosted-glass fills
+/// the brutalist language. Inside that slab, BackdropFilter liquid-glass fills
 /// the surface instead of a flat color — a glass panel behind brutalist bars.
 class MiniPlayer extends ConsumerWidget {
   const MiniPlayer({super.key});

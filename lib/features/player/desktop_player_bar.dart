@@ -20,7 +20,7 @@ final _log = logFor('desktop_player_bar');
 
 /// A full-featured desktop player bar that spans the bottom of the window.
 ///
-/// Designed with Neo-Brutalism + Frosted Glass aesthetics:
+/// Designed with Neo-Brutalism + Liquid Glass aesthetics:
 /// - Left: Track artwork with hover zoom, title, artist, and reactive Like heart.
 /// - Center: Full transport controls (Shuffle, Prev, Play/Pause, Next, Repeat)
 ///   plus an interactive scrubbable timeline with numeric timestamps.

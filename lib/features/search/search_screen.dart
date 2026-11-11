@@ -273,7 +273,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Compact Frosted Glass Search Bar (~44px)
+                        // Compact Liquid Glass Search Bar (~44px)
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),

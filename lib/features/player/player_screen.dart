@@ -476,7 +476,7 @@ class _Artwork extends ConsumerWidget {
     final url = song.artwork?.max ?? song.artworkUrl;
 
     // The "liquid pool" extends slightly beyond the actual artwork to create
-    // a floating card illusion — frosted glass base with specular edges.
+    // a floating card illusion — liquid glass base with specular edges.
     final poolSize = artSize + 24;
 
     return Center(
@@ -496,7 +496,7 @@ class _Artwork extends ConsumerWidget {
                 color: EuBrutal.accent,
               ),
 
-              // ── Frosted glass pool / liquid surface ───────────────────
+              // ── Liquid glass pool / reflective surface ───────────────────
               ClipRRect(
                 borderRadius: BorderRadius.circular(40),
                 child: BackdropFilter(
@@ -1431,7 +1431,7 @@ class _GlassBottomActionBar extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
-              // Translucent frosted glass
+              // Translucent liquid glass
               color: isDark
                   ? const Color(0x80141422)
                   : Colors.white.withValues(alpha: 0.72),

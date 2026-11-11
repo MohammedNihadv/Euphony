@@ -10,7 +10,7 @@ import '../../playback/player_provider.dart';
 import 'lyrics_service.dart';
 import 'romanizer.dart';
 
-/// Shows a Frosted Neo-Glassmorphic synchronized lyrics modal sheet or desktop dialog for the given [song].
+/// Shows a Liquid Glass synchronized lyrics modal sheet or desktop dialog for the given [song].
 void showLyricsSheet(BuildContext context, Song song) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final isDesktop = MediaQuery.sizeOf(context).width >= 700;
