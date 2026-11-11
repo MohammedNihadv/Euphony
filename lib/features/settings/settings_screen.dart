@@ -33,12 +33,14 @@ class SettingsScreen extends ConsumerWidget {
     final isDark = themeData.brightness == Brightness.dark;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: false,
         toolbarHeight: 64,
         titleSpacing: 20,
-        backgroundColor: themeData.colorScheme.surface,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
         title: const EuphonyPageCapsule(
@@ -47,11 +49,17 @@ class SettingsScreen extends ConsumerWidget {
         ),
       ),
       body: SafeArea(
+        top: false,
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 1000),
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, EuSpace.sm, 20, 140),
+              padding: EdgeInsets.fromLTRB(
+                20,
+                MediaQuery.of(context).padding.top + 64 + EuSpace.sm,
+                20,
+                200,
+              ),
               children: [
                 // ---------------- 1. Hero Banner ----------------
                 _SettingsHeroBanner(

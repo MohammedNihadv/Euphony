@@ -40,9 +40,11 @@ class SettingsRepository {
   Future<void> setAmoled({required bool value}) =>
       _prefs.setBool(_kAmoled, value);
 
-  ColourSource get colourSource =>
-      ColourSource.values.asNameMap()[_prefs.getString(_kColourSource)] ??
-      ColourSource.artwork;
+  ColourSource get colourSource {
+    final raw = _prefs.getString(_kColourSource);
+    if (raw == null || raw == 'artwork') return ColourSource.fixed;
+    return ColourSource.values.asNameMap()[raw] ?? ColourSource.fixed;
+  }
 
   Future<void> setColourSource(ColourSource value) =>
       _prefs.setString(_kColourSource, value.name);

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -100,7 +102,7 @@ class EuphonyBrandBadge extends StatelessWidget {
   }
 }
 
-/// A sleek, neo-glassmorphic capsule badge used across all main page AppBars
+/// A sleek, floating Liquid Glass capsule badge used across all page AppBars
 /// (e.g. "Euphony | Home", "Euphony | Explore", "Euphony | Library", "Euphony | Settings").
 class EuphonyPageCapsule extends StatelessWidget {
   const EuphonyPageCapsule({
@@ -118,50 +120,208 @@ class EuphonyPageCapsule extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: isDark
-            ? Colors.white.withValues(alpha: 0.07)
-            : Colors.black.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.14)
-              : Colors.black.withValues(alpha: 0.08),
-          width: 1,
-        ),
+        borderRadius: BorderRadius.circular(22),
         boxShadow: [
+          // Expansive floating drop shadow
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.10),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+            offset: const Offset(0, 6),
+            blurRadius: 18,
+            spreadRadius: -2,
+          ),
+          // Tight caustic contact shadow
+          BoxShadow(
+            color: (isDark ? Colors.black : const Color(0xFF0F172A)).withValues(
+              alpha: isDark ? 0.20 : 0.04,
+            ),
             offset: const Offset(0, 2),
+            blurRadius: 6,
+            spreadRadius: -1,
+          ),
+          // Upper specular crest light for liquid curvature
+          BoxShadow(
+            color: Colors.white.withValues(alpha: isDark ? 0.10 : 0.85),
+            offset: const Offset(0, 1.2),
+            blurRadius: 1,
+            spreadRadius: 0,
           ),
         ],
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const EuphonyBrandBadge(fontSize: 15),
-          Container(
-            width: 1.2,
-            height: 12,
-            margin: const EdgeInsets.symmetric(horizontal: 8),
-            color: isDark ? Colors.white24 : Colors.black12,
-          ),
-          Icon(icon, size: 14, color: EuBrutal.accent),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
-              letterSpacing: 0.4,
-              color: isDark ? Colors.white70 : Colors.black87,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(22),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              // Liquid Glass gradient: glossy surface reflection + crystal water core + bottom meniscus
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.0, 0.22, 0.78, 1.0],
+                colors: isDark
+                    ? [
+                        Colors.white.withValues(alpha: 0.20),
+                        const Color(0xFF1C1C2C).withValues(alpha: 0.32),
+                        const Color(0xFF101018).withValues(alpha: 0.22),
+                        const Color(0xFF28283E).withValues(alpha: 0.28),
+                      ]
+                    : [
+                        Colors.white.withValues(alpha: 0.50),
+                        Colors.white.withValues(alpha: 0.16),
+                        const Color(0xFFE2E8F0).withValues(alpha: 0.08),
+                        Colors.white.withValues(alpha: 0.25),
+                      ],
+              ),
+              borderRadius: BorderRadius.circular(22),
+              // Luminous liquid glass rim border
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.28)
+                    : Colors.white.withValues(alpha: 0.85),
+                width: 1.2,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const EuphonyBrandBadge(fontSize: 15),
+                Container(
+                  width: 1.2,
+                  height: 12,
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
+                  color: isDark ? Colors.white24 : Colors.black12,
+                ),
+                Icon(icon, size: 14, color: EuBrutal.accent),
+                const SizedBox(width: 5),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    letterSpacing: 0.4,
+                    color: isDark ? Colors.white70 : Colors.black87,
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
+  }
+}
+
+/// A floating Liquid Glass circular button for AppBar actions & back buttons.
+class EuphonyGlassIconButton extends StatelessWidget {
+  const EuphonyGlassIconButton({
+    super.key,
+    required this.icon,
+    required this.onPressed,
+    this.tooltip,
+    this.size = 40,
+    this.iconSize = 20,
+    this.iconColor,
+  });
+
+  final IconData icon;
+  final VoidCallback onPressed;
+  final String? tooltip;
+  final double size;
+  final double iconSize;
+  final Color? iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    Widget button = Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(size / 2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+            offset: const Offset(0, 6),
+            blurRadius: 18,
+            spreadRadius: -2,
+          ),
+          BoxShadow(
+            color: (isDark ? Colors.black : const Color(0xFF0F172A)).withValues(
+              alpha: isDark ? 0.20 : 0.04,
+            ),
+            offset: const Offset(0, 2),
+            blurRadius: 6,
+            spreadRadius: -1,
+          ),
+          BoxShadow(
+            color: Colors.white.withValues(alpha: isDark ? 0.10 : 0.85),
+            offset: const Offset(0, 1.2),
+            blurRadius: 1,
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(size / 2),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0.0, 0.22, 0.78, 1.0],
+                colors: isDark
+                    ? [
+                        Colors.white.withValues(alpha: 0.20),
+                        const Color(0xFF1C1C2C).withValues(alpha: 0.32),
+                        const Color(0xFF101018).withValues(alpha: 0.22),
+                        const Color(0xFF28283E).withValues(alpha: 0.28),
+                      ]
+                    : [
+                        Colors.white.withValues(alpha: 0.50),
+                        Colors.white.withValues(alpha: 0.16),
+                        const Color(0xFFE2E8F0).withValues(alpha: 0.08),
+                        Colors.white.withValues(alpha: 0.25),
+                      ],
+              ),
+              borderRadius: BorderRadius.circular(size / 2),
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.28)
+                    : Colors.white.withValues(alpha: 0.85),
+                width: 1.2,
+              ),
+            ),
+            child: Material(
+              type: MaterialType.transparency,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(size / 2),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  onPressed();
+                },
+                child: Center(
+                  child: Icon(
+                    icon,
+                    size: iconSize,
+                    color: iconColor ?? (isDark ? Colors.white : Colors.black87),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    if (tooltip != null) {
+      button = Tooltip(message: tooltip!, child: button);
+    }
+    return button;
   }
 }
 
@@ -209,36 +369,13 @@ class EuphonySubpageAppBar extends StatelessWidget implements PreferredSizeWidge
       surfaceTintColor: Colors.transparent,
       centerTitle: false,
       titleSpacing: 8,
-      leadingWidth: 54,
+      leadingWidth: 56,
       leading: Padding(
         padding: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
-        child: Container(
-          decoration: BoxDecoration(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.08)
-                : Colors.black.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.12)
-                  : Colors.black.withValues(alpha: 0.08),
-              width: 1.0,
-            ),
-          ),
-          child: Material(
-            type: MaterialType.transparency,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: handleBack,
-              child: Center(
-                child: Icon(
-                  Icons.arrow_back_ios_new_rounded,
-                  size: 15,
-                  color: isDark ? Colors.white : Colors.black87,
-                ),
-              ),
-            ),
-          ),
+        child: EuphonyGlassIconButton(
+          icon: Icons.arrow_back_ios_new_rounded,
+          iconSize: 15,
+          onPressed: handleBack,
         ),
       ),
       title: Row(
@@ -249,15 +386,64 @@ class EuphonySubpageAppBar extends StatelessWidget implements PreferredSizeWidge
             icon: icon,
           ),
           if (title != null && title!.isNotEmpty) ...[
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             Flexible(
-              child: Text(
-                title!,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: isDark ? Colors.white70 : Colors.black87,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
+                      offset: const Offset(0, 4),
+                      blurRadius: 12,
+                      spreadRadius: -2,
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          stops: const [0.0, 0.22, 0.78, 1.0],
+                          colors: isDark
+                              ? [
+                                  Colors.white.withValues(alpha: 0.18),
+                                  const Color(0xFF1C1C2C).withValues(alpha: 0.28),
+                                  const Color(0xFF101018).withValues(alpha: 0.18),
+                                  const Color(0xFF28283E).withValues(alpha: 0.24),
+                                ]
+                              : [
+                                  Colors.white.withValues(alpha: 0.45),
+                                  Colors.white.withValues(alpha: 0.14),
+                                  const Color(0xFFE2E8F0).withValues(alpha: 0.07),
+                                  Colors.white.withValues(alpha: 0.22),
+                                ],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.22)
+                              : Colors.white.withValues(alpha: 0.80),
+                          width: 1.0,
+                        ),
+                      ),
+                      child: Text(
+                        title!,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),

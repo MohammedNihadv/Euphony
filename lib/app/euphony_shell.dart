@@ -403,18 +403,27 @@ class _GlassBrutalNavBar extends ConsumerWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(34),
                 boxShadow: [
-                  // Soft, expansive ambient drop shadow
+                  // Expansive floating drop shadow
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.38 : 0.10),
-                    offset: const Offset(0, 8),
-                    blurRadius: 30,
+                    color: Colors.black.withValues(alpha: isDark ? 0.40 : 0.10),
+                    offset: const Offset(0, 10),
+                    blurRadius: 28,
                     spreadRadius: -2,
                   ),
-                  // Top specular rim highlight for glass bevel
+                  // Caustic tight contact shadow
                   BoxShadow(
-                    color: Colors.white.withValues(alpha: isDark ? 0.07 : 0.70),
-                    offset: const Offset(0, 1),
-                    blurRadius: 0,
+                    color: (isDark ? Colors.black : const Color(0xFF0F172A)).withValues(
+                      alpha: isDark ? 0.25 : 0.05,
+                    ),
+                    offset: const Offset(0, 4),
+                    blurRadius: 8,
+                    spreadRadius: -1,
+                  ),
+                  // Upper specular crest light for liquid curvature
+                  BoxShadow(
+                    color: Colors.white.withValues(alpha: isDark ? 0.10 : 0.85),
+                    offset: const Offset(0, 1.5),
+                    blurRadius: 1,
                     spreadRadius: 0,
                   ),
                 ],
@@ -422,30 +431,35 @@ class _GlassBrutalNavBar extends ConsumerWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(34),
                 child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 28, sigmaY: 28),
+                  filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
                   child: Container(
                     decoration: BoxDecoration(
-                      // True iPhone frosted liquid glass translucency
+                      // Liquid Glass gradient: glossy surface reflection + crystal water core + bottom meniscus
                       gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: const [0.0, 0.22, 0.78, 1.0],
                         colors: isDark
                             ? [
-                                const Color(0xFF242436).withValues(alpha: 0.65),
-                                const Color(0xFF13131E).withValues(alpha: 0.52),
+                                Colors.white.withValues(alpha: 0.20),
+                                const Color(0xFF1C1C2C).withValues(alpha: 0.32),
+                                const Color(0xFF101018).withValues(alpha: 0.22),
+                                const Color(0xFF28283E).withValues(alpha: 0.28),
                               ]
                             : [
-                                Colors.white.withValues(alpha: 0.72),
-                                const Color(0xFFEDF2F7).withValues(alpha: 0.55),
+                                Colors.white.withValues(alpha: 0.50),
+                                Colors.white.withValues(alpha: 0.16),
+                                const Color(0xFFE2E8F0).withValues(alpha: 0.08),
+                                Colors.white.withValues(alpha: 0.25),
                               ],
                       ),
                       borderRadius: BorderRadius.circular(34),
-                      // Ultra-refined specular rim border
+                      // Luminous liquid glass rim border
                       border: Border.all(
                         color: isDark
-                            ? Colors.white.withValues(alpha: 0.18)
+                            ? Colors.white.withValues(alpha: 0.28)
                             : Colors.white.withValues(alpha: 0.85),
-                        width: 1.0,
+                        width: 1.2,
                       ),
                     ),
                     padding: const EdgeInsets.symmetric(
@@ -528,13 +542,17 @@ class _GlassBrutalNavBar extends ConsumerWidget {
             ),
             if (isSelected) ...[
               const SizedBox(width: 5),
-              Text(
-                dest.label,
-                style: const TextStyle(
-                  color: EuBrutal.onAccent,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 12,
-                  letterSpacing: -0.3,
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 68),
+                child: Text(
+                  dest.label,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: EuBrutal.onAccent,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 12,
+                    letterSpacing: -0.3,
+                  ),
                 ),
               ),
             ],

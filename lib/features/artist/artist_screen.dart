@@ -59,6 +59,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
 
     return Scaffold(
       extendBody: true,
+      extendBodyBehindAppBar: true,
       appBar: EuphonySubpageAppBar(
         categoryLabel: 'Artist',
         icon: Icons.mic_external_on_rounded,
@@ -452,7 +453,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
 
                         const SizedBox(height: EuSpace.xl),
                       ],
-                      const SizedBox(height: 100),
+                      const SizedBox(height: 190),
                     ],
                   ),
                 ),

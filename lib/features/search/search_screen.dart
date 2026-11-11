@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 import '../../core/failure.dart';
 import '../../data/providers.dart';
 import '../../data/remote/innertube/innertube_utils.dart';
-import '../../data/repository/settings_repository.dart';
 import '../../design/theme/theme_controller.dart';
 import '../../design/tokens/brutal.dart';
 import '../../design/tokens/tokens.dart';
@@ -23,6 +22,7 @@ import '../../domain/song.dart';
 import '../../playback/player_provider.dart';
 import '../common/song_options_sheet.dart';
 import '../settings/log_exporter.dart';
+import '../settings/settings_provider.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
   const SearchScreen({super.key, this.initialQuery});
@@ -229,12 +229,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: false,
         toolbarHeight: 64,
         titleSpacing: 20,
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
         title: const EuphonyPageCapsule(
@@ -242,10 +244,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           icon: Icons.search_rounded,
         ),
         actions: [
-          IconButton(
-            tooltip: 'Settings',
-            icon: const Icon(Icons.tune_rounded, size: 20),
-            onPressed: () => _showSettingsSheet(context),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: EuphonyGlassIconButton(
+              tooltip: 'Settings',
+              icon: Icons.tune_rounded,
+              iconSize: 20,
+              onPressed: () => _showSettingsSheet(context),
+            ),
           ),
         ],
       ),
@@ -257,9 +263,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             child: CustomScrollView(
               slivers: [
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(
+                  padding: EdgeInsets.fromLTRB(
                     EuSpace.screenGutter,
-                    EuSpace.xs,
+                    MediaQuery.of(context).padding.top + 64 + EuSpace.sm,
                     EuSpace.screenGutter,
                     EuSpace.lg,
                   ),
@@ -421,7 +427,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       EuSpace.screenGutter,
                       0,
                       EuSpace.screenGutter,
-                      EuSpace.xxxl,
+                      80.0,
                     ),
                     sliver: SliverToBoxAdapter(
                       child: _SearchLanding(
@@ -1028,7 +1034,7 @@ class _ResultSlivers extends StatelessWidget {
         EuSpace.screenGutter,
         0,
         EuSpace.screenGutter,
-        EuSpace.xxxl,
+        80.0,
       ),
       sliver: SliverList.list(children: children),
     );
@@ -1594,184 +1600,519 @@ class _SettingsSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = ref.watch(themeControllerProvider);
-    final controller = ref.read(themeControllerProvider.notifier);
+    final themeController = ref.read(themeControllerProvider.notifier);
+    final settings = ref.watch(settingsControllerProvider);
+    final settingsController = ref.read(settingsControllerProvider.notifier);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final surfaceColor = isDark ? const Color(0xFF13131E) : const Color(0xFFF8FAFD);
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark
+                ? const Color(0xFF13131E).withValues(alpha: 0.96)
+                : Colors.white.withValues(alpha: 0.96),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+            border: Border(
+              top: BorderSide(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.16)
+                    : Colors.black.withValues(alpha: 0.08),
+                width: 1.2,
+              ),
+            ),
+          ),
+          child: SafeArea(
+            top: false,
+            child: ListView(
+              shrinkWrap: true,
+              physics: const ClampingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(
+                EuSpace.screenGutter,
+                8,
+                EuSpace.screenGutter,
+                EuSpace.xl,
+              ),
+              children: [
+                // Top drag handle pill
+                Center(
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 4, bottom: 14),
+                    width: 38,
+                    height: 4.5,
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.22)
+                          : Colors.black.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                ),
 
-    return Material(
-      color: surfaceColor,
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-      clipBehavior: Clip.antiAlias,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.16)
-                  : Colors.white.withValues(alpha: 0.90),
-              width: 1.2,
+                // Sheet Header: Avatar + Title + Close Button
+                Padding(
+                  padding: const EdgeInsets.only(bottom: EuSpace.md),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: EuBrutal.accent.withValues(alpha: 0.14),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.tune_rounded,
+                          color: EuBrutal.accent,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Quick Settings',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 17,
+                                letterSpacing: -0.3,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 1),
+                            Text(
+                              'Theme & interface shortcuts',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: isDark ? Colors.white54 : Colors.black45,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          Icons.close_rounded,
+                          size: 20,
+                          color: isDark ? Colors.white60 : Colors.black54,
+                        ),
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // ── 1. Appearance & Theme Bento Card ──
+                _QuickSettingsCard(
+                  isDark: isDark,
+                  children: [
+                    Text(
+                      'THEME MODE',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 11.5,
+                        letterSpacing: 0.8,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
+                        _QuickThemeButton(
+                          title: 'System',
+                          icon: Icons.brightness_auto_rounded,
+                          isSelected: theme.mode == ThemeMode.system,
+                          onTap: () => themeController.setMode(ThemeMode.system),
+                        ),
+                        const SizedBox(width: 8),
+                        _QuickThemeButton(
+                          title: 'Light',
+                          icon: Icons.light_mode_rounded,
+                          isSelected: theme.mode == ThemeMode.light,
+                          onTap: () => themeController.setMode(ThemeMode.light),
+                        ),
+                        const SizedBox(width: 8),
+                        _QuickThemeButton(
+                          title: 'Dark',
+                          icon: Icons.dark_mode_rounded,
+                          isSelected: theme.mode == ThemeMode.dark,
+                          onTap: () => themeController.setMode(ThemeMode.dark),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Divider(
+                      height: 1,
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : Colors.black.withValues(alpha: 0.06),
+                    ),
+                    const SizedBox(height: 6),
+
+                    // AMOLED Pure Black
+                    _QuickSwitchRow(
+                      icon: Icons.dark_mode_rounded,
+                      iconColor: Colors.amber,
+                      title: 'AMOLED Pure Black',
+                      subtitle: 'True pitch-black theme for OLED screens',
+                      value: theme.amoled,
+                      onChanged: (val) => themeController.setAmoled(value: val),
+                    ),
+                    const SizedBox(height: 6),
+                    Divider(
+                      height: 1,
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : Colors.black.withValues(alpha: 0.06),
+                    ),
+                    const SizedBox(height: 6),
+
+                    // Dynamic Island Toggle
+                    _QuickSwitchRow(
+                      icon: Icons.motion_photos_on_rounded,
+                      iconColor: EuBrutal.accent,
+                      title: 'Dynamic Island',
+                      subtitle: 'In-app capsule replaces mini-player',
+                      value: settings.dynamicIsland,
+                      onChanged: (val) =>
+                          settingsController.setDynamicIsland(val),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+
+                // ── 2. Diagnostic & Navigation Card ──
+                _QuickSettingsCard(
+                  isDark: isDark,
+                  children: [
+                    _QuickActionTile(
+                      icon: Icons.bug_report_outlined,
+                      iconColor: const Color(0xFFF97316),
+                      title: 'Export Diagnostic Logs',
+                      subtitle: 'Save error log bundle to report issues',
+                      trailing: Icon(
+                        Icons.download_rounded,
+                        size: 20,
+                        color: isDark ? Colors.white70 : Colors.black54,
+                      ),
+                      onTap: () async {
+                        Navigator.of(context).pop();
+                        final success = await LogExporter.exportLogs();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                success
+                                    ? 'Logs saved successfully! Share with developers.'
+                                    : 'Log export failed or cancelled.',
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                    Divider(
+                      height: 1,
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : Colors.black.withValues(alpha: 0.06),
+                    ),
+                    _QuickActionTile(
+                      icon: Icons.tune_rounded,
+                      iconColor: EuBrutal.accent,
+                      title: 'All Settings & Audio Engine',
+                      subtitle: 'Audio quality, region, crossfade & cache',
+                      trailing: Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
+                        color: isDark ? Colors.white54 : Colors.black38,
+                      ),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        context.push('/settings');
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
-        child: SafeArea(
-          child: ListView(
-            shrinkWrap: true,
-            padding: const EdgeInsets.fromLTRB(
-              EuSpace.screenGutter,
-              EuSpace.sm,
-              EuSpace.screenGutter,
-              EuSpace.xl,
+      ),
+    );
+  }
+}
+
+class _QuickSettingsCard extends StatelessWidget {
+  const _QuickSettingsCard({
+    required this.isDark,
+    required this.children,
+  });
+
+  final bool isDark;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1B1B29) : const Color(0xFFF5F7FA),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.06),
+          width: 1.0,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: children,
+      ),
+    );
+  }
+}
+
+class _QuickThemeButton extends StatelessWidget {
+  const _QuickThemeButton({
+    required this.title,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String title;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? EuBrutal.accent
+                : (isDark
+                    ? Colors.white.withValues(alpha: 0.06)
+                    : Colors.white),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? EuBrutal.accent
+                  : (isDark
+                      ? Colors.white.withValues(alpha: 0.10)
+                      : Colors.black.withValues(alpha: 0.08)),
+              width: 1.2,
             ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: EuBrutal.accent.withValues(alpha: 0.35),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Center(
-                child: Container(
-                  margin: const EdgeInsets.only(top: 4, bottom: 12),
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.25)
-                        : Colors.black.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
+              Icon(
+                icon,
+                size: 20,
+                color: isSelected
+                    ? EuBrutal.onAccent
+                    : (isDark ? Colors.white70 : Colors.black87),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: EuSpace.md),
-                child: Text(
-                  'QUICK SETTINGS',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
-                    fontSize: 16,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                ),
-              ),
-              SegmentedButton<ThemeMode>(
-                segments: const [
-                  ButtonSegment(
-                    value: ThemeMode.system,
-                    icon: Icon(Icons.brightness_auto),
-                    label: Text('System'),
-                  ),
-                  ButtonSegment(
-                    value: ThemeMode.light,
-                    icon: Icon(Icons.light_mode),
-                    label: Text('Light'),
-                  ),
-                  ButtonSegment(
-                    value: ThemeMode.dark,
-                    icon: Icon(Icons.dark_mode),
-                    label: Text('Dark'),
-                  ),
-                ],
-                selected: {theme.mode},
-                onSelectionChanged: (selection) =>
-                    controller.setMode(selection.first),
-              ),
-              Material(
-                type: MaterialType.transparency,
-                child: SwitchListTile(
-                  title: Text(
-                    'AMOLED dark',
-                    style: TextStyle(
-                      color: isDark ? Colors.white : Colors.black87,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  value: theme.amoled,
-                  onChanged: (value) => controller.setAmoled(value: value),
-                ),
-              ),
-              Material(
-                type: MaterialType.transparency,
-                child: SwitchListTile(
-                  title: Text(
-                    'Colour from artwork',
-                    style: TextStyle(
-                      color: isDark ? Colors.white : Colors.black87,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  value: theme.source == ColourSource.artwork,
-                  onChanged: (value) => controller.setColourSource(
-                    value ? ColourSource.artwork : ColourSource.fixed,
-                  ),
-                ),
-              ),
-              Divider(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : Colors.black.withValues(alpha: 0.06),
-                height: 16,
-              ),
-              Material(
-                type: MaterialType.transparency,
-                child: ListTile(
-                  leading: Icon(
-                    Icons.bug_report_outlined,
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
-                  title: Text(
-                    'Export Error Logs',
-                    style: TextStyle(
-                      color: isDark ? Colors.white : Colors.black87,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  subtitle: Text(
-                    'Download log file to report issues',
-                    style: TextStyle(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.6)
-                          : Colors.black54,
-                    ),
-                  ),
-                  onTap: () async {
-                    Navigator.of(context).pop();
-                    final success = await LogExporter.exportLogs();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            success
-                                ? 'Logs saved successfully! Share with developers.'
-                                : 'Log export failed or cancelled.',
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ),
-              Material(
-                type: MaterialType.transparency,
-                child: ListTile(
-                  leading: const Icon(
-                    Icons.settings_outlined,
-                    color: EuBrutal.accent,
-                  ),
-                  title: Text(
-                    'All Settings',
-                    style: TextStyle(
-                      color: isDark ? Colors.white : Colors.black87,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  trailing: Icon(
-                    Icons.chevron_right,
-                    color: isDark ? Colors.white54 : Colors.black38,
-                  ),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    context.push('/settings');
-                  },
+              const SizedBox(height: 4),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w900 : FontWeight.w700,
+                  color: isSelected
+                      ? EuBrutal.onAccent
+                      : (isDark ? Colors.white70 : Colors.black87),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickSwitchRow extends StatelessWidget {
+  const _QuickSwitchRow({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.14),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: iconColor, size: 17),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 13,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: isDark ? Colors.white54 : Colors.black54,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: value,
+            activeTrackColor: EuBrutal.accent,
+            activeThumbColor: Colors.white,
+            onChanged: (val) {
+              HapticFeedback.lightImpact();
+              onChanged(val);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickActionTile extends StatelessWidget {
+  const _QuickActionTile({
+    required this.icon,
+    required this.iconColor,
+    required this.title,
+    required this.subtitle,
+    required this.trailing,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color iconColor;
+  final String title;
+  final String subtitle;
+  final Widget trailing;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return InkWell(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onTap();
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 2),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.14),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 17),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? Colors.white54 : Colors.black54,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            trailing,
+          ],
         ),
       ),
     );

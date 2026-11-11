@@ -127,6 +127,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
 
     return Scaffold(
       extendBody: true,
+      extendBodyBehindAppBar: true,
       appBar: EuphonySubpageAppBar(
         categoryLabel: widget.isPlaylist ? 'Playlist' : 'Album',
         icon: widget.isPlaylist
@@ -146,89 +147,66 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                             .watchIsSaved(widget.id),
                   builder: (context, snapshot) {
                     final isSaved = snapshot.data ?? false;
-                    return Container(
-                      width: 38,
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.08)
-                            : Colors.black.withValues(alpha: 0.06),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.12)
-                              : Colors.black.withValues(alpha: 0.08),
-                          width: 1.0,
-                        ),
-                      ),
-                      child: Material(
-                        type: MaterialType.transparency,
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          icon: Icon(
-                            isSaved
-                                ? Icons.favorite_rounded
-                                : Icons.favorite_border_rounded,
-                            size: 19,
-                            color: isSaved
-                                ? EuBrutal.alert
-                                : (isDark ? Colors.white70 : Colors.black87),
-                          ),
-                          tooltip: isSaved
-                              ? 'Remove from library'
-                              : 'Save to library',
-                          onPressed: () {
-                            HapticFeedback.lightImpact();
-                            final messenger = ScaffoldMessenger.of(context);
-                            if (isSaved) {
-                              if (widget.isPlaylist) {
-                                ref
-                                    .read(savedPlaylistsDaoProvider)
-                                    .remove(widget.id);
-                              } else {
-                                ref
-                                    .read(savedAlbumsDaoProvider)
-                                    .remove(widget.id);
-                              }
-                              messenger.showSnackBar(
-                                const SnackBar(
-                                  content: Text('Removed from library'),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            } else {
-                              if (widget.isPlaylist) {
-                                ref
-                                    .read(savedPlaylistsDaoProvider)
-                                    .save(
-                                      id: widget.id,
-                                      title: _title ?? 'Playlist',
-                                      author: _author,
-                                      artworkUrl: _artworkUrl,
-                                      trackCount:
-                                          _trackCount ?? _tracks.length,
-                                    );
-                              } else {
-                                ref
-                                    .read(savedAlbumsDaoProvider)
-                                    .save(
-                                      browseId: widget.id,
-                                      title: _title ?? 'Album',
-                                      artists: _artists ?? '',
-                                      artworkUrl: _artworkUrl,
-                                      year: _year,
-                                    );
-                              }
-                              messenger.showSnackBar(
-                                const SnackBar(
-                                  content: Text('Saved to library'),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ),
+                    return EuphonyGlassIconButton(
+                      icon: isSaved
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
+                      iconColor: isSaved
+                          ? EuBrutal.alert
+                          : (isDark ? Colors.white70 : Colors.black87),
+                      tooltip: isSaved
+                          ? 'Remove from library'
+                          : 'Save to library',
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        final messenger = ScaffoldMessenger.of(context);
+                        if (isSaved) {
+                          if (widget.isPlaylist) {
+                            ref
+                                .read(savedPlaylistsDaoProvider)
+                                .remove(widget.id);
+                          } else {
+                            ref
+                                .read(savedAlbumsDaoProvider)
+                                .remove(widget.id);
+                          }
+                          messenger.showSnackBar(
+                            const SnackBar(
+                              content: Text('Removed from library'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        } else {
+                          if (widget.isPlaylist) {
+                            ref
+                                .read(savedPlaylistsDaoProvider)
+                                .save(
+                                  id: widget.id,
+                                  title: _title ?? 'Playlist',
+                                  author: _author,
+                                  artworkUrl: _artworkUrl,
+                                  trackCount:
+                                      _trackCount ?? _tracks.length,
+                                );
+                          } else {
+                            ref
+                                .read(savedAlbumsDaoProvider)
+                                .save(
+                                  browseId: widget.id,
+                                  title: _title ?? 'Album',
+                                  artists: _artists ?? '',
+                                  artworkUrl: _artworkUrl,
+                                  year: _year,
+                                );
+                          }
+                          messenger.showSnackBar(
+                            const SnackBar(
+                              content: Text('Saved to library'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      },
                     );
                   },
                 ),
@@ -678,7 +656,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                               );
                             },
                           ),
-                      const SizedBox(height: 100),
+                      const SizedBox(height: 190),
                     ],
                   ),
                 ),

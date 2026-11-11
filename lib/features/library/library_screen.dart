@@ -72,7 +72,8 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
         centerTitle: false,
         toolbarHeight: 64,
         titleSpacing: 20,
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
         title: const EuphonyPageCapsule(
@@ -123,18 +124,21 @@ class _LibraryScreenState extends ConsumerState<LibraryScreen>
           ],
         ),
       ),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1180),
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              _LikedSongsTab(),
-              _DownloadsTab(),
-              _SavedPlaylistsTab(),
-              _SavedAlbumsTab(),
-              _SearchHistoryTab(),
-            ],
+      body: SafeArea(
+        top: false,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1180),
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _LikedSongsTab(),
+                _DownloadsTab(),
+                _SavedPlaylistsTab(),
+                _SavedAlbumsTab(),
+                _SearchHistoryTab(),
+              ],
+            ),
           ),
         ),
       ),
@@ -200,7 +204,12 @@ class _LikedSongsTab extends ConsumerWidget {
         final isDark = theme.brightness == Brightness.dark;
 
         return ListView(
-          padding: const EdgeInsets.all(EuSpace.screenGutter),
+          padding: const EdgeInsets.fromLTRB(
+            EuSpace.screenGutter,
+            EuSpace.screenGutter,
+            EuSpace.screenGutter,
+            190,
+          ),
           children: [
             // Spotify-style Liked Songs Hero Banner Card (Glassmorphic Crimson)
             Container(
@@ -530,7 +539,12 @@ class _SavedPlaylistsTab extends ConsumerWidget {
         final entries = snapshot.data ?? const [];
 
         return ListView(
-          padding: const EdgeInsets.all(EuSpace.screenGutter),
+          padding: const EdgeInsets.fromLTRB(
+            EuSpace.screenGutter,
+            EuSpace.screenGutter,
+            EuSpace.screenGutter,
+            190,
+          ),
           children: [
             // Create Playlist Action Tile (Neo-Glassmorphic)
             Container(
@@ -946,7 +960,12 @@ Widget _buildStream<T>({
         );
       }
       return ListView.builder(
-        padding: const EdgeInsets.all(EuSpace.screenGutter),
+        padding: const EdgeInsets.fromLTRB(
+          EuSpace.screenGutter,
+          EuSpace.screenGutter,
+          EuSpace.screenGutter,
+          190,
+        ),
         itemCount: data.length,
         itemBuilder: (context, index) => Padding(
           padding: const EdgeInsets.only(bottom: EuSpace.sm),
@@ -1112,7 +1131,7 @@ class _DownloadsTab extends ConsumerWidget {
         EuSpace.screenGutter,
         EuSpace.md,
         EuSpace.screenGutter,
-        100,
+        190,
       ),
       children: [
         if (progressMap.isNotEmpty) ...[

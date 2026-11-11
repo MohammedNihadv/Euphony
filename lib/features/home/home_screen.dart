@@ -91,12 +91,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     });
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: false,
         toolbarHeight: 64,
         titleSpacing: 20,
-        backgroundColor: theme.colorScheme.surface,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
         title: const EuphonyPageCapsule(
@@ -104,14 +106,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           icon: Icons.home_rounded,
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Settings',
-            onPressed: () => context.go('/settings'),
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: EuphonyGlassIconButton(
+              icon: Icons.settings_outlined,
+              tooltip: 'Settings',
+              onPressed: () => context.go('/settings'),
+            ),
           ),
         ],
       ),
       body: SafeArea(
+        top: false,
         child: RefreshIndicator(
           onRefresh: () => _loadHomeFeed(force: true),
           color: EuBrutal.accent,
@@ -123,6 +129,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               constraints: const BoxConstraints(maxWidth: 1180),
               child: CustomScrollView(
                 slivers: [
+                  // Top clearance — push content below the floating AppBar
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height:
+                          MediaQuery.of(context).padding.top + 64 + EuSpace.sm,
+                    ),
+                  ),
+
                   // Category Filter Pills (Spotify-style)
                   SliverToBoxAdapter(
                     child: SingleChildScrollView(
@@ -224,7 +238,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       ),
 
                     const SliverPadding(
-                      padding: EdgeInsets.only(bottom: 110.0),
+                      padding: EdgeInsets.only(bottom: 190.0),
                     ),
                   ],
                 ],

@@ -170,6 +170,7 @@ class _ArtistDiscographyScreenState
 
     return Scaffold(
       extendBody: true,
+      extendBodyBehindAppBar: true,
       appBar: EuphonySubpageAppBar(
         categoryLabel: widget.sectionTitle,
         icon: Icons.library_music_rounded,
@@ -332,7 +333,7 @@ class _ArtistDiscographyScreenState
 
   Widget _buildSongsList(BuildContext context, ThemeData theme) {
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 112),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 190),
       itemCount: _songs.length,
       itemBuilder: (context, index) {
         final song = _songs[index];
