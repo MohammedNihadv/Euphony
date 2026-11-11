@@ -66,6 +66,7 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
         title: _artist?.name,
       ),
       body: SafeArea(
+        top: false,
         child: _loading
             ? const Center(
                 child: CircularProgressIndicator(color: EuBrutal.accent),
@@ -78,7 +79,12 @@ class _ArtistScreenState extends ConsumerState<ArtistScreen> {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 1100),
                   child: ListView(
-                    padding: const EdgeInsets.all(EuSpace.screenGutter),
+                    padding: EdgeInsets.fromLTRB(
+                      EuSpace.screenGutter,
+                      MediaQuery.of(context).padding.top + kToolbarHeight + EuSpace.md,
+                      EuSpace.screenGutter,
+                      190,
+                    ),
                     children: [
                       // Artist Header Card (Borderless, luxury surface)
                       Container(

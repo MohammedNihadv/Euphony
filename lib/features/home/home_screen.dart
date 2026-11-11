@@ -121,6 +121,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         child: RefreshIndicator(
           onRefresh: () => _loadHomeFeed(force: true),
           color: EuBrutal.accent,
+          edgeOffset: MediaQuery.of(context).padding.top + 64,
           // Cap content width and centre it so a wide desktop window doesn't
           // stretch the banner and rows into thin full-bleed strips. No effect
           // on phones, where the screen is narrower than the cap.

@@ -177,6 +177,7 @@ class _ArtistDiscographyScreenState
         title: widget.artistName,
       ),
       body: SafeArea(
+        top: false,
         child: hasAlbums
             ? _buildAlbumsGrid(context, isDark)
             : hasSongs
@@ -229,9 +230,9 @@ class _ArtistDiscographyScreenState
       builder: (context, constraints) {
         final crossAxisCount = (constraints.maxWidth / 175).floor().clamp(2, 6);
         return GridView.builder(
-          padding: const EdgeInsets.fromLTRB(
+          padding: EdgeInsets.fromLTRB(
             EuSpace.lg,
-            EuSpace.lg,
+            MediaQuery.of(context).padding.top + kToolbarHeight + EuSpace.sm,
             EuSpace.lg,
             EuSpace.lg + 100,
           ),
@@ -333,7 +334,12 @@ class _ArtistDiscographyScreenState
 
   Widget _buildSongsList(BuildContext context, ThemeData theme) {
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 190),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        MediaQuery.of(context).padding.top + kToolbarHeight + 8,
+        16,
+        190,
+      ),
       itemCount: _songs.length,
       itemBuilder: (context, index) {
         final song = _songs[index];
@@ -385,9 +391,9 @@ class _ArtistDiscographyScreenState
       builder: (context, constraints) {
         final crossAxisCount = (constraints.maxWidth / 175).floor().clamp(2, 6);
         return GridView.builder(
-          padding: const EdgeInsets.fromLTRB(
+          padding: EdgeInsets.fromLTRB(
             EuSpace.lg,
-            EuSpace.lg,
+            MediaQuery.of(context).padding.top + kToolbarHeight + EuSpace.sm,
             EuSpace.lg,
             EuSpace.lg + 100,
           ),

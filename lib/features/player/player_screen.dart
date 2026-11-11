@@ -13,6 +13,7 @@ import '../../data/providers.dart';
 import '../../design/tokens/brutal.dart';
 import '../../design/tokens/tokens.dart';
 import '../../design/widgets/animated_waveform.dart';
+import '../../design/widgets/brand_badge.dart';
 import '../../domain/song.dart';
 import '../../domain/song_details.dart';
 import '../../playback/download_provider.dart';
@@ -85,93 +86,150 @@ class _PlayerScreenState extends ConsumerState<PlayerScreen> {
       resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
       backgroundColor: theme.colorScheme.surface,
-      appBar: _GlassAppBar(
-        song: song,
-        onLyricsTap: _scrollToLyrics,
+      appBar: EuphonySubpageAppBar(
+        categoryLabel: 'Now Playing',
+        backIcon: Icons.keyboard_arrow_down_rounded,
+        backIconSize: 24.0,
+        onBackPressed: () {
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          } else {
+            context.go('/');
+          }
+        },
+        actions: [
+          if (song != null)
+            EuphonyGlassIconButton(
+              icon: Icons.lyrics_outlined,
+              iconSize: 18,
+              tooltip: 'Lyrics',
+              onPressed: _scrollToLyrics,
+            ),
+          EuphonyGlassIconButton(
+            icon: Icons.queue_music_rounded,
+            iconSize: 18,
+            tooltip: 'Queue',
+            onPressed: () => showQueueSheet(context),
+          ),
+        ],
       ),
       body: song == null
           ? const _NothingPlaying()
-          : SafeArea(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  if (constraints.maxWidth >= 900) {
-                    return _WideLayout(
-                      song: song,
-                      isPlaying: isPlaying,
-                      scrollController: _scrollController,
-                      onLyricsTap: _scrollToLyrics,
-                      viewportHeight: constraints.maxHeight,
-                    );
-                  }
-                  return _NarrowLayout(
-                    song: song,
-                    isPlaying: isPlaying,
-                    scrollController: _scrollController,
-                    onLyricsTap: _scrollToLyrics,
-                    viewportHeight: constraints.maxHeight,
-                  );
-                },
-              ),
+          : Stack(
+              fit: StackFit.expand,
+              children: [
+                Positioned.fill(
+                  child: _PlayerAmbientBackdrop(song: song),
+                ),
+                SafeArea(
+                  top: false,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      if (constraints.maxWidth >= 900) {
+                        return _WideLayout(
+                          song: song,
+                          isPlaying: isPlaying,
+                          scrollController: _scrollController,
+                          onLyricsTap: _scrollToLyrics,
+                          viewportHeight: constraints.maxHeight,
+                        );
+                      }
+                      return _NarrowLayout(
+                        song: song,
+                        isPlaying: isPlaying,
+                        scrollController: _scrollController,
+                        onLyricsTap: _scrollToLyrics,
+                        viewportHeight: constraints.maxHeight,
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Glass AppBar
-// ---------------------------------------------------------------------------
+/// Atmospheric full-bleed ambient liquid backdrop that reflects the album artwork
+/// and top accent aurora, giving the floating navbar and glass controls real light
+/// and color to blur and refract.
+class _PlayerAmbientBackdrop extends StatelessWidget {
+  const _PlayerAmbientBackdrop({required this.song});
 
-class _GlassAppBar extends ConsumerWidget implements PreferredSizeWidget {
-  const _GlassAppBar({required this.song, this.onLyricsTap});
-
-  final Song? song;
-  final VoidCallback? onLyricsTap;
+  final Song song;
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final artworkUrl = song.artwork?.max ?? song.artworkUrl;
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: AppBar(
-          backgroundColor: theme.colorScheme.surface.withValues(alpha: 0.6),
-          surfaceTintColor: Colors.transparent,
-          leading: IconButton(
-            icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 32),
-            onPressed: () {
-              if (Navigator.of(context).canPop()) {
-                Navigator.of(context).pop();
-              } else {
-                context.go('/');
-              }
-            },
-            tooltip: 'Close player',
+    return RepaintBoundary(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Base surface
+          Container(
+            color: isDark ? const Color(0xFF0C0C14) : const Color(0xFFF6F8FC),
           ),
-          title: Text(
-            'NOW PLAYING',
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.5,
-            ),
-          ),
-          centerTitle: true,
-          actions: [
-            if (song != null)
-              IconButton(
-                icon: const Icon(Icons.lyrics_outlined),
-                tooltip: 'Lyrics',
-                onPressed: onLyricsTap ?? () => showLyricsSheet(context, song!),
+          // Large diffused ambient light pool from artwork
+          if (artworkUrl != null)
+            Positioned.fill(
+              child: Opacity(
+                opacity: isDark ? 0.22 : 0.15,
+                child: Image.network(
+                  artworkUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                ),
               ),
-            IconButton(
-              icon: const Icon(Icons.queue_music_rounded),
-              tooltip: 'Queue',
-              onPressed: () => showQueueSheet(context),
             ),
-          ],
-        ),
+          // Heavy Gaussian blur over the artwork image
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 75, sigmaY: 75),
+              child: const SizedBox.expand(),
+            ),
+          ),
+          // Glowing top aurora for the floating navbar to refract
+          Positioned(
+            top: -60,
+            left: -40,
+            right: -40,
+            height: 280,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(200),
+                gradient: RadialGradient(
+                  center: Alignment.topCenter,
+                  radius: 0.9,
+                  colors: [
+                    EuBrutal.accent.withValues(alpha: isDark ? 0.35 : 0.18),
+                    const Color(0xFF9060FA).withValues(alpha: isDark ? 0.18 : 0.08),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Soft dark scrim for text readability
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.0, 0.45, 1.0],
+                  colors: [
+                    Colors.black.withValues(alpha: isDark ? 0.25 : 0.05),
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: isDark ? 0.55 : 0.08),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -198,7 +256,8 @@ class _NarrowLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final maxArtSize = (viewportHeight - 400.0).clamp(160.0, 350.0);
+    final topClearance = MediaQuery.of(context).padding.top + kToolbarHeight + 14.0;
+    final maxArtSize = (viewportHeight - (topClearance + 410.0)).clamp(140.0, 310.0);
     return SingleChildScrollView(
       controller: scrollController,
       padding: const EdgeInsets.symmetric(horizontal: EuSpace.xl),
@@ -216,7 +275,7 @@ class _NarrowLayout extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const SizedBox(height: EuSpace.xs),
+                      SizedBox(height: topClearance),
                       Center(
                         child: _Artwork(
                           song: song,
@@ -416,58 +475,131 @@ class _Artwork extends ConsumerWidget {
     final isDark = theme.brightness == Brightness.dark;
     final url = song.artwork?.max ?? song.artworkUrl;
 
+    // The "liquid pool" extends slightly beyond the actual artwork to create
+    // a floating card illusion — frosted glass base with specular edges.
+    final poolSize = artSize + 24;
+
     return Center(
       child: AnimatedSwitcher(
         duration: EuMotion.standard,
         child: SizedBox(
           key: ValueKey(url ?? song.id),
-          width: artSize,
-          height: artSize,
+          width: poolSize,
+          height: poolSize,
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // ── Pulsing ambient aura behind artwork ───────────────────
+              // ── Deep ambient glow pool (wider than artwork) ───────────
               _PulsingGlowRing(
-                artSize: artSize - 16,
+                artSize: poolSize,
                 isPlaying: isPlaying,
                 color: EuBrutal.accent,
               ),
 
-              // ── Glassmorphic Artwork Slab ────────────────────────────
+              // ── Frosted glass pool / liquid surface ───────────────────
+              ClipRRect(
+                borderRadius: BorderRadius.circular(40),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                  child: Container(
+                    width: poolSize,
+                    height: poolSize,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(40),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        stops: const [0.0, 0.3, 0.7, 1.0],
+                        colors: isDark
+                            ? [
+                                Colors.white.withValues(alpha: 0.14),
+                                Colors.white.withValues(alpha: 0.04),
+                                Colors.black.withValues(alpha: 0.08),
+                                Colors.white.withValues(alpha: 0.06),
+                              ]
+                            : [
+                                Colors.white.withValues(alpha: 0.65),
+                                Colors.white.withValues(alpha: 0.20),
+                                Colors.white.withValues(alpha: 0.08),
+                                Colors.white.withValues(alpha: 0.40),
+                              ],
+                      ),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.22)
+                            : Colors.white.withValues(alpha: 0.90),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                            alpha: isDark ? 0.30 : 0.08,
+                          ),
+                          blurRadius: 48,
+                          spreadRadius: -8,
+                          offset: const Offset(0, 20),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // ── Top specular highlight streak ─────────────────────────
+              Positioned(
+                top: 10,
+                left: 20,
+                right: 20,
+                child: Container(
+                  height: 1.5,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(2),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.transparent,
+                        Colors.white.withValues(alpha: isDark ? 0.45 : 0.90),
+                        Colors.transparent,
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // ── Glassmorphic Artwork Slab (floating inside the pool) ──
               AnimatedScale(
-                scale: isPlaying ? 1.0 : 0.94,
-                duration: const Duration(milliseconds: 500),
+                scale: isPlaying ? 1.0 : 0.92,
+                duration: const Duration(milliseconds: 550),
                 curve: Curves.easeOutBack,
                 child: Container(
-                  width: artSize - 16,
-                  height: artSize - 16,
+                  width: artSize,
+                  height: artSize,
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(28),
                     border: Border.all(
                       color: isDark
-                          ? Colors.white.withValues(alpha: 0.18)
-                          : Colors.white.withValues(alpha: 0.80),
-                      width: 1.2,
+                          ? Colors.white.withValues(alpha: 0.20)
+                          : Colors.white.withValues(alpha: 0.85),
+                      width: 1.5,
                     ),
                     boxShadow: [
-                      // Smooth deep diffusion shadow
+                      // Deep diffusion shadow for float illusion
                       BoxShadow(
                         color: Colors.black.withValues(
-                          alpha: isDark ? 0.50 : 0.16,
+                          alpha: isDark ? 0.55 : 0.18,
                         ),
-                        blurRadius: 32,
-                        spreadRadius: -4,
-                        offset: const Offset(0, 16),
+                        blurRadius: 40,
+                        spreadRadius: -6,
+                        offset: const Offset(0, 18),
                       ),
                       // Ambient accent illumination
                       BoxShadow(
                         color: EuBrutal.accent.withValues(
-                          alpha: isPlaying ? 0.35 : 0.10,
+                          alpha: isPlaying ? 0.40 : 0.12,
                         ),
-                        blurRadius: 40,
-                        spreadRadius: -6,
-                        offset: const Offset(0, 8),
+                        blurRadius: 50,
+                        spreadRadius: -8,
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
@@ -501,13 +633,34 @@ class _Artwork extends ConsumerWidget {
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                              stops: const [0.0, 0.35, 1.0],
+                              stops: const [0.0, 0.30, 1.0],
                               colors: [
                                 Colors.white.withValues(
-                                  alpha: isDark ? 0.15 : 0.25,
+                                  alpha: isDark ? 0.18 : 0.30,
                                 ),
                                 Colors.white.withValues(alpha: 0.02),
                                 Colors.transparent,
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Bottom scrim for depth
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: artSize * 0.25,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withValues(
+                                  alpha: isDark ? 0.30 : 0.10,
+                                ),
                               ],
                             ),
                           ),
@@ -943,17 +1096,31 @@ class _GlassScrubberState extends ConsumerState<_GlassScrubber> {
     );
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
         child: Container(
           padding: const EdgeInsets.fromLTRB(4, 12, 4, 8),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerLow.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: Theme.of(context).brightness == Brightness.dark
+                  ? [
+                      Colors.white.withValues(alpha: 0.10),
+                      Colors.white.withValues(alpha: 0.04),
+                    ]
+                  : [
+                      Colors.white.withValues(alpha: 0.65),
+                      Colors.white.withValues(alpha: 0.35),
+                    ],
+            ),
+            borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: context.eu.ink.withValues(alpha: 0.15),
-              width: 1,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withValues(alpha: 0.18)
+                  : Colors.white.withValues(alpha: 0.85),
+              width: 1.2,
             ),
           ),
           child: Column(
@@ -2007,10 +2174,14 @@ class _EmbeddedLyricsCardState extends ConsumerState<_EmbeddedLyricsCard> {
                       children: [
                         NotificationListener<ScrollNotification>(
                           onNotification: (notification) {
-                            if (notification is ScrollStartNotification) {
-                              _onUserScrollStart();
-                            } else if (notification is ScrollEndNotification) {
-                              _onUserScrollEnd();
+                            if (notification.depth == 0) {
+                              if (notification is ScrollStartNotification &&
+                                  notification.dragDetails != null) {
+                                _onUserScrollStart();
+                              } else if (notification is ScrollEndNotification &&
+                                  notification.dragDetails != null) {
+                                _onUserScrollEnd();
+                              }
                             }
                             return false;
                           },

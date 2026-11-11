@@ -107,8 +107,9 @@ class _LyricsSheetState extends ConsumerState<_LyricsSheet> {
   }
 
   void _searchLyricsOnline() async {
+    final clean = LyricsService.cleanTrackTitle(widget.song.title);
     final query = Uri.encodeComponent(
-      '${widget.song.title} ${widget.song.artistNames} lyrics',
+      '$clean ${widget.song.artistNames} lyrics',
     );
     final url = Uri.parse('https://www.google.com/search?q=$query');
     if (await canLaunchUrl(url)) {
@@ -120,9 +121,13 @@ class _LyricsSheetState extends ConsumerState<_LyricsSheet> {
     if (!_scrollController.hasClients || _userIsScrolling || activeIndex < 0) {
       return;
     }
-    // Estimated line height for smooth auto-centering
-    const estimatedItemHeight = 52.0;
-    final targetOffset = (activeIndex * estimatedItemHeight) - 160.0;
+    const estimatedItemHeight = 56.0;
+    final viewportHeight = _scrollController.position.hasViewportDimension
+        ? _scrollController.position.viewportDimension
+        : 400.0;
+    final viewportCenter = viewportHeight / 2;
+    final targetOffset =
+        (activeIndex * estimatedItemHeight) + 24.0 - (viewportCenter - estimatedItemHeight / 2);
     final clampedOffset = targetOffset.clamp(
       0.0,
       _scrollController.position.maxScrollExtent,
@@ -174,7 +179,8 @@ class _LyricsSheetState extends ConsumerState<_LyricsSheet> {
             ? BorderRadius.circular(24)
             : const BorderRadius.vertical(top: Radius.circular(28));
 
-        return Center(
+        return Align(
+          alignment: widget.isDialog ? Alignment.center : Alignment.bottomCenter,
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: widget.isDialog ? 680 : (isWide ? 780 : double.infinity),
@@ -504,25 +510,31 @@ class _LyricsSheetState extends ConsumerState<_LyricsSheet> {
                             : lyrics != null && lyrics.isSynced && !_viewPlain
                                 ? NotificationListener<ScrollNotification>(
                                     onNotification: (notification) {
-                                      if (notification is ScrollStartNotification) {
-                                        _userIsScrolling = true;
-                                      } else if (notification is ScrollEndNotification) {
-                                        Future.delayed(
-                                          const Duration(seconds: 3),
-                                          () {
-                                            if (mounted) {
-                                              _userIsScrolling = false;
-                                            }
-                                          },
-                                        );
+                                      if (notification.depth == 0) {
+                                        if (notification is ScrollStartNotification &&
+                                            notification.dragDetails != null) {
+                                          _userIsScrolling = true;
+                                        } else if (notification is ScrollEndNotification &&
+                                            notification.dragDetails != null) {
+                                          Future.delayed(
+                                            const Duration(milliseconds: 1800),
+                                            () {
+                                              if (mounted) {
+                                                _userIsScrolling = false;
+                                              }
+                                            },
+                                          );
+                                        }
                                       }
                                       return false;
                                     },
                                     child: ListView.builder(
                                       controller: _scrollController,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: EuSpace.xl,
-                                        vertical: EuSpace.xl,
+                                      padding: EdgeInsets.fromLTRB(
+                                        EuSpace.xl,
+                                        EuSpace.xl,
+                                        EuSpace.xl,
+                                        EuSpace.xl + MediaQuery.of(context).viewPadding.bottom,
                                       ),
                                       itemCount: lyrics.syncedLines.length,
                                       itemBuilder: (context, index) {

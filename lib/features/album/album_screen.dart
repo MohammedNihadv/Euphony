@@ -213,6 +213,7 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
               ],
       ),
       body: SafeArea(
+        top: false,
         child: _loading
             ? const Center(
                 child: CircularProgressIndicator(color: EuBrutal.accent),
@@ -259,7 +260,12 @@ class _AlbumScreenState extends ConsumerState<AlbumScreen> {
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 1100),
                   child: ListView(
-                    padding: const EdgeInsets.all(EuSpace.screenGutter),
+                    padding: EdgeInsets.fromLTRB(
+                      EuSpace.screenGutter,
+                      MediaQuery.of(context).padding.top + kToolbarHeight + EuSpace.sm,
+                      EuSpace.screenGutter,
+                      EuSpace.screenGutter,
+                    ),
                     children: [
                       // Cover & Actions Card (Borderless luxury surface)
                       Container(

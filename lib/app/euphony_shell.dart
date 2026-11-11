@@ -313,7 +313,7 @@ class _EuphonyShellState extends ConsumerState<EuphonyShell> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF0C0C10) : const Color(0xFFF1F3F7),
+      backgroundColor: isDark ? theme.scaffoldBackgroundColor : const Color(0xFFF1F3F7),
       body: Column(
         children: [
           Expanded(

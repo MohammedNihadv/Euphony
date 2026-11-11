@@ -119,19 +119,60 @@ class LyricsService {
     return lines;
   }
 
-  /// Cleans noise from track title (e.g. "(Official Music Video)", "[Remastered]").
+  /// Cleans noise from track title (e.g. "(Official Music Video)", "[Remastered]",
+  /// YouTube video suffixes, pipe separated metadata, and movie tags).
   static String cleanTrackTitle(String rawTitle) {
-    return rawTitle
+    var title = rawTitle;
+
+    // 1. If title contains pipe '|', take the first segment (often the actual track title)
+    if (title.contains('|')) {
+      title = title.split('|').first;
+    }
+
+    // 2. Strip noise after dash/hyphen if it contains common video/release keywords
+    final dashMatch = RegExp(
+      r'\s*[-–—]\s*(official\s*(music)?\s*(video|audio)?|lyric(al)?\s*(video)?|video\s*song|audio\s*song|full\s*(video|song)?|remastered|hd|4k|from\s+.*|ost|promo|teaser|visualizer).*$',
+      caseSensitive: false,
+    );
+    title = title.replaceAll(dashMatch, '');
+
+    // 3. Strip bracketed/parenthesized tags
+    title = title
         .replaceAll(
           RegExp(
-            r'\s*[\(\[](official\s*(music)?\s*(video|audio)?|lyric\s*(video)?|audio|remastered|hd|4k|from\s+[^)\]]+)[\)\]]',
+            r'\s*[\(\[](official\s*(music)?\s*(video|audio)?|lyric(al)?\s*(video)?|audio|video\s*song|remastered|hd|4k|from\s+[^)\]]+|visualizer)[\)\]]',
             caseSensitive: false,
           ),
           '',
         )
-        .replaceAll(RegExp(r'\s*\(feat\..*?\)', caseSensitive: false), '')
-        .replaceAll(RegExp(r'\s*\[feat\..*?\]', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\s*[\(\[]feat\..*?[\)\]]', caseSensitive: false), '')
+        .replaceAll(RegExp(r'\s*[\(\[]ft\..*?[\)\]]', caseSensitive: false), '')
         .trim();
+
+    return title.isNotEmpty ? title : rawTitle.trim();
+  }
+
+  /// Helper to pick the best matching lyrics candidate (prioritizing synchronized lyrics).
+  static Map<String, dynamic>? _pickBestLyrics(List<dynamic> list) {
+    for (final item in list) {
+      if (item is Map) {
+        final synced = item['syncedLyrics']?.toString().trim();
+        if (synced != null && synced.isNotEmpty) {
+          return Map<String, dynamic>.from(item);
+        }
+      }
+    }
+    for (final item in list) {
+      if (item is Map) {
+        final plain = item['plainLyrics']?.toString().trim();
+        if (plain != null && plain.isNotEmpty) {
+          return Map<String, dynamic>.from(item);
+        }
+      }
+    }
+    return list.isNotEmpty && list.first is Map
+        ? Map<String, dynamic>.from(list.first as Map)
+        : null;
   }
 
   /// Fetches lyrics for [song], utilizing local disk cache first, followed by LRCLIB.
@@ -166,7 +207,7 @@ class LyricsService {
 
       final response = await _dio.get<dynamic>(url);
       if (response.statusCode == 200 && response.data is Map) {
-        data = response.data as Map<String, dynamic>;
+        data = Map<String, dynamic>.from(response.data as Map);
       }
     } catch (_) {}
 
@@ -179,10 +220,8 @@ class LyricsService {
         final searchUrl = 'https://lrclib.net/api/search?q=$query';
         final response = await _dio.get<dynamic>(searchUrl);
         if (response.statusCode == 200 && response.data is List) {
-          final list = response.data as List;
-          if (list.isNotEmpty && list.first is Map) {
-            data = list.first as Map<String, dynamic>;
-          }
+          final candidate = _pickBestLyrics(response.data as List);
+          if (candidate != null) data = candidate;
         }
       } catch (_) {}
     }
@@ -196,9 +235,23 @@ class LyricsService {
         final searchUrl = 'https://lrclib.net/api/search?q=$query';
         final response = await _dio.get<dynamic>(searchUrl);
         if (response.statusCode == 200 && response.data is List) {
-          final list = response.data as List;
-          if (list.isNotEmpty && list.first is Map) {
-            data = list.first as Map<String, dynamic>;
+          final candidate = _pickBestLyrics(response.data as List);
+          if (candidate != null) data = candidate;
+        }
+      } catch (_) {}
+    }
+
+    // D. Final fallback: If queryTitle contains a hyphen/dash, search with first segment only
+    if (data == null && queryTitle.contains(RegExp(r'[-–—]'))) {
+      try {
+        final shortTitle = queryTitle.split(RegExp(r'[-–—]')).first.trim();
+        if (shortTitle.isNotEmpty && shortTitle != queryTitle) {
+          final query = Uri.encodeComponent(shortTitle);
+          final searchUrl = 'https://lrclib.net/api/search?q=$query';
+          final response = await _dio.get<dynamic>(searchUrl);
+          if (response.statusCode == 200 && response.data is List) {
+            final candidate = _pickBestLyrics(response.data as List);
+            if (candidate != null) data = candidate;
           }
         }
       } catch (_) {}

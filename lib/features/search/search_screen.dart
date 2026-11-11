@@ -267,7 +267,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     EuSpace.screenGutter,
                     MediaQuery.of(context).padding.top + 64 + EuSpace.sm,
                     EuSpace.screenGutter,
-                    EuSpace.lg,
+                    EuSpace.sm,
                   ),
                   sliver: SliverToBoxAdapter(
                     child: Column(
@@ -753,7 +753,7 @@ class _SearchLanding extends ConsumerWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: EuSpace.xl),
+              const SizedBox(height: EuSpace.sm),
             ],
 
             Text(
@@ -762,80 +762,94 @@ class _SearchLanding extends ConsumerWidget {
                 fontWeight: FontWeight.w900,
               ),
             ),
-            const SizedBox(height: EuSpace.md),
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: categoryCols,
-                childAspectRatio: 2.2,
-                crossAxisSpacing: EuSpace.md,
-                mainAxisSpacing: EuSpace.md,
-              ),
-              itemCount: _genres.length,
-              itemBuilder: (context, index) {
-                final item = _genres[index];
-                return GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => onSelected(item.title),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
-                    ),
-                    decoration: BoxDecoration(
-                      color: item.color,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: item.color.withValues(alpha: 0.35),
-                          blurRadius: 14,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          right: -10,
-                          bottom: -14,
-                          child: Transform.rotate(
-                            angle: 0.35,
-                            child: Icon(
-                              item.icon,
-                              size: 58,
-                              color:
-                                  (item.color.computeLuminance() > 0.5
-                                          ? const Color(0xFF0D0D14)
-                                          : Colors.white)
-                                      .withValues(alpha: 0.22),
+            const SizedBox(height: EuSpace.sm),
+            for (var i = 0; i < _genres.length; i += categoryCols)
+              Padding(
+                padding: const EdgeInsets.only(bottom: EuSpace.sm),
+                child: Row(
+                  children: [
+                    for (var c = 0; c < categoryCols; c++)
+                      if (i + c < _genres.length) ...[
+                        if (c > 0) const SizedBox(width: EuSpace.sm),
+                        Expanded(
+                          child: AspectRatio(
+                            aspectRatio: 2.2,
+                            child: _buildCategoryCard(
+                              context,
+                              _genres[i + c],
+                              onSelected,
                             ),
                           ),
                         ),
-                        Text(
-                          item.title,
-                          style: TextStyle(
-                            // Pick ink or white by the tile's own brightness, so
-                            // every label clears contrast without a hardcoded
-                            // per-colour lookup.
-                            color: item.color.computeLuminance() > 0.5
-                                ? const Color(0xFF0D0D14)
-                                : Colors.white,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 16,
-                            letterSpacing: -0.2,
-                          ),
-                        ),
+                      ] else ...[
+                        if (c > 0) const SizedBox(width: EuSpace.sm),
+                        const Expanded(child: SizedBox.shrink()),
                       ],
-                    ),
-                  ),
-                );
-              },
-            ),
+                  ],
+                ),
+              ),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildCategoryCard(
+    BuildContext context,
+    _GenreItem item,
+    ValueChanged<String> onSelected,
+  ) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => onSelected(item.title),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        decoration: BoxDecoration(
+          color: item.color,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: item.color.withValues(alpha: 0.35),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            Positioned(
+              right: -10,
+              bottom: -14,
+              child: Transform.rotate(
+                angle: 0.35,
+                child: Icon(
+                  item.icon,
+                  size: 58,
+                  color: (item.color.computeLuminance() > 0.5
+                          ? const Color(0xFF0D0D14)
+                          : Colors.white)
+                      .withValues(alpha: 0.22),
+                ),
+              ),
+            ),
+            Text(
+              item.title,
+              style: TextStyle(
+                color: item.color.computeLuminance() > 0.5
+                    ? const Color(0xFF0D0D14)
+                    : Colors.white,
+                fontWeight: FontWeight.w900,
+                fontSize: 16,
+                letterSpacing: -0.2,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1612,7 +1626,9 @@ class _SettingsSheet extends ConsumerWidget {
         child: Container(
           decoration: BoxDecoration(
             color: isDark
-                ? const Color(0xFF13131E).withValues(alpha: 0.96)
+                ? (theme.amoled
+                    ? Colors.black.withValues(alpha: 0.96)
+                    : const Color(0xFF13131E).withValues(alpha: 0.96))
                 : Colors.white.withValues(alpha: 0.96),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
             border: Border(
@@ -1763,7 +1779,12 @@ class _SettingsSheet extends ConsumerWidget {
                       title: 'AMOLED Pure Black',
                       subtitle: 'True pitch-black theme for OLED screens',
                       value: theme.amoled,
-                      onChanged: (val) => themeController.setAmoled(value: val),
+                      onChanged: (val) {
+                        themeController.setAmoled(value: val);
+                        if (val && theme.mode != ThemeMode.dark) {
+                          themeController.setMode(ThemeMode.dark);
+                        }
+                      },
                     ),
                     const SizedBox(height: 6),
                     Divider(

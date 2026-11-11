@@ -139,8 +139,12 @@ class SettingsScreen extends ConsumerWidget {
                       title: 'AMOLED Pure Black',
                       subtitle: 'True pitch-black theme for OLED screens',
                       value: theme.amoled,
-                      onChanged: (value) =>
-                          themeController.setAmoled(value: value),
+                      onChanged: (value) {
+                        themeController.setAmoled(value: value);
+                        if (value && theme.mode != ThemeMode.dark) {
+                          themeController.setMode(ThemeMode.dark);
+                        }
+                      },
                     ),
                   ],
                 ),
