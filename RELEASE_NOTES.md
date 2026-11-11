@@ -1,11 +1,12 @@
-## Euphony v1.0.2 — Neo-Brutalist Polish, Mobile Refinements & Update System
+## Euphony v1.0.3 — Liquid Glass Polish, Live Lyrics Auto-Sync & Subpage Layout Refinements
 
 ### What's New & Improvements
-- **Enlarged Album Art** — Expanded Now Playing artwork scaling (up to 36% viewport on compact phones, 50% fold on foldables/tablets) for a bold, immersive visual presence.
-- **Mobile Settings Redesign** — Transformed `Audio DSP Preset` and `Track Crossfade` dropdowns into sleek pill badges with dedicated bottom-sheet picker dialogs, completely eliminating text squishing on narrow mobile screens.
-- **External Links & Intent Visibility** — Added Android 11+ `<queries>` scheme declarations (`https`, `http`, `upi`) and fallback handling, ensuring Web App, GitHub Source, Fedaration, and Tip buttons open smoothly on all Android devices.
-- **In-App Software Updates** — Re-architected update checks with live build verification and an auto-opening, luxury neo-brutalist / glassmorphic update prompt featuring version migration comparison (`v1.0.1 ➔ v1.0.2`) and data preservation assurance.
-- **Desktop Enhancements** — Auto-enabled update checking by default for Windows, macOS, and Linux, and resolved mini-player drag bounds snapping against window maximization.
+- **Synchronized Live Lyrics Auto-Scroll** — Differentiated direct user drag gestures from programmatic scroll animations (`dragDetails != null`), ensuring synchronized lyrics smoothly advance and center with track playback without getting stuck.
+- **Lyrics Modal Sheet Gap Elimination** — Docked the lyrics bottom sheet flush to the bottom of the screen with navigation bar insets, completely resolving the bottom void gap.
+- **Liquid Glass Atmosphere & Floating Player Bar** — Replaced the crowded top bar with a clean floating capsule (`Euphony | Now Playing`), added proper top clearance above the album art, and introduced an ambient diffused aurora backdrop for authentic glass refraction.
+- **Artist & Subpage Header Clearance** — Restored top clearance across subpages including the Artist screen, preventing floating capsules from blocking the artist's name and avatar.
+- **Browse Categories Layout** — Fixed empty spacing below "Browse Categories" in Explore with streamlined chunked layout rows.
+- **AMOLED Pure Black Integration** — Toggling AMOLED pure black mode in quick settings automatically switches to dark mode for instant pitch-black power savings.
 
 ### Downloads & Platform Binaries
 

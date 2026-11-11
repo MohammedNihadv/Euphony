@@ -1,0 +1,6 @@
+- Synchronized Live Lyrics: Fixed auto-scroll tracking so active lyric lines advance smoothly with playback.
+- Lyrics Modal Sheet: Docked flush to the bottom of the screen with system navigation bar insets to eliminate void gaps.
+- Music Player: Added floating top bar clearance and atmospheric liquid aurora background.
+- UI Refinements: Restored proper top margins on Artist and playlist headers to prevent overlapping with floating capsules.
+- AMOLED Pure Black: Automatically switches to dark theme when enabled in quick settings.
+
