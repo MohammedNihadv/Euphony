@@ -34,7 +34,7 @@ dependencies:
   package_info_plus: ^9.0.1
   path_provider: ^2.1.6
   permission_handler: ^11.3.1
-  riverpod_annotation: ^4.0.3
+  riverpod_annotation: ^4.0.8
   shared_preferences: ^2.5.5
 
   # Windows-only System Media Transport Controls (SMTC)
